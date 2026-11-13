@@ -1,0 +1,198 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>NinePatch.Core</name>
+    </assembly>
+    <members>
+        <member name="T:NinePatchWpf.Interop.NativeMethods">
+            <summary>
+            P/Invoke declarations for NinePatchLib (see NinePatchLib/nine_patch.h).
+            </summary>
+        </member>
+        <member name="M:NinePatchWpf.Interop.NativeMethods.#cctor">
+            <summary>
+            Finds NinePatchLib next to the application or in the NuGet layout
+            (runtimes/win-&lt;arch&gt;/native) before falling back to default probing.
+            </summary>
+        </member>
+        <member name="T:NinePatchWpf.Interop.NinePatchSafeHandle">
+            <summary>
+            Owns a native nine-patch handle. The runtime keeps the handle alive for the
+            duration of every native call, so a Dispose on another thread can never free
+            memory that is still being rendered.
+            </summary>
+        </member>
+        <member name="T:NinePatchWpf.NinePatchDiagnostics">
+             <summary>
+             Central place where skin load and render failures are reported.
+            
+             Controls never throw from layout or rendering. Instead every failure is
+             written to <see cref="T:System.Diagnostics.Trace"/> and raised through <see cref="E:NinePatchWpf.NinePatchDiagnostics.Reported"/>,
+             so a missing file or native DLL is visible in Release builds too.
+             Set <see cref="P:NinePatchWpf.NinePatchDiagnostics.ThrowOnError"/> during development to fail fast.
+             </summary>
+        </member>
+        <member name="E:NinePatchWpf.NinePatchDiagnostics.Reported">
+            <summary>Raised for every reported problem, on the thread where it happened.</summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchDiagnostics.ThrowOnError">
+            <summary>When true, reported problems are rethrown as <see cref="T:NinePatchWpf.NinePatchException"/>.</summary>
+        </member>
+        <member name="M:NinePatchWpf.NinePatchDiagnostics.Report(System.Object,System.String,System.Exception)">
+            <summary>Report a problem. Used by the library; applications may call it too.</summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchDiagnosticEventArgs.Origin">
+            <summary>Type or component that reported the problem.</summary>
+        </member>
+        <member name="T:NinePatchWpf.NinePatchImage">
+            <summary>
+            A decoded nine-patch image held by the native renderer.
+            Thread-safe for rendering; dispose it (or let the owning cache dispose it) when done.
+            </summary>
+        </member>
+        <member name="M:NinePatchWpf.NinePatchImage.#ctor(System.String)">
+            <summary>
+            Load a .9.png file (stretch markers are read from the 1px border).
+            Relative paths are resolved with <see cref="M:NinePatchWpf.NinePatchPaths.Resolve(System.String)"/>.
+            </summary>
+        </member>
+        <member name="M:NinePatchWpf.NinePatchImage.#ctor(System.Byte[],System.Int32,System.Int32,NinePatchWpf.NinePatchInfo)">
+            <summary>
+            Create from raw RGBA pixels (tightly packed, width * 4 bytes per row) with a manual stretch region.
+            </summary>
+        </member>
+        <member name="M:NinePatchWpf.NinePatchImage.#ctor(System.ReadOnlySpan{System.Byte},System.Int32,System.Int32,System.Int32,NinePatchWpf.NinePatchInfo)">
+            <summary>Create from raw RGBA pixels with an explicit row stride.</summary>
+        </member>
+        <member name="M:NinePatchWpf.NinePatchImage.FromEncoded(System.ReadOnlySpan{System.Byte},System.String)">
+            <summary>Decode an encoded .9.png held in memory.</summary>
+        </member>
+        <member name="M:NinePatchWpf.NinePatchImage.FromStream(System.IO.Stream,System.String)">
+            <summary>Decode an encoded .9.png from a stream (for example an embedded resource).</summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchImage.SourcePath">
+            <summary>Full path the image was loaded from, if it came from a file.</summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchImage.Width">
+            <summary>Content width in pixels (the 1px marker border is excluded).</summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchImage.Height">
+            <summary>Content height in pixels.</summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchImage.HorizontalStretchRegions">
+            <summary>Number of horizontal stretch regions (top border markers).</summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchImage.VerticalStretchRegions">
+            <summary>Number of vertical stretch regions (left border markers).</summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchImage.Padding">
+            <summary>Content padding from the right/bottom markers, or null when the image has none.</summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchImage.IsDisposed">
+            <summary>True once <see cref="M:NinePatchWpf.NinePatchImage.Dispose"/> has been called.</summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchImage.Handle">
+            <summary>
+            Raw native handle, for building <see cref="T:NinePatchWpf.NinePatchBatchItem"/> arrays.
+            The image must stay alive (not disposed) while a batch that uses it renders.
+            </summary>
+        </member>
+        <member name="M:NinePatchWpf.NinePatchImage.Render(System.Int32,System.Int32)">
+            <summary>Render at the given size. Returns straight-alpha RGBA bytes (version 1 behaviour).</summary>
+        </member>
+        <member name="M:NinePatchWpf.NinePatchImage.Render(System.Int32,System.Int32,NinePatchWpf.NinePatchPixelFormat,NinePatchWpf.NinePatchScaling)">
+            <summary>Render at the given size into a new tightly packed buffer.</summary>
+        </member>
+        <member name="M:NinePatchWpf.NinePatchImage.Render(System.Span{System.Byte},System.Int32,System.Int32,System.Int32,NinePatchWpf.NinePatchPixelFormat,NinePatchWpf.NinePatchScaling)">
+            <summary>Render into a caller-provided buffer.</summary>
+        </member>
+        <member name="M:NinePatchWpf.NinePatchImage.RenderTo(System.IntPtr,System.Int64,System.Int32,System.Int32,System.Int32,NinePatchWpf.NinePatchPixelFormat,NinePatchWpf.NinePatchScaling)">
+            <summary>
+            Render directly into unmanaged memory such as <c>WriteableBitmap.BackBuffer</c>.
+            <paramref name="bufferSize"/> is the number of writable bytes at <paramref name="buffer"/>;
+            the call fails instead of writing past it.
+            </summary>
+        </member>
+        <member name="M:NinePatchWpf.NinePatchImage.RenderTo(System.IntPtr,System.Int32,System.Int32,System.Int32)">
+            <summary>Render straight-alpha RGBA into unmanaged memory (version 1 API).</summary>
+        </member>
+        <member name="M:NinePatchWpf.NinePatchImage.RenderBgraTo(System.IntPtr,System.Int32,System.Int32,System.Int32)">
+            <summary>Render straight-alpha BGRA into unmanaged memory (version 1 API).</summary>
+        </member>
+        <member name="M:NinePatchWpf.NinePatchImage.RenderAt(System.IntPtr,System.Int64,System.Int32,System.Int32,System.Int32,System.Int32,System.Int32,System.Int32,System.Int32,NinePatchWpf.NinePatchPixelFormat,NinePatchWpf.NinePatchScaling)">
+            <summary>
+            Render at (x, y) inside a larger surface, clipping anything outside it.
+            Does not clear the target area first.
+            </summary>
+        </member>
+        <member name="M:NinePatchWpf.NinePatchImage.RenderBatch(System.ReadOnlySpan{NinePatchWpf.NinePatchBatchItem},System.IntPtr,System.Int64,System.Int32,System.Int32,System.Int32,NinePatchWpf.NinePatchPixelFormat,NinePatchWpf.NinePatchScaling)">
+            <summary>
+            Render many nine-patches into one surface in a single native call.
+            Every image referenced by <paramref name="items"/> must stay alive for the call.
+            </summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchImage.NativeVersion">
+            <summary>Version of the loaded native library, (major &lt;&lt; 16) | minor.</summary>
+        </member>
+        <member name="T:NinePatchWpf.NinePatchPaths">
+            <summary>
+            Resolves skin paths. Relative paths are looked up next to the application
+            (<see cref="P:NinePatchWpf.NinePatchPaths.BaseDirectory"/>) first, then in the current directory, so an app
+            started from a shortcut or another folder still finds its Assets.
+            </summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchPaths.BaseDirectory">
+            <summary>Folder relative skin paths start from. Defaults to <see cref="P:System.AppContext.BaseDirectory"/>.</summary>
+        </member>
+        <member name="M:NinePatchWpf.NinePatchPaths.IsResourceUri(System.String)">
+            <summary>True for WPF resource URIs (pack://… or /Assembly;component/…), which the WPF layer opens.</summary>
+        </member>
+        <member name="M:NinePatchWpf.NinePatchPaths.Resolve(System.String)">
+            <summary>Absolute path for a skin file. Resource URIs are returned unchanged.</summary>
+        </member>
+        <member name="T:NinePatchWpf.NinePatchInfo">
+            <summary>
+            Single stretch region in content pixels (end exclusive), for images without
+            .9.png border markers. Layout matches the native <c>NinePatchInfo</c>.
+            </summary>
+        </member>
+        <member name="T:NinePatchWpf.NinePatchBatchItem">
+            <summary>
+            Batch item for <see cref="M:NinePatchWpf.NinePatchImage.RenderBatch(System.ReadOnlySpan{NinePatchWpf.NinePatchBatchItem},System.IntPtr,System.Int64,System.Int32,System.Int32,System.Int32,NinePatchWpf.NinePatchPixelFormat,NinePatchWpf.NinePatchScaling)"/>. Must match the C++ NinePatchBatchItem layout.
+            </summary>
+        </member>
+        <member name="T:NinePatchWpf.NinePatchPadding">
+            <summary>Content padding declared by the right and bottom .9.png markers, in pixels.</summary>
+        </member>
+        <member name="M:NinePatchWpf.NinePatchPadding.#ctor(System.Int32,System.Int32,System.Int32,System.Int32)">
+            <summary>Content padding declared by the right and bottom .9.png markers, in pixels.</summary>
+        </member>
+        <member name="T:NinePatchWpf.NinePatchPixelFormat">
+            <summary>Byte order and alpha convention of rendered pixels.</summary>
+        </member>
+        <member name="F:NinePatchWpf.NinePatchPixelFormat.Rgba">
+            <summary>R, G, B, A with straight alpha (version 1 default).</summary>
+        </member>
+        <member name="F:NinePatchWpf.NinePatchPixelFormat.Bgra">
+            <summary>B, G, R, A with straight alpha.</summary>
+        </member>
+        <member name="F:NinePatchWpf.NinePatchPixelFormat.PremultipliedRgba">
+            <summary>R, G, B, A with colour multiplied by alpha.</summary>
+        </member>
+        <member name="F:NinePatchWpf.NinePatchPixelFormat.PremultipliedBgra">
+            <summary>B, G, R, A with colour multiplied by alpha. This is WPF's Pbgra32.</summary>
+        </member>
+        <member name="T:NinePatchWpf.NinePatchScaling">
+            <summary>How stretched regions are sampled.</summary>
+        </member>
+        <member name="F:NinePatchWpf.NinePatchScaling.NearestNeighbor">
+            <summary>Repeat source pixels. Crisp, best for pixel art and flat skins.</summary>
+        </member>
+        <member name="F:NinePatchWpf.NinePatchScaling.Bilinear">
+            <summary>Blend neighbouring pixels. Smooth, best for gradients.</summary>
+        </member>
+        <member name="T:NinePatchWpf.NinePatchException">
+            <summary>Thrown when a nine-patch cannot be loaded or rendered.</summary>
+        </member>
+    </members>
+</doc>

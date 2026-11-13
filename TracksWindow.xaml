@@ -1,0 +1,234 @@
+<Window x:Class="nMIDI.TracksWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:np="urn:ninepatch:wpf"
+        xmlns:lanes="clr-namespace:nMIDI.Lanes"
+        Title="Track lanes – nMIDI"
+        Width="1280" Height="760" MinWidth="700" MinHeight="300"
+        Background="{DynamicResource Bg0}"
+        Foreground="{DynamicResource Text}"
+        FontFamily="{DynamicResource UiFont}" FontSize="12"
+        UseLayoutRounding="True"
+        WindowStartupLocation="CenterOwner">
+
+    <Window.Resources>
+        <!-- The strip at the bottom of each lane that you drag to change its height. -->
+        <Style x:Key="LaneResizeGrip" TargetType="Thumb">
+            <Setter Property="Cursor" Value="SizeNS"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Thumb">
+                        <Border x:Name="grip" Background="Transparent"/>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="grip" Property="Background" Value="{DynamicResource AccentSoft}"/>
+                            </Trigger>
+                            <Trigger Property="IsDragging" Value="True">
+                                <Setter TargetName="grip" Property="Background" Value="{DynamicResource Accent}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>   <!-- toolbar -->
+            <RowDefinition Height="26"/>     <!-- ruler -->
+            <RowDefinition Height="*"/>      <!-- lanes -->
+            <RowDefinition Height="Auto"/>   <!-- horizontal zoom scroll bar -->
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="250"/>  <!-- track headers -->
+            <ColumnDefinition Width="*"/>    <!-- lanes -->
+            <ColumnDefinition Width="Auto"/> <!-- vertical scroll bar -->
+        </Grid.ColumnDefinitions>
+
+        <!-- Toolbar -->
+        <Border Grid.Row="0" Grid.ColumnSpan="3" Background="{DynamicResource Bg1}" BorderBrush="{DynamicResource Line}"
+                BorderThickness="0,0,0,1" Padding="10,6">
+            <DockPanel>
+                <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" VerticalAlignment="Center">
+                    <ToggleButton x:Name="btnFollow" Style="{DynamicResource ToolToggle}" IsChecked="True"
+                                  ToolTip="Turn the page when the playhead reaches the right edge">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE8B0;" Style="{DynamicResource Icon}" Margin="0,0,6,0"/>
+                            <TextBlock Text="Follow"/>
+                        </StackPanel>
+                    </ToggleButton>
+                    <Button Style="{DynamicResource ToolButton}" Margin="6,0,0,0" Click="OnFit"
+                            ToolTip="Show the whole song (or double-click the scroll bar thumb)">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE9A6;" Style="{DynamicResource Icon}" Margin="0,0,6,0"/>
+                            <TextBlock Text="Fit"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{DynamicResource ToolButton}" Margin="6,0,0,0" Click="OnShrinkLanes"
+                            ToolTip="Make every lane lower">
+                        <TextBlock Text="&#xE738;" Style="{DynamicResource Icon}"/>
+                    </Button>
+                    <Button Style="{DynamicResource ToolButton}" Margin="4,0,0,0" Click="OnGrowLanes"
+                            ToolTip="Make every lane taller">
+                        <TextBlock Text="&#xE710;" Style="{DynamicResource Icon}"/>
+                    </Button>
+                </StackPanel>
+
+                <!-- Transport: the same buttons as in the main window, driving the same player. -->
+                <Border DockPanel.Dock="Left" Style="{DynamicResource TransportGroup}" Margin="0,0,14,0">
+                    <StackPanel Orientation="Horizontal">
+                        <ToggleButton x:Name="btnRewind" Style="{DynamicResource TransportButton}" Content="&#xE892;"
+                                      Click="OnRewind" ToolTip="Back to start (Home)"/>
+                        <ToggleButton x:Name="btnPlay" Style="{DynamicResource TransportButton}" Content="&#xE768;" Margin="4,0,0,0"
+                                      Tag="{DynamicResource PlayBrush}" Click="OnPlay" ToolTip="Play (Space)"/>
+                        <ToggleButton x:Name="btnPause" Style="{DynamicResource TransportButton}" Content="&#xE769;" Margin="4,0,0,0"
+                                      Tag="{DynamicResource SoloBrush}" Click="OnPause" ToolTip="Pause (Space)"/>
+                        <ToggleButton x:Name="btnStop" Style="{DynamicResource TransportButton}" Content="&#xE71A;" Margin="4,0,0,0"
+                                      Tag="{DynamicResource StopBrush}" Click="OnStop" ToolTip="Stop and go back to start"/>
+                        <ToggleButton x:Name="btnPanic" Style="{DynamicResource TransportButton}" Content="&#xE7BA;" Margin="4,0,0,0"
+                                      Tag="{DynamicResource MuteBrush}" Click="OnPanic"
+                                      ToolTip="Panic (Esc): pause and send All Notes Off on all 16 channels of every MIDI output port"/>
+
+                        <Border Style="{DynamicResource LcdPanel}" Margin="10,0,0,0" Padding="12,1" MinWidth="150">
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock x:Name="txtTime" Text="00:00.000" FontFamily="{DynamicResource MonoFont}" FontSize="19"
+                                           Foreground="{DynamicResource LcdText}" HorizontalAlignment="Center"/>
+                                <TextBlock x:Name="txtBars" Text="  1.1.000" FontFamily="{DynamicResource MonoFont}" FontSize="10"
+                                           Foreground="{DynamicResource TextDim}" HorizontalAlignment="Center" Margin="0,-2,0,0"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Border>
+
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="TRACK LANES" Style="{DynamicResource CapsLabel}" Foreground="{DynamicResource Text}"/>
+                    <TextBlock x:Name="txtSong" Foreground="{DynamicResource TextDim}" Margin="12,0,0,0" VerticalAlignment="Center"
+                               TextTrimming="CharacterEllipsis"/>
+                    <TextBlock Foreground="{DynamicResource TextFaint}" FontSize="11" Margin="16,0,0,0" VerticalAlignment="Center"
+                               TextTrimming="CharacterEllipsis"
+                               Text="Drag a track's bottom edge to resize it  ·  Ctrl+wheel: zoom time  ·  Ctrl+Shift+wheel: zoom all tracks"/>
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <!-- Ruler -->
+        <Border Grid.Row="1" Grid.Column="0" Background="{DynamicResource Bg1}" BorderBrush="{DynamicResource Line}"
+                BorderThickness="0,0,1,1"/>
+        <lanes:LaneRuler x:Name="ruler" Grid.Row="1" Grid.Column="1"/>
+        <Border Grid.Row="1" Grid.Column="2" Background="{DynamicResource Bg1}"/>
+
+        <!-- Lanes
+             The scroll viewer's own scroll bar is hidden. The zoom scroll bar in column 2 is always
+             there, so the lanes, the ruler and the time bar always have the same width. -->
+        <ScrollViewer x:Name="scroller" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                      VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Disabled"
+                      ScrollChanged="OnLanesScrolled" PreviewMouseWheel="OnLanesWheel">
+            <ItemsControl x:Name="lstLanes" ItemsSource="{Binding Tracks}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Height="{Binding LaneHeight}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="250"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Track header -->
+                            <Border x:Name="header" Grid.Column="0" Background="{DynamicResource Bg1}"
+                                    BorderBrush="{DynamicResource Line}" BorderThickness="0,0,1,1">
+                                <Grid Margin="0,0,8,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="5"/>
+                                        <ColumnDefinition Width="26"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="26"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+
+                                    <Rectangle Grid.RowSpan="2" Fill="{Binding Brush}"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding Number}" Foreground="{DynamicResource TextFaint}"
+                                               FontSize="11" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    <TextBlock x:Name="title" Grid.Column="2" Text="{Binding Name}" FontWeight="SemiBold"
+                                               VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+
+                                    <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center">
+                                        <ToggleButton Style="{DynamicResource ChipToggle}" Content="M" Tag="{DynamicResource MuteBrush}"
+                                                      IsChecked="{Binding IsMuted}" MouseRightButtonUp="OnMuteRightClick"
+                                                      ToolTip="Mute. Right-click: mute only this track"/>
+                                        <ToggleButton Style="{DynamicResource ChipToggle}" Content="S" Tag="{DynamicResource SoloBrush}"
+                                                      IsChecked="{Binding IsSolo}" MouseRightButtonUp="OnSoloRightClick"
+                                                      ToolTip="Solo. Right-click: solo only this track" Margin="3,0,0,0"/>
+                                        <ToggleButton Style="{DynamicResource ChipToggle}" Tag="{DynamicResource ViewBrush}"
+                                                      IsChecked="{Binding ShowNotes}" MouseRightButtonUp="OnShowRightClick"
+                                                      ToolTip="Show in the piano roll of the main window. Right-click: show only this track"
+                                                      Margin="3,0,0,0">
+                                            <TextBlock Text="&#xE7B3;" Style="{DynamicResource Icon}" FontSize="11"/>
+                                        </ToggleButton>
+                                    </StackPanel>
+
+                                    <!-- Second line, when the lane is tall enough: instrument, channel and meter. -->
+                                    <DockPanel Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2" VerticalAlignment="Top" Margin="0,0,0,4">
+                                        <Border DockPanel.Dock="Right" Height="6" Width="52" CornerRadius="3" Background="{DynamicResource LcdBg}"
+                                                VerticalAlignment="Center" ClipToBounds="True">
+                                            <Border CornerRadius="3" Background="{DynamicResource MeterBrush}" RenderTransformOrigin="0,0.5">
+                                                <Border.RenderTransform>
+                                                    <ScaleTransform ScaleX="{Binding Level}"/>
+                                                </Border.RenderTransform>
+                                            </Border>
+                                        </Border>
+                                        <TextBlock Foreground="{DynamicResource TextDim}" FontSize="11" TextTrimming="CharacterEllipsis"
+                                                   VerticalAlignment="Center">
+                                            <Run Text="{Binding ChannelText, Mode=OneWay}"/>
+                                            <Run Text="{Binding Instrument, Mode=OneWay}"/>
+                                        </TextBlock>
+                                    </DockPanel>
+                                </Grid>
+                            </Border>
+
+                            <!-- Notes -->
+                            <lanes:TrackLane Grid.Column="1" Track="{Binding}" Focusable="True" FocusVisualStyle="{x:Null}"
+                                             Axis="{Binding DataContext.Axis, RelativeSource={RelativeSource AncestorType=Window}}"
+                                             Range="{Binding DataContext.Range, RelativeSource={RelativeSource AncestorType=Window}}"
+                                             Seek="OnLaneSeek" RangeMoved="OnLaneRangeMoved"
+                                             ToolTip="Click to move the playhead. Drag to select a range of this track, drag the range to move it. Del deletes it, Ctrl+C / Ctrl+X / Ctrl+V / Ctrl+D copy, cut, paste at the playhead, duplicate."/>
+
+                            <!-- Drag to change the height of the lane. -->
+                            <Thumb Grid.ColumnSpan="2" Height="5" VerticalAlignment="Bottom" Style="{DynamicResource LaneResizeGrip}"
+                                   DragDelta="OnLaneResize" MouseDoubleClick="OnLaneResetHeight"
+                                   ToolTip="Drag to change the height of this track. Double-click: default height"/>
+                        </Grid>
+                        <DataTemplate.Triggers>
+                            <DataTrigger Binding="{Binding IsAudible}" Value="False">
+                                <Setter TargetName="title" Property="Opacity" Value="0.45"/>
+                            </DataTrigger>
+                        </DataTemplate.Triggers>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+
+        <!-- Shown when no song is loaded. -->
+        <TextBlock x:Name="txtEmpty" Grid.Row="2" Grid.ColumnSpan="2" Text="Open a MIDI file in the main window."
+                   Foreground="{DynamicResource TextDim}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+
+        <!-- Vertical scroll and zoom: drag the thumb to scroll, drag one of its ends to make every
+             lane taller or lower at once, double-click it to fit all tracks in the window. -->
+        <np:ZoomScrollBar x:Name="vzoom" Grid.Row="2" Grid.Column="2" Orientation="Vertical" Width="16"
+                          ToolTip="Drag to scroll. Drag an end of the thumb to zoom all tracks. Double-click: fit all tracks"/>
+
+        <!-- Playhead over the ruler and the lanes. -->
+        <Canvas x:Name="overlay" Grid.Row="1" Grid.RowSpan="2" Grid.Column="1" IsHitTestVisible="False" ClipToBounds="True">
+            <Line x:Name="playheadGlow" Y1="0" Y2="20000" Stroke="#FF4D4D" StrokeThickness="6" Opacity="0.16"/>
+            <Line x:Name="playheadLine" Y1="0" Y2="20000" Stroke="#FF4D4D" StrokeThickness="1" SnapsToDevicePixels="True"/>
+        </Canvas>
+
+        <!-- Horizontal scroll and zoom
+             Drag the thumb to scroll, drag one of its ends to zoom, double-click it to see everything. -->
+        <Border Grid.Row="3" Grid.Column="0" Background="{DynamicResource Bg1}"/>
+        <np:ZoomScrollBar x:Name="hscroll" Grid.Row="3" Grid.Column="1" Height="16"/>
+        <Border Grid.Row="3" Grid.Column="2" Background="{DynamicResource Bg1}"/>
+    </Grid>
+</Window>

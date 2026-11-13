@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Tests for the song model (loading, editing, undo, saving). They build the model's source files
+       directly, so they run on any OS without WPF:  dotnet test tests -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <RootNamespace>nMIDI.Tests</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Model\Song.cs" Link="Model\Song.cs" />
+    <Compile Include="..\Model\Fingering.cs" Link="Model\Fingering.cs" />
+    <Compile Include="..\Model\FingeringReport.cs" Link="Model\FingeringReport.cs" />
+    <Compile Include="..\Model\NoteOps.cs" Link="Model\NoteOps.cs" />
+    <Compile Include="..\Model\EditHistory.cs" Link="Model\EditHistory.cs" />
+    <Compile Include="..\Model\NoteProcessing.cs" Link="Model\NoteProcessing.cs" />
+    <Compile Include="..\Model\SongOps.cs" Link="Model\SongOps.cs" />
+    <Compile Include="..\Theory\NoteHelper.cs" Link="Theory\NoteHelper.cs" />
+    <Compile Include="..\Theory\PianoFingering.cs" Link="Theory\PianoFingering.cs" />
+    <Compile Include="..\Model\Pedals.cs" Link="Model\Pedals.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Melanchall.DryWetMidi" Version="7.1.0" />
+    <Reference Include="nPianoFingering.Core" HintPath="..\lib\nPianoFingering\nPianoFingering.Core.dll" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,21 @@
+# Build output
+bin/
+obj/
+publish/
+artifacts/
+TestResults/
+
+# Visual Studio / Rider / VS Code
+.vs/
+.idea/
+.vscode/
+*.user
+*.suo
+*.rsuser
+
+# OS
+Thumbs.db
+.DS_Store
+
+# The prebuilt libraries in lib/ are kept on purpose.
+!lib/**/*.dll

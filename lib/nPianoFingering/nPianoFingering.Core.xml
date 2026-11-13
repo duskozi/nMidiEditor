@@ -1,0 +1,283 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>nPianoFingering.Core</name>
+    </assembly>
+    <members>
+        <member name="P:nPianoFingering.FingeringOptions.UseScaleCharts">
+            <summary>Prefer standard chart fingering inside recognised scale runs.</summary>
+        </member>
+        <member name="P:nPianoFingering.FingeringOptions.BeamWidth">
+            <summary>Hypotheses kept per step of the search. Larger is slower and (slightly) better.</summary>
+        </member>
+        <member name="P:nPianoFingering.FingeringOptions.ChordTolerance">
+            <summary>Notes whose onsets are this close (seconds) are played together as a chord.</summary>
+        </member>
+        <member name="P:nPianoFingering.FingeringOptions.FreeMoveTime">
+            <summary>A rest this long (seconds) halves the cost of stretches and position shifts.</summary>
+        </member>
+        <member name="P:nPianoFingering.FingeringOptions.FingerChangeOnRepeats">
+            <summary>
+            Fast repeated notes (same key, onsets closer than <see cref="P:nPianoFingering.FingeringOptions.FastRepeatTime"/>) prefer changing fingers
+            (3-2-1, 4-3-2-1) instead of the same finger.
+            </summary>
+        </member>
+        <member name="P:nPianoFingering.FingeringOptions.FastRepeatTime">
+            <summary>Onset interval (seconds) below which a repeated note counts as fast.</summary>
+        </member>
+        <member name="T:nPianoFingering.FingeringEngine">
+            <summary>
+            Offline fingering for the notes of one hand. Every onset group (single note or chord) gets a set of
+            fingers; the whole sequence is optimised with a beam (Viterbi-style) search over an ergonomic cost model:
+            <list type="bullet">
+            <item>Parncutt/Jacobs finger-pair spans (<see cref="T:nPianoFingering.SpanTable"/>): stretch, large-span and small-span costs;</item>
+            <item>finger rules: thumb or 5th on a black key, 3-4 successions, 4 on black, thumb passing on mixed levels,
+              the same finger on two different keys, weak fingers;</item>
+            <item>second-order (three-note) position-change rules and the 3-4-5 rule;</item>
+            <item>chords scored over all finger pairs; held notes block their fingers and constrain finger order;</item>
+            <item>time: rests make stretches and shifts cheap;</item>
+            <item>chart prior: inside a recognised scale run, the standard scale fingering is strongly preferred.</item>
+            </list>
+            </summary>
+        </member>
+        <member name="M:nPianoFingering.FingeringEngine.Assign(System.Collections.Generic.IReadOnlyList{nPianoFingering.PianoNote},nPianoFingering.Hand,nPianoFingering.FingeringOptions,System.Threading.CancellationToken)">
+            <summary>Fingers the notes of one hand. Throws <see cref="T:System.OperationCanceledException"/> when cancelled.</summary>
+        </member>
+        <member name="M:nPianoFingering.FingeringEngine.Playable(nPianoFingering.FingeringEngine.Cluster)">
+            <summary>At most five notes can be fingered; keep the outer notes and spread the rest.</summary>
+        </member>
+        <member name="M:nPianoFingering.FingeringEngine.Candidates(System.Int32,System.Boolean)">
+            <summary>All finger sets for n notes in ascending pitch order (RH ascending fingers, LH descending).</summary>
+        </member>
+        <member name="M:nPianoFingering.FingeringEngine.StaticCost(nPianoFingering.PianoNote[],System.Int32[],System.Boolean,System.Collections.Generic.Dictionary{nPianoFingering.PianoNote,nPianoFingering.ScaleRunDetector.ChartHint})">
+            <summary>Cost of a finger set on its own: chord spans, black-key and weak-finger preferences, chart prior.</summary>
+        </member>
+        <member name="M:nPianoFingering.FingeringEngine.ChordPairCost(System.Int32,System.Int32,System.Int32)">
+            <summary>Two notes held at the same time: x semitones apart (always positive inside a sorted chord).</summary>
+        </member>
+        <member name="M:nPianoFingering.FingeringEngine.HeldCost(nPianoFingering.FingeringEngine.HeldNote[],nPianoFingering.PianoNote[],System.Int32[],System.Boolean)">
+            <summary>New notes played while other keys of the same hand are still held.</summary>
+        </member>
+        <member name="M:nPianoFingering.FingeringEngine.RepeatCost(System.Int32,System.Int32)">
+            <summary>A fast repeated key: walking down the fingers (3-2-1) is natural, the same finger is slow.</summary>
+        </member>
+        <member name="M:nPianoFingering.FingeringEngine.PairCost(System.Int32,System.Int32,System.Int32,System.Int32,System.Boolean,System.Double,System.Boolean)">
+            <summary>Parncutt-style cost of moving from (p1,f1) to (p2,f2).</summary>
+        </member>
+        <member name="M:nPianoFingering.FingeringEngine.TripleCost(nPianoFingering.FingeringEngine.Cluster,nPianoFingering.FingeringEngine.State,nPianoFingering.FingeringEngine.Cluster,nPianoFingering.FingeringEngine.State,nPianoFingering.PianoNote[],System.Int32[],System.Boolean,nPianoFingering.FingeringEngine.Cluster,nPianoFingering.FingeringOptions)">
+            <summary>Second-order rules over three single notes: position change count / size and 3-4-5.</summary>
+        </member>
+        <member name="T:nPianoFingering.SessionResult">
+            <summary>What one <see cref="M:nPianoFingering.FingeringSession.Update(System.Collections.Generic.IReadOnlyList{nPianoFingering.PianoNote},System.Threading.CancellationToken)"/> did.</summary>
+            <param name="Full">True when the whole part was analysed (first run, options changed, or a large edit).</param>
+            <param name="Refingered">Notes whose hand and finger were recomputed; the others kept their previous result.</param>
+            <param name="Changed">Notes whose hand or finger is different from before.</param>
+            <param name="Elapsed">Time the update took.</param>
+        </member>
+        <member name="M:nPianoFingering.SessionResult.#ctor(System.Boolean,System.Int32,System.Int32,System.TimeSpan)">
+            <summary>What one <see cref="M:nPianoFingering.FingeringSession.Update(System.Collections.Generic.IReadOnlyList{nPianoFingering.PianoNote},System.Threading.CancellationToken)"/> did.</summary>
+            <param name="Full">True when the whole part was analysed (first run, options changed, or a large edit).</param>
+            <param name="Refingered">Notes whose hand and finger were recomputed; the others kept their previous result.</param>
+            <param name="Changed">Notes whose hand or finger is different from before.</param>
+            <param name="Elapsed">Time the update took.</param>
+        </member>
+        <member name="P:nPianoFingering.SessionResult.Full">
+            <summary>True when the whole part was analysed (first run, options changed, or a large edit).</summary>
+        </member>
+        <member name="P:nPianoFingering.SessionResult.Refingered">
+            <summary>Notes whose hand and finger were recomputed; the others kept their previous result.</summary>
+        </member>
+        <member name="P:nPianoFingering.SessionResult.Changed">
+            <summary>Notes whose hand or finger is different from before.</summary>
+        </member>
+        <member name="P:nPianoFingering.SessionResult.Elapsed">
+            <summary>Time the update took.</summary>
+        </member>
+        <member name="T:nPianoFingering.FingeringSession">
+            <summary>
+            Incremental fingering for an editor. Keep one session per part and call <see cref="M:nPianoFingering.FingeringSession.Update(System.Collections.Generic.IReadOnlyList{nPianoFingering.PianoNote},System.Threading.CancellationToken)"/> with the whole
+            part after every edit: the notes are compared with the previous call, only a region around the edit is
+            analysed again, and every other note gets its previous hand and finger back. A single edit in a part of a few
+            thousand notes takes milliseconds instead of a full run.
+            <para>
+            The run region is the edited range widened by <see cref="P:nPianoFingering.FingeringSession.RunMargin"/> onset groups on each side (cut at a rest
+            when there is one, so the search starts and ends in a natural place); results are written only for the edited
+            range widened by <see cref="P:nPianoFingering.FingeringSession.WriteMargin"/> groups, so the region's own edges never leak into the result.
+            </para>
+            Not thread safe: use a session from one thread at a time (a background worker is fine).
+            </summary>
+        </member>
+        <member name="P:nPianoFingering.FingeringSession.Options">
+            <summary>Options for every run. After changing them call <see cref="M:nPianoFingering.FingeringSession.Reset"/>.</summary>
+        </member>
+        <member name="P:nPianoFingering.FingeringSession.RunMargin">
+            <summary>Onset groups analysed on each side of an edit.</summary>
+        </member>
+        <member name="P:nPianoFingering.FingeringSession.WriteMargin">
+            <summary>Onset groups on each side of an edit whose result is replaced.</summary>
+        </member>
+        <member name="P:nPianoFingering.FingeringSession.BoundaryRest">
+            <summary>A rest at least this long (seconds) is used as a boundary of the run region.</summary>
+        </member>
+        <member name="P:nPianoFingering.FingeringSession.FullRunShare">
+            <summary>When more than this share of the part changed, the whole part is analysed.</summary>
+        </member>
+        <member name="M:nPianoFingering.FingeringSession.Reset">
+            <summary>Forget the previous result: the next update analyses the whole part.</summary>
+        </member>
+        <member name="M:nPianoFingering.FingeringSession.Update(System.Collections.Generic.IReadOnlyList{nPianoFingering.PianoNote},System.Threading.CancellationToken)">
+            <summary>Fills Hand, Finger and FromChart of every note. Throws <see cref="T:System.OperationCanceledException"/> when cancelled (the session then keeps its previous state).</summary>
+        </member>
+        <member name="M:nPianoFingering.FingeringSession.RunBoundary(nPianoFingering.PianoNote[],System.Collections.Generic.List{System.Int32},System.Int32,System.Int32)">
+            <summary>Group index RunMargin groups away from <paramref name="from"/>, moved to a rest between RunMargin/2 and 1.5·RunMargin when there is one.</summary>
+        </member>
+        <member name="F:nPianoFingering.HandSource.Auto">
+            <summary>Use the hands given by the file (LH/RH track names or two piano tracks) when every note has one, otherwise the algorithm.</summary>
+        </member>
+        <member name="F:nPianoFingering.HandSource.Tracks">
+            <summary>Always use the file's hands (notes without one go through the algorithm).</summary>
+        </member>
+        <member name="F:nPianoFingering.HandSource.Algorithm">
+            <summary>Ignore the file's hands and separate with the algorithm.</summary>
+        </member>
+        <member name="P:nPianoFingering.HandSeparationOptions.ComfortSpan">
+            <summary>Comfortable span of one hand in semitones (an octave); beyond it costs grow.</summary>
+        </member>
+        <member name="P:nPianoFingering.HandSeparationOptions.MaxSpan">
+            <summary>Largest span one hand can hold (a tenth).</summary>
+        </member>
+        <member name="T:nPianoFingering.HandSeparator">
+            <summary>
+            Splits a piano part into left and right hand. Every onset group is split at one point (lower notes to the
+            left hand), and the sequence of splits is optimised with a beam search. Costs: hand span over an octave,
+            more than five keys in a hand, hands crossing (including keys still held), how far each hand has to move
+            for the time it has, and a weak register preference.
+            </summary>
+        </member>
+        <member name="M:nPianoFingering.HandSeparator.Separate(System.Collections.Generic.IReadOnlyList{nPianoFingering.PianoNote},nPianoFingering.HandSeparationOptions)">
+            <summary>Fills <see cref="P:nPianoFingering.PianoNote.Hand"/> for every note. Returns true if the file's hands were used.</summary>
+        </member>
+        <member name="M:nPianoFingering.HandSeparator.Separate(System.Collections.Generic.IReadOnlyList{nPianoFingering.PianoNote},nPianoFingering.HandSeparationOptions,System.Threading.CancellationToken)">
+            <summary>
+            Fills <see cref="P:nPianoFingering.PianoNote.Hand"/> for every note (a <see cref="P:nPianoFingering.PianoNote.LockedHand"/> always wins).
+            Returns true if the file's hands were used.
+            </summary>
+        </member>
+        <member name="M:nPianoFingering.HandSeparator.UseFileHands(System.Collections.Generic.IReadOnlyList{nPianoFingering.PianoNote},nPianoFingering.HandSeparationOptions)">
+            <summary>True when <paramref name="o"/> says to take the hands from the file for these notes.</summary>
+        </member>
+        <member name="M:nPianoFingering.HandSeparator.Poly(System.Int32)">
+            <summary>Effort of striking n keys at once with one hand (2+2 is easier than 1+3).</summary>
+        </member>
+        <member name="M:nPianoFingering.HandSeparator.MoveCost(System.Double,System.Int32[],System.Collections.Generic.List{System.Int32},System.Double)">
+            <summary>
+            Moving the hand costs more the less time it has; after a long pause it is almost free. Notes inside
+            the range the hand has just been playing (bass + chord in a waltz) are cheap.
+            </summary>
+        </member>
+        <member name="M:nPianoFingering.Keyboard.Name(System.Int32)">
+            <summary>Scientific pitch name, C4 = MIDI 60.</summary>
+        </member>
+        <member name="M:nPianoFingering.Keyboard.ParsePitch(System.String)">
+            <summary>Parses "C4", "F#5", "Bb3", "E##4", "Cb4" (also PIG style "D-4" for flats). C4 = 60.</summary>
+        </member>
+        <member name="T:nPianoFingering.PianoAnalyzer">
+            <summary>Hand separation followed by fingering of each hand. Entry point for apps.</summary>
+        </member>
+        <member name="M:nPianoFingering.PianoAnalyzer.Analyze(System.Collections.Generic.IReadOnlyList{nPianoFingering.PianoNote},nPianoFingering.AnalyzerOptions,System.Threading.CancellationToken)">
+            <summary>
+            Separates the hands and fingers both. Notes can come from several tracks (a LH and a RH track are
+            fingered together; give each note its track's <see cref="P:nPianoFingering.PianoNote.SourceHand"/>).
+            Throws <see cref="T:System.OperationCanceledException"/> when cancelled; the notes are then partly filled.
+            </summary>
+        </member>
+        <member name="T:nPianoFingering.PianoNote">
+            <summary>One note of a piano part. The engine fills <see cref="P:nPianoFingering.PianoNote.Hand"/> and <see cref="P:nPianoFingering.PianoNote.Finger"/>.</summary>
+        </member>
+        <member name="P:nPianoFingering.PianoNote.Start">
+            <summary>Onset and release in seconds.</summary>
+        </member>
+        <member name="P:nPianoFingering.PianoNote.SourceHand">
+            <summary>Hand given by the source (track name, separate LH/RH tracks, PIG ground truth).</summary>
+        </member>
+        <member name="P:nPianoFingering.PianoNote.SourceFinger">
+            <summary>Ground-truth finger when the source has one (PIG files, chart tests); 0 = unknown.</summary>
+        </member>
+        <member name="P:nPianoFingering.PianoNote.LockedFinger">
+            <summary>Finger fixed by the user (1-5); the engine keeps it and fingers the notes around it to fit. 0 = free.</summary>
+        </member>
+        <member name="P:nPianoFingering.PianoNote.LockedHand">
+            <summary>Hand fixed by the user; overrides the source hand and the algorithm. Unknown = free.</summary>
+        </member>
+        <member name="P:nPianoFingering.PianoNote.Hand">
+            <summary>Result: which hand plays the note.</summary>
+        </member>
+        <member name="P:nPianoFingering.PianoNote.Finger">
+            <summary>Result: finger 1 (thumb) … 5 (little finger); 0 = not fingered.</summary>
+        </member>
+        <member name="P:nPianoFingering.PianoNote.FromChart">
+            <summary>True when the finger came from a recognised scale run (chart fingering).</summary>
+        </member>
+        <member name="T:nPianoFingering.ScaleChart">
+            <summary>A scale with its standard (ABRSM / Hanon style) one-octave fingering for both hands.</summary>
+        </member>
+        <member name="P:nPianoFingering.ScaleChart.Right">
+            <summary>Right hand, ascending, tonic to tonic (8 fingers).</summary>
+        </member>
+        <member name="P:nPianoFingering.ScaleChart.Left">
+            <summary>Left hand, ascending, tonic to tonic (8 fingers).</summary>
+        </member>
+        <member name="P:nPianoFingering.ScaleChart.RightStart">
+            <summary>Right-hand finger on the bottom tonic when it differs from the inner one (B♭ minor starts on 2, inner tonic 4).</summary>
+        </member>
+        <member name="M:nPianoFingering.ScaleChart.Degree(System.Int32)">
+            <summary>Scale degree (0-6) of a pitch, or -1 if it is not in the scale.</summary>
+        </member>
+        <member name="M:nPianoFingering.ScaleChart.InteriorFinger(System.Int32,nPianoFingering.Hand)">
+            <summary>Finger for a note inside a run (not the bottom or top end note).</summary>
+        </member>
+        <member name="M:nPianoFingering.ScaleChart.InnerTonicFinger(nPianoFingering.Hand)">
+            <summary>Finger on the tonic at the inner end of a run (bottom for RH, top for LH).</summary>
+        </member>
+        <member name="M:nPianoFingering.ScaleChart.OuterTonicFinger(nPianoFingering.Hand)">
+            <summary>Finger on the tonic at the outer end of a run (top for RH, bottom for LH).</summary>
+        </member>
+        <member name="M:nPianoFingering.ScaleChart.Fingering(nPianoFingering.Hand,System.Int32,System.Boolean)">
+            <summary>Standard fingering for an ascending scale of <paramref name="octaves"/> octaves from the tonic (middle-C octave).</summary>
+        </member>
+        <member name="P:nPianoFingering.ScaleCharts.All">
+            <summary>12 major + 12 harmonic minor (the charted scales), then natural and melodic minor using the same fingering.</summary>
+        </member>
+        <member name="T:nPianoFingering.ScaleRunDetector">
+            <summary>
+            Finds scale runs in one hand's single-note line and returns the chart finger for each note in them.
+            A run is at least 6 notes moving one scale degree at a time in one direction, covering more than a
+            fifth (so a five-finger pattern is left to the optimiser).
+            </summary>
+        </member>
+        <member name="T:nPianoFingering.FingerSpan">
+            <summary>
+            Finger-pair span limits in semitones, after Parncutt et al. (1997), "An ergonomic model of keyboard
+            fingering for melodic fragments", as used by Jacobs (2001) and Al Kasimi et al. (2007).
+            Distances are measured from the lower-numbered finger to the higher-numbered finger, positive towards
+            the little finger (up for the right hand, down for the left hand). A negative value means a crossing
+            (thumb under / finger over).
+            </summary>
+        </member>
+        <member name="M:nPianoFingering.FingerSpan.#ctor(System.Int32,System.Int32,System.Int32,System.Int32,System.Int32,System.Int32)">
+            <summary>
+            Finger-pair span limits in semitones, after Parncutt et al. (1997), "An ergonomic model of keyboard
+            fingering for melodic fragments", as used by Jacobs (2001) and Al Kasimi et al. (2007).
+            Distances are measured from the lower-numbered finger to the higher-numbered finger, positive towards
+            the little finger (up for the right hand, down for the left hand). A negative value means a crossing
+            (thumb under / finger over).
+            </summary>
+        </member>
+        <member name="M:nPianoFingering.SpanTable.Get(System.Int32,System.Int32)">
+            <summary>Span for fingers a and b (any order), for keys held together (chords).</summary>
+        </member>
+        <member name="M:nPianoFingering.SpanTable.GetMelodic(System.Int32,System.Int32)">
+            <summary>Span for consecutive notes of a line.</summary>
+        </member>
+    </members>
+</doc>

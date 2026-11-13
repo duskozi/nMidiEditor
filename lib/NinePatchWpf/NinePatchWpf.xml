@@ -1,0 +1,847 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>NinePatchWpf</name>
+    </assembly>
+    <members>
+        <member name="T:NinePatchWpf.NinePatchBorder">
+             <summary>
+             A Decorator that draws a nine-patch behind its child.
+            
+             Set NinePatchFile (path or resource URI, loaded through the skin cache) or
+             NinePatchSource (an image you own). Small sizes share cached bitmaps; large ones
+             render into a reusable per-element surface, so resizing a window does not allocate
+             a new bitmap for every pixel.
+            
+             DESIGNER: DesignPreviewImage (a normal PNG) is drawn stretched, else DesignBackground,
+             else a dashed outline with the file name.
+            
+               &lt;np:NinePatchBorder NinePatchFile="Assets/panel.9.png" ContentPadding="12"&gt;
+                   &lt;TextBlock Text="Hello" /&gt;
+               &lt;/np:NinePatchBorder&gt;
+             </summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchBorder.NinePatchFile">
+            <summary>Skin file path or resource URI.</summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchBorder.NinePatchSource">
+            <summary>An image you own and dispose. Takes precedence over NinePatchFile.</summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchBorder.DesignPreviewImage">
+            <summary>Plain PNG/JPG shown stretched in the designer. Ignored at runtime.</summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchBorder.DesignBackground">
+            <summary>Brush shown in the designer when there is no DesignPreviewImage. Ignored at runtime.</summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchBorder.ContentPadding">
+            <summary>Space between the skin's edge and the child.</summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchBorder.EnableGpuCache">
+            <summary>
+            Composite this element from a GPU texture (BitmapCache). Helps when the border is
+            animated or transformed; costs video memory and blurs at fractional scales, so it is off by default.
+            </summary>
+        </member>
+        <member name="T:NinePatchWpf.NinePatchButton">
+             <summary>
+             A Button drawn with nine-patch skins.
+            
+             STATES:
+               Normal   → NormalFile (required)
+               Hover    → HoverFile (falls back to Normal)
+               Pressed  → PressedFile (falls back to Hover, then Normal)
+               Disabled → DisabledFile (falls back to Normal)
+               Focused  → FocusedFile, drawn under the current state while the button has keyboard focus
+            
+             USAGE:
+               &lt;np:NinePatchButton NormalFile="Skins/btn_normal.9.png"
+                                   HoverFile="Skins/btn_hover.9.png"
+                                   PressedFile="Skins/btn_pressed.9.png"
+                                   ContentPadding="16,8,16,8"
+                                   Content="Click Me" /&gt;
+             </summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchButton.NormalFile">
+            <summary>Normal state skin (required).</summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchButton.HoverFile">
+            <summary>Hover state skin. Falls back to Normal.</summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchButton.PressedFile">
+            <summary>Pressed state skin. Falls back to Hover, then Normal.</summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchButton.DisabledFile">
+            <summary>Disabled state skin. Falls back to Normal.</summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchButton.FocusedFile">
+            <summary>Focus skin drawn under the state skin. Not drawn if null.</summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchButton.ContentPadding">
+            <summary>Space between the skin's edge and the content.</summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchButton.SkinCache">
+            <summary>Cache to draw with. Inherits; null means <see cref="P:NinePatchWpf.NinePatchSkinCache.Global"/> or the default cache.</summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchButton.DesignBackground">
+            <summary>Brush shown in the designer. Ignored at runtime.</summary>
+        </member>
+        <member name="T:NinePatchWpf.NinePatchElement">
+            <summary>
+            One nine-patch on a <see cref="T:NinePatchWpf.NinePatchCanvas"/>, in canvas coordinates (pixels).
+            </summary>
+        </member>
+        <member name="T:NinePatchWpf.NinePatchCanvas">
+             <summary>
+             Renders many nine-patches into one WriteableBitmap with a single native call.
+            
+             FULL CANVAS:
+               canvas.Resize(totalWidth, totalHeight);
+               canvas.RenderBatch(allElements);
+            
+             VIRTUALISED VIEWPORT (for a ScrollViewer):
+               canvas.RenderViewport(allElements, scrollX, scrollY, viewportW, viewportH);
+               Only elements that intersect the viewport are rendered, shifted by (-scrollX, -scrollY).
+               RenderViewportSorted does the same for lists sorted by Y, using a binary search.
+            
+             ZOOMED VIEWPORT (see <see cref="T:NinePatchWpf.NinePatchZoomViewer"/>):
+               canvas.Resize(pixelW, pixelH, dpiX, dpiY);
+               canvas.RenderViewportScaled(worldElements, sortedByY, offsetX, offsetY, scaleX, scaleY);
+               Elements are in world units; each one is mapped to device pixels before it is rendered,
+               so the fixed nine-patch borders stay sharp at every zoom level.
+            
+             The bitmap is premultiplied BGRA (Pbgra32). Bind <see cref="P:NinePatchWpf.NinePatchCanvas.Bitmap"/> to an Image.
+             </summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchCanvas.Bitmap">
+            <summary>The output bitmap. Bind to Image.Source.</summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchCanvas.Scaling">
+            <summary>Sampling used for stretched regions.</summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchCanvas.LastVisibleCount">
+            <summary>Items rendered by the last call.</summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchCanvas.LastTotalCount">
+            <summary>Items passed to the last call.</summary>
+        </member>
+        <member name="M:NinePatchWpf.NinePatchCanvas.Resize(System.Int32,System.Int32)">
+            <summary>
+            Set the bitmap size; reallocates only when it changes.
+            In viewport mode this is the viewport size, not the whole canvas.
+            </summary>
+        </member>
+        <member name="M:NinePatchWpf.NinePatchCanvas.Resize(System.Int32,System.Int32,System.Double,System.Double)">
+            <summary>
+            Set the bitmap size in device pixels and its DPI, so that it covers
+            width × 96 / dpiX device-independent units when drawn at its natural size.
+            </summary>
+        </member>
+        <member name="M:NinePatchWpf.NinePatchCanvas.RenderBatch(System.Collections.Generic.IReadOnlyList{NinePatchWpf.NinePatchElement})">
+            <summary>Clear the surface and render all elements.</summary>
+        </member>
+        <member name="M:NinePatchWpf.NinePatchCanvas.RenderViewport(System.Collections.Generic.IReadOnlyList{NinePatchWpf.NinePatchElement},System.Int32,System.Int32,System.Int32,System.Int32)">
+            <summary>
+            Clear the surface and render only the elements that intersect the viewport.
+            Call from ScrollViewer.ScrollChanged with HorizontalOffset, VerticalOffset, ViewportWidth, ViewportHeight.
+            </summary>
+        </member>
+        <member name="M:NinePatchWpf.NinePatchCanvas.RenderViewportSorted(System.Collections.Generic.IReadOnlyList{NinePatchWpf.NinePatchElement},System.Int32,System.Int32,System.Int32,System.Int32)">
+            <summary>
+            <see cref="M:NinePatchWpf.NinePatchCanvas.RenderViewport(System.Collections.Generic.IReadOnlyList{NinePatchWpf.NinePatchElement},System.Int32,System.Int32,System.Int32,System.Int32)"/> for elements sorted by Y ascending: a binary search finds the
+            first visible row and the scan stops below the viewport.
+            </summary>
+        </member>
+        <member name="M:NinePatchWpf.NinePatchCanvas.RenderViewportScaled(System.Collections.Generic.IReadOnlyList{NinePatchWpf.NinePatchElement},System.Boolean,System.Double,System.Double,System.Double,System.Double,System.Int32,System.Int32)">
+            <summary>
+            Clear the surface and render elements given in world units, mapped to pixels by
+            <c>pixel = (world - offset) × scale</c>. The surface must already have the viewport size
+            (<see cref="M:NinePatchWpf.NinePatchCanvas.Resize(System.Int32,System.Int32,System.Double,System.Double)"/>).
+            </summary>
+            <param name="elements">Elements in world units.</param>
+            <param name="sortedByY">True if <paramref name="elements"/> is sorted by Y ascending (enables a binary search).</param>
+            <param name="offsetX">World X at the left edge of the surface.</param>
+            <param name="offsetY">World Y at the top edge of the surface.</param>
+            <param name="scaleX">Device pixels per world unit, horizontally.</param>
+            <param name="scaleY">Device pixels per world unit, vertically.</param>
+            <param name="gap">Pixels left empty at the right and bottom of every element, so neighbours stay apart.</param>
+            <param name="minSize">Smallest width and height an element is drawn with, in pixels.</param>
+        </member>
+        <member name="M:NinePatchWpf.NinePatchCanvas.RenderOne(NinePatchWpf.NinePatchImage,System.Int32,System.Int32,System.Int32,System.Int32)">
+            <summary>Render one element on top of what is there (no clear). For incremental updates.</summary>
+        </member>
+        <member name="M:NinePatchWpf.NinePatchCanvas.Clear">
+            <summary>Clear the surface to transparent.</summary>
+        </member>
+        <member name="M:NinePatchWpf.NinePatchCanvas.Dispose">
+            <summary>Release the bitmap and batch buffer.</summary>
+        </member>
+        <member name="T:NinePatchWpf.NinePatchToggleBase">
+             <summary>
+             Base of <see cref="T:NinePatchWpf.NinePatchCheckBox"/> and <see cref="T:NinePatchWpf.NinePatchRadioButton"/>: a nine-patch
+             indicator (IndicatorSize square, vertically centred) followed by the content after IndicatorGap.
+            
+             Skins: Unchecked{Normal,Hover,Pressed,Disabled}File and Checked{Normal,Hover,Pressed,Disabled}File.
+             Within a set, Pressed falls back to Hover then Normal; a missing Checked skin falls back to
+             the Unchecked skin for the same state.
+             </summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchToggleBase.IndicatorSize">
+            <summary>Width and height of the indicator. Default 18.</summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchToggleBase.IndicatorGap">
+            <summary>Gap between the indicator and the content. Default 6.</summary>
+        </member>
+        <member name="M:NinePatchWpf.NinePatchToggleBase.ResolveFile">
+            <summary>Skin for the current check and visual state.</summary>
+        </member>
+        <member name="T:NinePatchWpf.NinePatchCheckBox">
+            <summary>
+            A CheckBox with a nine-patch indicator. Indeterminate (IsChecked = null) draws
+            IndeterminateFile, falling back to CheckedNormalFile, then UncheckedNormalFile.
+            Set IsThreeState to let the user reach the indeterminate state.
+            </summary>
+        </member>
+        <member name="T:NinePatchWpf.NinePatchRadioButton">
+            <summary>A RadioButton with a nine-patch indicator. Use GroupName to group buttons.</summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchRadioButton.GroupName">
+            <summary>Buttons with the same group name (and the same parent when empty) are mutually exclusive.</summary>
+        </member>
+        <member name="T:NinePatchWpf.NinePatchComboBox">
+             <summary>
+             A ComboBox drawn with nine-patch skins.
+            
+             STATES: Normal, Hover, Pressed (while the drop-down is open), Disabled, plus a
+             FocusedFile layer while it has keyboard focus. DropdownFile skins the drop-down list;
+             without it the list uses a plain dark background.
+             </summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchComboBox.DropdownFile">
+            <summary>Skin of the drop-down list's background.</summary>
+        </member>
+        <member name="T:NinePatchWpf.NinePatchLabel">
+            <summary>
+            A Label with a nine-patch background: NormalFile, and DisabledFile while disabled.
+            </summary>
+        </member>
+        <member name="T:NinePatchWpf.NinePatchProgressBar">
+             <summary>
+             A ProgressBar drawn with a nine-patch track and fill.
+            
+             The fill skin is rendered at the full size of the bar and clipped to the progress
+             fraction, so its rounded ends and gradients keep their shape at every value.
+             Horizontal bars fill from the left, vertical bars from the bottom.
+             </summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchProgressBar.Fraction">
+            <summary>Filled fraction, 0 to 1.</summary>
+        </member>
+        <member name="T:NinePatchWpf.NinePatchScrollBar">
+            <summary>
+            A ScrollBar drawn with nine-patch skins: [line button] [track + thumb] [line button].
+            Vertical and horizontal bars use separate templates (chosen by Orientation in Generic.xaml).
+            </summary>
+        </member>
+        <member name="T:NinePatchWpf.NinePatchScrollThumb">
+            <summary>Scroll bar thumb drawn with nine-patch skins. Pressed = being dragged.</summary>
+        </member>
+        <member name="T:NinePatchWpf.NinePatchScrollButton">
+            <summary>Line-up / line-down button of a scroll bar: a nine-patch background and an arrow glyph.</summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchScrollButton.ArrowDirection">
+            <summary>Which way the arrow glyph points.</summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchScrollButton.ArrowBrush">
+            <summary>Arrow fill. Default white; drawn at 40 % opacity when disabled.</summary>
+        </member>
+        <member name="T:NinePatchWpf.ArrowDirection">
+            <summary>Direction of a scroll arrow button glyph.</summary>
+        </member>
+        <member name="T:NinePatchWpf.NinePatchSlider">
+             <summary>
+             A Slider with a nine-patch track and thumb.
+            
+             TrackThickness is the track's height (horizontal) or width (vertical); the track
+             skin stretches along the slider. ThumbWidth/ThumbHeight size the thumb.
+             </summary>
+        </member>
+        <member name="T:NinePatchWpf.NinePatchSliderTrack">
+            <summary>
+            A lightweight element that draws one nine-patch stretched over its bounds.
+            Used for slider and scroll bar tracks, and inside templates generally.
+            </summary>
+        </member>
+        <member name="T:NinePatchWpf.NinePatchSliderThumb">
+            <summary>Slider thumb drawn with a nine-patch (through a NinePatchSliderTrack in its template).</summary>
+        </member>
+        <member name="T:NinePatchWpf.NinePatchTextBox">
+             <summary>
+             A TextBox drawn with nine-patch skins.
+            
+             STATES (first that applies):
+               Disabled → DisabledFile (falls back to Normal)
+               ReadOnly → ReadOnlyFile (falls back to Disabled, then Normal)
+               Focused  → FocusedFile (falls back to Normal)
+               Normal   → NormalFile (required)
+             </summary>
+        </member>
+        <member name="T:NinePatchWpf.NinePatchToggleButton">
+             <summary>
+             A ToggleButton drawn with two nine-patch skin sets.
+            
+             Off set (unchecked): OffNormalFile (required), OffHoverFile, OffPressedFile, OffDisabledFile.
+             On set (checked):    OnNormalFile, OnHoverFile, OnPressedFile, OnDisabledFile.
+             Within a set, Pressed falls back to Hover then Normal, and Hover/Disabled fall back to Normal.
+             A missing On skin falls back to the Off skin for the same state.
+             </summary>
+        </member>
+        <member name="T:NinePatchWpf.ZoomViewerRenderEventArgs">
+            <summary>Arguments of <see cref="E:NinePatchWpf.NinePatchZoomViewer.RenderBackground"/>.</summary>
+        </member>
+        <member name="P:NinePatchWpf.ZoomViewerRenderEventArgs.Context">
+            <summary>Draw here, in viewport coordinates (DIPs). Use the viewer's WorldToView methods to place things.</summary>
+        </member>
+        <member name="T:NinePatchWpf.NinePatchZoomViewer">
+             <summary>
+             A zoomable, scrollable view of many nine-patches, with DAW-style <see cref="T:NinePatchWpf.ZoomScrollBar"/>s:
+             drag a thumb to scroll, drag a thumb edge to zoom that axis.
+            
+             CONTENT is a list of <see cref="T:NinePatchWpf.NinePatchElement"/>s in world units (for a piano roll:
+             X = ticks, Y = note row). <see cref="P:NinePatchWpf.NinePatchZoomViewer.ContentWidth"/> × <see cref="P:NinePatchWpf.NinePatchZoomViewer.ContentHeight"/> is the world size.
+             The visible part is rendered with one native call into a bitmap of the viewport's size in
+             device pixels, so the cost depends on what is visible, not on the zoom or the content size.
+            
+             VIEW: <see cref="P:NinePatchWpf.NinePatchZoomViewer.ZoomX"/>/<see cref="P:NinePatchWpf.NinePatchZoomViewer.ZoomY"/> are DIPs per world unit, <see cref="P:NinePatchWpf.NinePatchZoomViewer.OffsetX"/>/<see cref="P:NinePatchWpf.NinePatchZoomViewer.OffsetY"/>
+             the world coordinates at the top-left corner. The thumbs always show exactly that view:
+             thumb length = visible world / content size, so zooming out to the whole content fills the track.
+            
+             MOUSE over the content:
+               wheel = scroll vertically, Shift+wheel = scroll horizontally,
+               Ctrl+wheel = zoom horizontally around the mouse, Ctrl+Shift+wheel = zoom vertically,
+               middle-drag = pan.
+            
+             EXTRAS: <see cref="P:NinePatchWpf.NinePatchZoomViewer.TopContent"/> and <see cref="P:NinePatchWpf.NinePatchZoomViewer.LeftContent"/> (rulers, piano keys) sit beside the view,
+             <see cref="P:NinePatchWpf.NinePatchZoomViewer.OverlayContent"/> on top of it (playhead, selection), and <see cref="E:NinePatchWpf.NinePatchZoomViewer.RenderBackground"/> lets you
+             draw grid lines underneath the elements. All of them follow the view through <see cref="E:NinePatchWpf.NinePatchZoomViewer.ViewChanged"/>.
+             </summary>
+        </member>
+        <member name="E:NinePatchWpf.NinePatchZoomViewer.ViewChanged">
+            <summary>Raised after the zoom, offset, content size or viewport size changed (once per change).</summary>
+        </member>
+        <member name="E:NinePatchWpf.NinePatchZoomViewer.RenderBackground">
+            <summary>Raised when the view is drawn, before the elements, to draw a background (grid lines, stripes).</summary>
+        </member>
+        <member name="E:NinePatchWpf.NinePatchZoomViewer.Rendered">
+            <summary>Raised after the elements were rendered; see <see cref="P:NinePatchWpf.NinePatchZoomViewer.LastRenderTime"/> and the counts.</summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchZoomViewer.ContentWidth">
+            <summary>World width (for example the song length in ticks).</summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchZoomViewer.ContentHeight">
+            <summary>World height (for example 128 note rows).</summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchZoomViewer.ZoomX">
+            <summary>Horizontal zoom in DIPs per world unit. The smallest value shows the whole width.</summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchZoomViewer.ZoomY">
+            <summary>Vertical zoom in DIPs per world unit. The smallest value shows the whole height.</summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchZoomViewer.OffsetX">
+            <summary>World X at the left edge of the view.</summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchZoomViewer.OffsetY">
+            <summary>World Y at the top edge of the view.</summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchZoomViewer.Elements">
+            <summary>Elements in world units. After changing the list in place call <see cref="M:NinePatchWpf.NinePatchZoomViewer.InvalidateElements"/>.</summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchZoomViewer.ElementsSortedByY">
+            <summary>True if <see cref="P:NinePatchWpf.NinePatchZoomViewer.Elements"/> is sorted by Y ascending; rendering then skips rows above the view.</summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchZoomViewer.ElementGap">
+            <summary>Device pixels left empty at the right and bottom of each element.</summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchZoomViewer.MinElementSize">
+            <summary>Smallest drawn width and height of an element, in device pixels.</summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchZoomViewer.WheelZoomFactor">
+            <summary>Zoom factor of one Ctrl+wheel notch.</summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchZoomViewer.WheelScrollAmount">
+            <summary>DIPs scrolled by one wheel notch.</summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchZoomViewer.TopContent">
+            <summary>Shown above the view, as wide as the view (a ruler or timeline).</summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchZoomViewer.LeftContent">
+            <summary>Shown left of the view, as tall as the view (piano keys, track headers).</summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchZoomViewer.OverlayContent">
+            <summary>Shown on top of the view and clipped to it (playhead, selection).</summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchZoomViewer.ChromeBackground">
+            <summary>Background behind the scroll bars and in the corners.</summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchZoomViewer.ViewportSize">
+            <summary>Size of the visible area in DIPs.</summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchZoomViewer.LastVisibleCount">
+            <summary>Elements drawn by the last render.</summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchZoomViewer.LastTotalCount">
+            <summary>Elements in the list at the last render.</summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchZoomViewer.LastRenderTime">
+            <summary>Time the last render took (culling plus the native call).</summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchZoomViewer.VisibleWorldWidth">
+            <summary>World width that fits in the view at the current zoom.</summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchZoomViewer.VisibleWorldHeight">
+            <summary>World height that fits in the view at the current zoom.</summary>
+        </member>
+        <member name="M:NinePatchWpf.NinePatchZoomViewer.SetView(System.Double,System.Double,System.Double,System.Double)">
+            <summary>Set zoom and offsets together, with one <see cref="E:NinePatchWpf.NinePatchZoomViewer.ViewChanged"/>. NaN keeps a value.</summary>
+        </member>
+        <member name="M:NinePatchWpf.NinePatchZoomViewer.ZoomXAt(System.Double,System.Double)">
+            <summary>Zoom horizontally by a factor, keeping the world point under <paramref name="viewX"/> in place.</summary>
+        </member>
+        <member name="M:NinePatchWpf.NinePatchZoomViewer.ZoomYAt(System.Double,System.Double)">
+            <summary>Zoom vertically by a factor, keeping the world point under <paramref name="viewY"/> in place.</summary>
+        </member>
+        <member name="M:NinePatchWpf.NinePatchZoomViewer.FitAll">
+            <summary>Zoom out on both axes until the whole content is visible.</summary>
+        </member>
+        <member name="M:NinePatchWpf.NinePatchZoomViewer.ScrollToX(System.Double,System.Double)">
+            <summary>Scroll horizontally so that world X sits at <paramref name="viewFraction"/> of the view width (0 = left edge).</summary>
+        </member>
+        <member name="M:NinePatchWpf.NinePatchZoomViewer.ScrollToY(System.Double,System.Double)">
+            <summary>Scroll vertically so that world Y sits at <paramref name="viewFraction"/> of the view height (0 = top edge).</summary>
+        </member>
+        <member name="M:NinePatchWpf.NinePatchZoomViewer.InvalidateElements">
+            <summary>Re-render after the element list was changed in place.</summary>
+        </member>
+        <member name="M:NinePatchWpf.NinePatchZoomViewer.CoerceZoom(System.Double,System.Double,System.Double,System.Double)">
+            <summary>Clamp a zoom to [fit, max], where fit shows the whole content in the viewport.</summary>
+        </member>
+        <member name="M:NinePatchWpf.NinePatchZoomViewer.CoerceOffset(System.Double,System.Double,System.Double,System.Double)">
+            <summary>Clamp an offset so the view stays inside the content.</summary>
+        </member>
+        <member name="T:NinePatchWpf.ZoomViewerSurface">
+            <summary>
+            The drawing area of a <see cref="T:NinePatchWpf.NinePatchZoomViewer"/> (template part PART_Surface).
+            It draws the viewer's background callback and the rendered bitmap; it has no logic of its own.
+            </summary>
+        </member>
+        <member name="T:NinePatchWpf.RotaryKnob">
+             <summary>
+             Rotary knob that draws one frame of a vertical sprite stack.
+            
+             MOUSE: drag up/down (PixelsPerFullRange pixels = full range), wheel = WheelStep.
+             KEYBOARD: Up/Right and Down/Left = WheelStep, PageUp/PageDown = 10 × WheelStep, Home/End = Minimum/Maximum.
+             VISUAL STATES (for templates and styles): Normal, MouseOver, Pressed, Disabled; Focused, Unfocused.
+             </summary>
+        </member>
+        <member name="P:NinePatchWpf.RotaryKnob.SpriteFile">
+            <summary>Vertical sprite stack, one frame per knob position.</summary>
+        </member>
+        <member name="P:NinePatchWpf.RotaryKnob.BackgroundFile">
+            <summary>Optional image drawn under the knob.</summary>
+        </member>
+        <member name="P:NinePatchWpf.RotaryKnob.FrameCount">
+            <summary>Frames in the stack; 0 infers height / width (square frames).</summary>
+        </member>
+        <member name="P:NinePatchWpf.RotaryKnob.PixelsPerFullRange">
+            <summary>Vertical drag distance, in pixels, that covers the full range.</summary>
+        </member>
+        <member name="P:NinePatchWpf.RotaryKnob.WheelStep">
+            <summary>Change per wheel notch or arrow key.</summary>
+        </member>
+        <member name="P:NinePatchWpf.RotaryKnob.TopFrameIsMaximum">
+            <summary>True if the first frame in the stack shows the maximum.</summary>
+        </member>
+        <member name="T:NinePatchWpf.SpriteState">
+            <summary>
+            Attached properties used by templates that render sprite-strip states.
+            </summary>
+        </member>
+        <member name="T:NinePatchWpf.StateImage">
+            <summary>
+            Draws one frame of a horizontal sprite strip (normal / hover / pressed …), selected by StateIndex.
+            Used by the Sprite* styles in Generic.xaml together with <see cref="T:NinePatchWpf.SpriteState"/>.
+            </summary>
+        </member>
+        <member name="P:NinePatchWpf.StateImage.SourceFile">
+            <summary>Sprite strip file (path or resource URI).</summary>
+        </member>
+        <member name="P:NinePatchWpf.StateImage.FrameCount">
+            <summary>Number of equal-width frames in the strip. Default 3.</summary>
+        </member>
+        <member name="P:NinePatchWpf.StateImage.StateIndex">
+            <summary>Frame to draw, from 0.</summary>
+        </member>
+        <member name="M:NinePatchWpf.StateImage.ClearCache">
+            <summary>
+            Forget the sprite images shared by all StateImage and RotaryKnob instances (for example after
+            a theme change), so they can be garbage-collected. Elements still showing them keep their frames.
+            </summary>
+        </member>
+        <member name="T:NinePatchWpf.ZoomScrollBarPart">
+            <summary>Part of a <see cref="T:NinePatchWpf.ZoomScrollBar"/> under the mouse or being dragged.</summary>
+        </member>
+        <member name="T:NinePatchWpf.ZoomViewportChangedEventArgs">
+            <summary>Arguments of <see cref="E:NinePatchWpf.ZoomScrollBar.ViewportChanged"/>.</summary>
+        </member>
+        <member name="P:NinePatchWpf.ZoomViewportChangedEventArgs.IsUserChange">
+            <summary>True when the change came from the mouse or keyboard, false when it was set from code.</summary>
+        </member>
+        <member name="T:NinePatchWpf.ZoomScrollBar">
+             <summary>
+             DAW-style scroll bar whose thumb is also the zoom control.
+            
+             The bar shows the visible part of the content as a fraction: the thumb starts at
+             <see cref="P:NinePatchWpf.ZoomScrollBar.ViewportStart"/> and is <see cref="P:NinePatchWpf.ZoomScrollBar.ViewportLength"/> long (both 0–1 of the content).
+            
+             MOUSE:
+               drag the thumb body       = scroll
+               drag a thumb edge         = zoom; the opposite edge stays put (Ctrl: both edges move, zoom around the centre)
+               click / hold on the track = page towards the mouse
+               double-click the thumb    = show everything; again = back to the previous view
+               wheel                     = scroll; Ctrl+wheel = zoom around the thumb centre
+            
+             When the thumb would be shorter than <see cref="P:NinePatchWpf.ZoomScrollBar.MinThumbSize"/> it is drawn at that size, and
+             dragging its edges zooms exponentially, so you can keep zooming in with a thumb that stays grabbable.
+            
+             The bar is drawn with vector shapes from the brush properties. Set <see cref="P:NinePatchWpf.ZoomScrollBar.TrackFile"/> and
+             <see cref="P:NinePatchWpf.ZoomScrollBar.ThumbFile"/> (and optionally <see cref="P:NinePatchWpf.ZoomScrollBar.ThumbHoverFile"/>, <see cref="P:NinePatchWpf.ZoomScrollBar.ThumbPressedFile"/>)
+             to skin it with nine-patches instead; the edge grips are drawn on top either way.
+             </summary>
+        </member>
+        <member name="E:NinePatchWpf.ZoomScrollBar.ViewportChanged">
+            <summary>Raised whenever <see cref="P:NinePatchWpf.ZoomScrollBar.ViewportStart"/> or <see cref="P:NinePatchWpf.ZoomScrollBar.ViewportLength"/> changes, once per change.</summary>
+        </member>
+        <member name="P:NinePatchWpf.ZoomScrollBar.ViewportStart">
+            <summary>Start of the visible part, as a fraction of the content (0 to 1 − <see cref="P:NinePatchWpf.ZoomScrollBar.ViewportLength"/>).</summary>
+        </member>
+        <member name="P:NinePatchWpf.ZoomScrollBar.ViewportLength">
+            <summary>Length of the visible part, as a fraction of the content (<see cref="P:NinePatchWpf.ZoomScrollBar.MinViewportLength"/> to 1). Smaller = zoomed in.</summary>
+        </member>
+        <member name="P:NinePatchWpf.ZoomScrollBar.MinViewportLength">
+            <summary>Smallest <see cref="P:NinePatchWpf.ZoomScrollBar.ViewportLength"/>, i.e. the maximum zoom.</summary>
+        </member>
+        <member name="P:NinePatchWpf.ZoomScrollBar.BarThickness">
+            <summary>Height of a horizontal bar, width of a vertical one.</summary>
+        </member>
+        <member name="P:NinePatchWpf.ZoomScrollBar.MinThumbSize">
+            <summary>The thumb is never drawn shorter than this, so its edges stay easy to grab.</summary>
+        </member>
+        <member name="P:NinePatchWpf.ZoomScrollBar.EdgeGripSize">
+            <summary>Length of the zoom grip at each end of the thumb.</summary>
+        </member>
+        <member name="P:NinePatchWpf.ZoomScrollBar.WheelStep">
+            <summary>Wheel scroll step as a fraction of the viewport.</summary>
+        </member>
+        <member name="P:NinePatchWpf.ZoomScrollBar.WheelZoomFactor">
+            <summary>Zoom factor of one Ctrl+wheel notch.</summary>
+        </member>
+        <member name="P:NinePatchWpf.ZoomScrollBar.AccentBrush">
+            <summary>Colour of a hovered or dragged edge grip and of the thumb outline while dragging.</summary>
+        </member>
+        <member name="P:NinePatchWpf.ZoomScrollBar.TrackFile">
+            <summary>Optional nine-patch for the track (replaces the vector track).</summary>
+        </member>
+        <member name="P:NinePatchWpf.ZoomScrollBar.ThumbFile">
+            <summary>Optional nine-patch for the thumb (replaces the vector thumb).</summary>
+        </member>
+        <member name="P:NinePatchWpf.ZoomScrollBar.HoverPart">
+            <summary>Part under the mouse (None when the mouse is elsewhere).</summary>
+        </member>
+        <member name="P:NinePatchWpf.ZoomScrollBar.DragPart">
+            <summary>Part being dragged (None when not dragging).</summary>
+        </member>
+        <member name="M:NinePatchWpf.ZoomScrollBar.SetViewport(System.Double,System.Double)">
+            <summary>
+            Set start and length together (one <see cref="E:NinePatchWpf.ZoomScrollBar.ViewportChanged"/> event). Values are clamped:
+            the length to [<see cref="P:NinePatchWpf.ZoomScrollBar.MinViewportLength"/>, 1], the start so that the viewport stays inside the content.
+            </summary>
+        </member>
+        <member name="M:NinePatchWpf.ZoomScrollBar.Clamp(System.Double,System.Double,System.Double)">
+            <summary>Clamp a viewport: length to [minLength, 1], start to [0, 1 − length].</summary>
+        </member>
+        <member name="P:NinePatchWpf.ZoomScrollBar.TrackRect">
+            <summary>Area inside <see cref="P:System.Windows.Controls.Control.Padding"/> that the thumb moves in.</summary>
+        </member>
+        <member name="M:NinePatchWpf.ZoomScrollBar.ThumbExtent">
+            <summary>Thumb position and size along the track, in DIPs relative to the track start.</summary>
+        </member>
+        <member name="M:NinePatchWpf.ZoomScrollBar.HitTestPart(System.Windows.Point)">
+            <summary>Which part of the bar is at a point (in this control's coordinates).</summary>
+        </member>
+        <member name="M:NinePatchWpf.ZoomScrollBar.ZoomAround(System.Double,System.Double)">
+            <summary>Change the length keeping <paramref name="center"/> (a content fraction) in place.</summary>
+        </member>
+        <member name="T:NinePatchWpf.DesignTime">
+            <summary>
+            Placeholder drawing for the Visual Studio / Blend designer, shared by all controls.
+            The designer cannot load the native renderer reliably, so controls draw their
+            DesignBackground brush, or a dashed outline with the control and skin name.
+            </summary>
+        </member>
+        <member name="M:NinePatchWpf.DesignTime.TryDraw(System.Windows.Media.DrawingContext,System.Windows.FrameworkElement,System.String,System.Nullable{System.Windows.Rect})">
+            <summary>
+            In the designer, draw the placeholder and return true; at runtime return false.
+            <paramref name="area"/> defaults to the element's bounds.
+            </summary>
+        </member>
+        <member name="T:NinePatchWpf.NinePatchPainter">
+            <summary>
+            The one drawing routine every control uses: resolve the skin through the element's
+            cache, render it at device pixels for the element's DPI, and draw it.
+            Failures are reported through <see cref="T:NinePatchWpf.NinePatchDiagnostics"/>; nothing throws from
+            OnRender unless <see cref="P:NinePatchWpf.NinePatchDiagnostics.ThrowOnError"/> is set.
+            </summary>
+        </member>
+        <member name="F:NinePatchWpf.NinePatchPainter.StateLayer">
+            <summary>Layers let one element draw several skins without them sharing a surface.</summary>
+        </member>
+        <member name="M:NinePatchWpf.NinePatchPainter.Draw(System.Windows.Media.DrawingContext,System.Windows.FrameworkElement,System.String,System.Windows.Rect,System.Int32)">
+            <summary>Draw a skin file (path or resource URI) into <paramref name="rect"/> (device-independent units).</summary>
+        </member>
+        <member name="M:NinePatchWpf.NinePatchPainter.Draw(System.Windows.Media.DrawingContext,System.Windows.FrameworkElement,NinePatchWpf.NinePatchImage,System.Windows.Rect,System.Int32)">
+            <summary>Draw an image the caller owns into <paramref name="rect"/>.</summary>
+        </member>
+        <member name="M:NinePatchWpf.NinePatchPainter.Bounds(System.Windows.UIElement)">
+            <summary>The element's bounds as a rectangle at the origin.</summary>
+        </member>
+        <member name="T:NinePatchWpf.NinePatchRenderer">
+            <summary>
+            Renders nine-patches into WPF bitmaps.
+            Output is premultiplied BGRA, which is what <see cref="P:System.Windows.Media.PixelFormats.Pbgra32"/> expects.
+            </summary>
+        </member>
+        <member name="M:NinePatchWpf.NinePatchRenderer.RenderToBitmap(NinePatchWpf.NinePatchImage,System.Int32,System.Int32)">
+            <summary>Render into a new frozen bitmap at 96 DPI with nearest-neighbour scaling.</summary>
+        </member>
+        <member name="M:NinePatchWpf.NinePatchRenderer.RenderToBitmap(NinePatchWpf.NinePatchImage,System.Int32,System.Int32,System.Double,System.Double,NinePatchWpf.NinePatchScaling)">
+            <summary>
+            Render into a new frozen bitmap of <paramref name="pixelWidth"/> × <paramref name="pixelHeight"/> pixels.
+            The bitmap's DPI is set so that it covers pixelWidth × 96 / dpiX device-independent units.
+            </summary>
+        </member>
+        <member name="M:NinePatchWpf.NinePatchRenderer.RenderInto(NinePatchWpf.NinePatchImage,System.Windows.Media.Imaging.WriteableBitmap,System.Int32,System.Int32)">
+            <summary>
+            Render into the top-left <paramref name="width"/> × <paramref name="height"/> pixels of an
+            existing Pbgra32 bitmap (reuses the allocation). Only that area is marked dirty.
+            </summary>
+        </member>
+        <member name="M:NinePatchWpf.NinePatchRenderer.RenderInto(NinePatchWpf.NinePatchImage,System.Windows.Media.Imaging.WriteableBitmap,System.Int32,System.Int32,NinePatchWpf.NinePatchScaling)">
+            <inheritdoc cref="M:NinePatchWpf.NinePatchRenderer.RenderInto(NinePatchWpf.NinePatchImage,System.Windows.Media.Imaging.WriteableBitmap,System.Int32,System.Int32)"/>
+        </member>
+        <member name="T:NinePatchWpf.NinePatchSurface">
+            <summary>
+            A reusable bitmap owned by one element, for skins too large to share through the cache
+            (a full-window panel, for instance). It is allocated with headroom so that resizing does
+            not allocate on every pixel, and drawn clipped so only the rendered area shows.
+            </summary>
+        </member>
+        <member name="M:NinePatchWpf.NinePatchSurface.Release(System.Windows.DependencyObject)">
+            <summary>Drop an element's surfaces (for example when it leaves the tree).</summary>
+        </member>
+        <member name="T:NinePatchWpf.NinePatchSkin">
+             <summary>
+             Skin properties shared by all NinePatch controls.
+            
+             The controls expose these as ordinary properties (NinePatchButton.NormalFile, …);
+             they are registered once here and added to each control with AddOwner.
+             <see cref="F:NinePatchWpf.NinePatchSkin.SkinCacheProperty"/> and <see cref="F:NinePatchWpf.NinePatchSkin.ScalingProperty"/> inherit down the
+             element tree, so setting them on a Window applies to every control inside it:
+             <code>
+               &lt;Window np:NinePatchSkin.SkinCache="{StaticResource Skins}"
+                       np:NinePatchSkin.Scaling="Bilinear"&gt;
+             </code>
+             </summary>
+        </member>
+        <member name="F:NinePatchWpf.NinePatchSkin.SkinCacheProperty">
+            <summary>Cache used by every NinePatch control at or below the element. Inherits.</summary>
+        </member>
+        <member name="F:NinePatchWpf.NinePatchSkin.ScalingProperty">
+            <summary>How stretched regions are sampled. Inherits. Default NearestNeighbor (version 1 look).</summary>
+        </member>
+        <member name="F:NinePatchWpf.NinePatchSkin.UseSkinPaddingProperty">
+            <summary>
+            When true, a control whose ContentPadding was not set explicitly uses the padding
+            declared by its skin's right/bottom markers. Inherits. Default false.
+            </summary>
+        </member>
+        <member name="M:NinePatchWpf.NinePatchSkin.GetEffectiveCache(System.Windows.DependencyObject)">
+            <summary>The cache a control draws with: tree value, else <see cref="P:NinePatchWpf.NinePatchSkinCache.Global"/>, else <see cref="P:NinePatchWpf.NinePatchSkinCache.Default"/>.</summary>
+        </member>
+        <member name="F:NinePatchWpf.NinePatchSkin.ContentPaddingProperty">
+            <summary>Space between the skin's edge and the control's content.</summary>
+        </member>
+        <member name="F:NinePatchWpf.NinePatchSkin.DesignBackgroundProperty">
+            <summary>Brush drawn in the Visual Studio / Blend designer instead of the skin. Ignored at runtime.</summary>
+        </member>
+        <member name="M:NinePatchWpf.NinePatchSkin.RegisterFile``1(System.String)">
+            <summary>Register a skin-file property (string, re-renders on change) owned by a control type.</summary>
+        </member>
+        <member name="M:NinePatchWpf.NinePatchSkin.AddFileOwner``1(System.Windows.DependencyProperty)">
+            <summary>Add one of the shared file properties to a control type.</summary>
+        </member>
+        <member name="M:NinePatchWpf.NinePatchSkin.CoercePadding(System.Windows.DependencyObject,System.Object)">
+            <summary>
+            With <see cref="F:NinePatchWpf.NinePatchSkin.UseSkinPaddingProperty"/> on, a ContentPadding that still has its
+            default value is replaced by the padding declared in the control's skin
+            (one skin pixel = one device-independent unit).
+            </summary>
+        </member>
+        <member name="T:NinePatchWpf.ISkinPaddingSource">
+            <summary>Implemented by controls whose ContentPadding can come from their skin's padding markers.</summary>
+        </member>
+        <member name="P:NinePatchWpf.ISkinPaddingSource.PaddingSkinFile">
+            <summary>The skin whose padding markers are used (normally the Normal state).</summary>
+        </member>
+        <member name="T:NinePatchWpf.NinePatchSkinCache">
+             <summary>
+             Shared cache of nine-patch source images and rendered bitmaps.
+            
+             Every NinePatch control draws through a cache: the one set with
+             <see cref="F:NinePatchWpf.NinePatchSkin.SkinCacheProperty"/> (inherited down the tree),
+             else <see cref="P:NinePatchWpf.NinePatchSkinCache.Global"/>, else <see cref="P:NinePatchWpf.NinePatchSkinCache.Default"/>. The cache owns the
+             source images, so controls never load or dispose them themselves.
+            
+             Rendered bitmaps are frozen, shared between controls that draw the same skin
+             at the same pixel size and DPI, and evicted least-recently-used once either
+             <see cref="P:NinePatchWpf.NinePatchSkinCache.MaxRenderedEntries"/> or <see cref="P:NinePatchWpf.NinePatchSkinCache.MaxRenderedBytes"/> is exceeded.
+             All members are thread-safe.
+             </summary>
+        </member>
+        <member name="F:NinePatchWpf.NinePatchSkinCache.DefaultMaxRenderedEntries">
+            <summary>Default for <see cref="P:NinePatchWpf.NinePatchSkinCache.MaxRenderedEntries"/>.</summary>
+        </member>
+        <member name="F:NinePatchWpf.NinePatchSkinCache.DefaultMaxRenderedBytes">
+            <summary>Default for <see cref="P:NinePatchWpf.NinePatchSkinCache.MaxRenderedBytes"/> (64 MB).</summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchSkinCache.Global">
+            <summary>
+            Application-wide cache used by controls that have no
+            <see cref="F:NinePatchWpf.NinePatchSkin.SkinCacheProperty"/> in their tree.
+            </summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchSkinCache.Default">
+            <summary>Library-wide fallback used when neither a tree cache nor <see cref="P:NinePatchWpf.NinePatchSkinCache.Global"/> is set.</summary>
+        </member>
+        <member name="M:NinePatchWpf.NinePatchSkinCache.#ctor(System.Int32,System.Int64)">
+            <summary>Create a cache.</summary>
+            <param name="maxRenderedEntries">Most rendered bitmaps kept; 0 means no entry limit.</param>
+            <param name="maxRenderedBytes">Most bytes of rendered bitmaps kept; 0 means no byte limit.</param>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchSkinCache.MaxRenderedEntries">
+            <summary>Most rendered bitmaps kept (0 = unlimited).</summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchSkinCache.MaxRenderedBytes">
+            <summary>Most bytes of rendered bitmaps kept (0 = unlimited).</summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchSkinCache.MaxCacheableBitmapBytes">
+            <summary>
+            Bitmaps larger than this are not cached; controls render them into a
+            per-control surface instead. Default 1 MB (about 512 × 512 pixels).
+            </summary>
+        </member>
+        <member name="M:NinePatchWpf.NinePatchSkinCache.GetSource(System.String)">
+            <summary>
+            Shared image for a file path or WPF resource URI, loaded on first use.
+            Returns null (and reports through <see cref="T:NinePatchWpf.NinePatchDiagnostics"/>) if it cannot be loaded.
+            </summary>
+        </member>
+        <member name="M:NinePatchWpf.NinePatchSkinCache.Preload(System.String)">
+            <summary>Load a skin now so the first render does no file I/O.</summary>
+        </member>
+        <member name="M:NinePatchWpf.NinePatchSkinCache.PreloadAll(System.String[])">
+            <summary>Load several skins now.</summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchSkinCache.SourceCount">
+            <summary>Number of source images held (including ones that failed to load).</summary>
+        </member>
+        <member name="M:NinePatchWpf.NinePatchSkinCache.GetRendered(System.String,System.Int32,System.Int32)">
+            <summary>
+            Frozen bitmap of a skin file at a pixel size, at 96 DPI with nearest-neighbour
+            scaling (version 1 signature). Returns null if the file cannot be loaded.
+            </summary>
+        </member>
+        <member name="M:NinePatchWpf.NinePatchSkinCache.GetRendered(System.String,System.Int32,System.Int32,System.Double,System.Double,NinePatchWpf.NinePatchScaling)">
+            <summary>Frozen bitmap of a skin file at a pixel size and DPI. Returns null if the file cannot be loaded.</summary>
+        </member>
+        <member name="M:NinePatchWpf.NinePatchSkinCache.GetRendered(NinePatchWpf.NinePatchImage,System.Int32,System.Int32,System.Double,System.Double,NinePatchWpf.NinePatchScaling)">
+            <summary>
+            Frozen bitmap of an image at a pixel size and DPI. The bitmap's DPI is set so
+            that it covers pixelWidth × 96 / dpiX device-independent units.
+            </summary>
+        </member>
+        <member name="M:NinePatchWpf.NinePatchSkinCache.InvalidateRendered">
+            <summary>Drop all rendered bitmaps (for example after a theme change). Source images are kept.</summary>
+        </member>
+        <member name="M:NinePatchWpf.NinePatchSkinCache.InvalidateRendered(System.String)">
+            <summary>Drop rendered bitmaps of one skin file.</summary>
+        </member>
+        <member name="M:NinePatchWpf.NinePatchSkinCache.Unload(System.String)">
+            <summary>Remove a skin and its rendered bitmaps, and dispose the image.</summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchSkinCache.RenderedCount">
+            <summary>Number of cached rendered bitmaps.</summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchSkinCache.RenderedBytes">
+            <summary>Bytes held by cached rendered bitmaps.</summary>
+        </member>
+        <member name="P:NinePatchWpf.NinePatchSkinCache.EstimatedMemoryBytes">
+            <summary>Estimated total memory: rendered bitmaps plus source pixels.</summary>
+        </member>
+        <member name="M:NinePatchWpf.NinePatchSkinCache.Dispose">
+            <summary>Dispose all source images. The cache cannot be used afterwards.</summary>
+        </member>
+        <member name="T:NinePatchWpf.SkinSources">
+            <summary>
+            Opens skin files. A skin path can be absolute, relative to the application folder
+            (see <see cref="T:NinePatchWpf.NinePatchPaths"/>), or a WPF resource URI such as
+            <c>pack://application:,,,/Skins/btn.9.png</c> or <c>/MyApp;component/Skins/btn.9.png</c>.
+            </summary>
+        </member>
+        <member name="M:NinePatchWpf.SkinSources.Normalize(System.String)">
+            <summary>Cache key for a skin path: resolved and case-insensitive (Windows file system semantics).</summary>
+        </member>
+        <member name="M:NinePatchWpf.SkinSources.GetBitmap(System.Object,System.String)">
+            <summary>Shared frozen bitmap for a plain image file, or null (reported) if it cannot be loaded.</summary>
+        </member>
+        <member name="M:NinePatchWpf.SkinSources.ClearBitmaps">
+            <summary>Forget all plain bitmaps loaded by StateImage and RotaryKnob.</summary>
+        </member>
+        <member name="T:NinePatchWpf.NinePatchVisualState">
+            <summary>Visual state a skinned control draws.</summary>
+        </member>
+        <member name="T:NinePatchWpf.SkinStates">
+             <summary>
+             State resolution shared by every control.
+            
+             Version 1 tracked state with mouse event handlers in each control, which got stuck
+             (for example pressed after the mouse left with the button down). The state is now
+             read from the control's own properties when it renders, and the controls redraw
+             when one of those properties changes (<see cref="M:NinePatchWpf.SkinStates.AffectsSkin(System.Windows.DependencyProperty)"/>).
+             </summary>
+        </member>
+        <member name="M:NinePatchWpf.SkinStates.AffectsSkin(System.Windows.DependencyProperty)">
+            <summary>True if a change of this property can change what a skinned control draws.</summary>
+        </member>
+        <member name="M:NinePatchWpf.SkinStates.Of(System.Windows.UIElement,System.Boolean)">
+            <summary>State of an element; <paramref name="pressed"/> is the control's own notion of pressed.</summary>
+        </member>
+        <member name="M:NinePatchWpf.SkinStates.Pick(NinePatchWpf.NinePatchVisualState,System.String,System.String,System.String,System.String)">
+            <summary>
+            Skin for a state, with the version 1 fallbacks:
+            Pressed → Hover → Normal, Hover → Normal, Disabled → Normal.
+            </summary>
+        </member>
+        <member name="M:NinePatchWpf.SkinStates.PickToggle(NinePatchWpf.NinePatchVisualState,System.Boolean,System.String,System.String,System.String,System.String,System.String,System.String,System.String,System.String)">
+            <summary>Skin for a two-set control (toggle, check box, radio button): the "on" set, then the "off" set.</summary>
+        </member>
+    </members>
+</doc>
