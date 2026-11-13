@@ -9,7 +9,21 @@ then save it back as a standard MIDI file. It grew out of nMIDI, a small MIDI pl
 everything it does: the track lanes window, the keyboard with fingering, per-track mute, solo and
 output port, speed, follow mode and panic.
 
-<!-- Add a screenshot of the main window here, e.g. docs/main-window.png -->
+![nMIDI Editor with the Studio theme](docs/screenshots/theme-studio.png)
+
+### Themes
+
+Four themes, switched from **Settings ▸ Theme**:
+
+| Studio | Light classic |
+| --- | --- |
+| ![Studio theme](docs/screenshots/theme-studio.png) | ![Light classic theme](docs/screenshots/theme-light-classic.png) |
+| **Retro hardware** | **High contrast** |
+| ![Retro hardware theme](docs/screenshots/theme-retro-hardware.png) | ![High contrast theme](docs/screenshots/theme-high-contrast.png) |
+
+The **Lanes** button opens every track in its own lane:
+
+![Track lanes window](docs/screenshots/track-lanes.png)
 
 ## Download
 
