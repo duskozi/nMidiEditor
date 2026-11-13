@@ -187,6 +187,7 @@ namespace nMIDI
                 vm.PropertyChanged += OnTrackChanged;
                 Tracks.Add(vm);
                 _player.SetTrackOutput(track.Index, _outputs.Get(port));
+                PushMix(vm);
             }
             _fallbackPort = fallbackPort;
             SetAllOutputsSelection();
@@ -258,6 +259,7 @@ namespace nMIDI
             {
                 _player.SetTrackOutput(t.Index, _outputs.Get(t.OutputDevice));
                 _player.SetTrackAudible(t.Index, t.IsAudible);
+                PushMix(t);
             }
             UpdateActiveTrackLabel();
             SetAllOutputsSelection();
@@ -287,6 +289,11 @@ namespace nMIDI
 
         private void BuildElements()
         {
+            if (_noteViewPaused)
+            {
+                _elementsDirty = true;   // rebuilt when the view resumes
+                return;
+            }
             _elements.Clear();
             if (_song == null)
             {
@@ -579,11 +586,12 @@ namespace nMIDI
             RecordFrame();
             if (_song == null) return;
             bool playing = _player.State == PlayerState.Playing;
+            UpdateNoteViewPause();
 
             if (playing)
             {
                 ShowPosition(force: false);
-                if (btnFollow.IsChecked == true) Follow(_player.PositionTicks);
+                if (btnFollow.IsChecked == true && !_noteViewPaused) Follow(_player.PositionTicks);
             }
 
             for (int i = 0; i < Tracks.Count; i++)
@@ -593,6 +601,8 @@ namespace nMIDI
                 double level = Math.Max(peak, t.Level * 0.86);
                 t.Level = level < 0.01 ? 0 : level;
             }
+            _mixerWindow?.UpdateFrame();
+            if (_noteViewPaused) return;
             UpdateKeyboard();
             UpdateWheels();
             UpdatePedals();
@@ -732,7 +742,7 @@ namespace nMIDI
             double tick = _player.PositionTicks;
             long whole = (long)tick;
 
-            UpdatePlayhead(tick);
+            if (!_noteViewPaused) UpdatePlayhead(tick);
             if (!force && whole == _lastShownTick) return;
             _lastShownTick = whole;
 

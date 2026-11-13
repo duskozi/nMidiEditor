@@ -14,7 +14,7 @@
 
     <ApplicationIcon>Assets\nMIDIEditor.ico</ApplicationIcon>
 
-    <Version>2.3.0</Version>
+    <Version>2.4.0</Version>
     <Product>nMIDI Editor</Product>
     <Description>MIDI editor and player with a piano roll, track lanes and a piano keyboard.</Description>
     <Authors>Duško</Authors>
@@ -22,11 +22,19 @@
     <Copyright>Copyright © 2026 Duško</Copyright>
   </PropertyGroup>
 
-  <!-- The tests are a separate project. -->
+  <!-- The tests and the controls library are separate projects. -->
   <ItemGroup>
     <Compile Remove="tests/**" />
     <None Remove="tests/**" />
     <Page Remove="tests/**" />
+    <Compile Remove="Controls/**" />
+    <None Remove="Controls/**" />
+    <Page Remove="Controls/**" />
+  </ItemGroup>
+
+  <!-- nMIDI.Controls: knobs, faders, meters and buttons for the mixer window. -->
+  <ItemGroup>
+    <ProjectReference Include="Controls\nMIDI.Controls\nMIDI.Controls.csproj" />
   </ItemGroup>
 
   <ItemGroup>

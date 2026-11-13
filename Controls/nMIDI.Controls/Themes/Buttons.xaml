@@ -1,0 +1,111 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="clr-namespace:nMIDI.Controls"
+                    xmlns:p="clr-namespace:nMIDI.Controls.Primitives"
+                    xmlns:s="clr-namespace:nMIDI.Controls.Skinning">
+    <Style TargetType="{x:Type c:LedToggleButton}">
+        <Setter Property="FocusVisualStyle" Value="{DynamicResource {x:Static s:DawStyleKeys.FocusVisual}}"/>
+        <Setter Property="MinWidth" Value="20"/>
+        <Setter Property="Height" Value="18"/>
+        <Setter Property="Padding" Value="4,0"/>
+        <Setter Property="FontFamily" Value="{DynamicResource {x:Static s:DawSkinKeys.FontFamily}}"/>
+        <Setter Property="FontSize" Value="10"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Foreground" Value="{DynamicResource {x:Static s:DawSkinKeys.TextDim}}"/>
+        <Setter Property="Background" Value="{DynamicResource {x:Static s:DawSkinKeys.ButtonBackground}}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.ButtonBorder}}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="LitBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.Accent}}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type c:LedToggleButton}">
+                    <p:NineFrame Bevel="Raised" x:Name="Face" CornerRadius="{DynamicResource {x:Static s:DawSkinKeys.CornerRadius}}" Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+                        <ContentPresenter x:Name="Content" Margin="{TemplateBinding Padding}"
+                                          HorizontalAlignment="Center" VerticalAlignment="Center" RecognizesAccessKey="True"/>
+                    </p:NineFrame>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Face" Property="Background" Value="{DynamicResource {x:Static s:DawSkinKeys.ButtonHover}}"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Face" Property="Background" Value="{DynamicResource {x:Static s:DawSkinKeys.ButtonPressed}}"/>
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Face" Property="Background"
+                                    Value="{Binding LitBrush, RelativeSource={RelativeSource TemplatedParent}}"/>
+                            <Setter TargetName="Face" Property="BorderBrush"
+                                    Value="{Binding LitBrush, RelativeSource={RelativeSource TemplatedParent}}"/>
+                            <Setter TargetName="Content" Property="TextElement.Foreground" Value="{DynamicResource {x:Static s:DawSkinKeys.LedLitForeground}}"/>
+                            <Setter TargetName="Face" Property="Bevel" Value="Glow"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.4"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <Trigger Property="Role" Value="Mute"><Setter Property="LitBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.LedMute}}"/></Trigger>
+            <Trigger Property="Role" Value="Solo"><Setter Property="LitBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.LedSolo}}"/></Trigger>
+            <Trigger Property="Role" Value="RecordArm"><Setter Property="LitBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.LedArm}}"/></Trigger>
+            <Trigger Property="Role" Value="Monitor"><Setter Property="LitBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.LedMonitor}}"/></Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style TargetType="{x:Type c:TransportButton}">
+        <Setter Property="FocusVisualStyle" Value="{DynamicResource {x:Static s:DawStyleKeys.FocusVisual}}"/>
+        <Setter Property="Width" Value="32"/>
+        <Setter Property="Height" Value="26"/>
+        <Setter Property="Foreground" Value="{DynamicResource {x:Static s:DawSkinKeys.Text}}"/>
+        <Setter Property="Background" Value="{DynamicResource {x:Static s:DawSkinKeys.ButtonBackground}}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.ButtonBorder}}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="LitBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.Accent}}"/>
+        <Setter Property="Icon" Value="{DynamicResource {x:Static s:DawIconKeys.Play}}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type c:TransportButton}">
+                    <p:NineFrame Bevel="Raised" x:Name="Face" CornerRadius="{DynamicResource {x:Static s:DawSkinKeys.CornerRadius}}" Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+                        <Path x:Name="Glyph" Data="{TemplateBinding Icon}" Fill="{TemplateBinding Foreground}"
+                              Width="13" Height="13" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </p:NineFrame>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Face" Property="Background" Value="{DynamicResource {x:Static s:DawSkinKeys.ButtonHover}}"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Face" Property="Background" Value="{DynamicResource {x:Static s:DawSkinKeys.ButtonPressed}}"/>
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Glyph" Property="Fill"
+                                    Value="{Binding LitBrush, RelativeSource={RelativeSource TemplatedParent}}"/>
+                            <Setter TargetName="Face" Property="BorderBrush"
+                                    Value="{Binding LitBrush, RelativeSource={RelativeSource TemplatedParent}}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.4"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <Trigger Property="Kind" Value="Play"><Setter Property="LitBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.TransportPlay}}"/></Trigger>
+            <Trigger Property="Kind" Value="Pause"><Setter Property="Icon" Value="{DynamicResource {x:Static s:DawIconKeys.Pause}}"/></Trigger>
+            <Trigger Property="Kind" Value="Stop"><Setter Property="Icon" Value="{DynamicResource {x:Static s:DawIconKeys.Stop}}"/></Trigger>
+            <Trigger Property="Kind" Value="Record">
+                <Setter Property="Icon" Value="{DynamicResource {x:Static s:DawIconKeys.Record}}"/>
+                <Setter Property="LitBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.TransportRecord}}"/>
+            </Trigger>
+            <Trigger Property="Kind" Value="Rewind"><Setter Property="Icon" Value="{DynamicResource {x:Static s:DawIconKeys.Rewind}}"/></Trigger>
+            <Trigger Property="Kind" Value="FastForward"><Setter Property="Icon" Value="{DynamicResource {x:Static s:DawIconKeys.FastForward}}"/></Trigger>
+            <Trigger Property="Kind" Value="ToStart"><Setter Property="Icon" Value="{DynamicResource {x:Static s:DawIconKeys.ToStart}}"/></Trigger>
+            <Trigger Property="Kind" Value="ToEnd"><Setter Property="Icon" Value="{DynamicResource {x:Static s:DawIconKeys.ToEnd}}"/></Trigger>
+            <Trigger Property="Kind" Value="Loop"><Setter Property="Icon" Value="{DynamicResource {x:Static s:DawIconKeys.Loop}}"/></Trigger>
+            <Trigger Property="Kind" Value="Metronome"><Setter Property="Icon" Value="{DynamicResource {x:Static s:DawIconKeys.Metronome}}"/></Trigger>
+        </Style.Triggers>
+    </Style>
+</ResourceDictionary>

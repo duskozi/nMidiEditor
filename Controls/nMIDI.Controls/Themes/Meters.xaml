@@ -1,0 +1,25 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="clr-namespace:nMIDI.Controls"
+                    xmlns:p="clr-namespace:nMIDI.Controls.Primitives"
+                    xmlns:s="clr-namespace:nMIDI.Controls.Skinning">
+    <Style TargetType="{x:Type c:LevelMeter}">
+        <Setter Property="MinWidth" Value="3"/>
+        <Setter Property="MinHeight" Value="3"/>
+        <Setter Property="Background" Value="{DynamicResource {x:Static s:DawSkinKeys.MeterBackground}}"/>
+        <Setter Property="SafeBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.MeterSafe}}"/>
+        <Setter Property="WarningBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.MeterWarning}}"/>
+        <Setter Property="DangerBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.MeterDanger}}"/>
+        <Setter Property="PeakHoldBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.MeterPeakHold}}"/>
+        <Setter Property="ClipOnBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.MeterClipOn}}"/>
+        <Setter Property="ClipOffBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.MeterClipOff}}"/>
+        <Setter Property="ToolTip" Value="Click the clip LED to reset"/>
+    </Style>
+
+    <Style TargetType="{x:Type c:ValueScale}">
+        <Setter Property="Foreground" Value="{DynamicResource {x:Static s:DawSkinKeys.ScaleText}}"/>
+        <Setter Property="TickBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.ScaleTick}}"/>
+        <Setter Property="FontFamily" Value="{DynamicResource {x:Static s:DawSkinKeys.FontFamily}}"/>
+        <Setter Property="FontSize" Value="9"/>
+    </Style>
+</ResourceDictionary>

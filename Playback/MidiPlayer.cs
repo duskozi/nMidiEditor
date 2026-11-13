@@ -58,7 +58,15 @@ namespace nMIDI.Playback
             public readonly int[] Held = new int[16 * 128];   // sounding notes per channel × key
             public readonly int[] Keys = new int[128];        // sounding notes per key
             public int Peak;                                   // loudest note-on since the UI last asked
+            public readonly int[] Mix = NewMix();              // mixer value per controller, -1 = the song's
+            public readonly int[] SongVolume = NewVolumes();   // last CC 7 of the song per channel, -1 = none yet
+            public int[] Channels = { 0 };                     // channels the mixer sends on
         }
+
+        private static int[] NewMix() { var a = new int[128]; Array.Fill(a, -1); return a; }
+        private static int[] NewVolumes() { var a = new int[16]; Array.Fill(a, -1); return a; }
+
+        private double _master = 1.0;   // master volume, scales every CC 7 (0–1)
 
         /// <summary>Raised on the player thread when the end of the song is reached.</summary>
         public event EventHandler? Finished;
@@ -221,6 +229,120 @@ namespace nMIDI.Playback
                 t.Device = device;
                 if (device != null) _usedDevices.Add(device);
                 if (_state == PlayerState.Playing) Chase(track);
+            }
+        }
+
+        // --- Mixer ---
+
+        /// <summary>GM default of a controller, sent when the mixer stops overriding it and the song has none.</summary>
+        private static int DefaultControl(int cc) => cc switch { 7 => 100, 10 => 64, 74 => 64, 91 => 40, 11 => 127, _ => 0 };
+
+        /// <summary>The channels a track's mixer settings are sent on.</summary>
+        public void SetTrackChannels(int track, IReadOnlyList<int> channels)
+        {
+            lock (_gate)
+            {
+                if ((uint)track >= (uint)_tracks.Length) return;
+                var list = new List<int>();
+                foreach (int c in channels) if (c is >= 0 and < 16 && !list.Contains(c)) list.Add(c);
+                _tracks[track].Channels = list.Count > 0 ? list.ToArray() : new[] { 0 };
+            }
+        }
+
+        /// <summary>
+        /// Override a controller of a track (volume 7, pan 10, reverb 91, chorus 93, ...) with a mixer value,
+        /// or give it back to the song with -1. The song's own events for that controller are replaced by the
+        /// mixer value while it is set. The new value is sent at once, playing or not.
+        /// </summary>
+        public void SetTrackControl(int track, int cc, int value)
+        {
+            lock (_gate)
+            {
+                if ((uint)track >= (uint)_tracks.Length || (uint)cc >= 120) return;
+                var t = _tracks[track];
+                value = value < 0 ? -1 : Math.Min(value, 127);
+                if (t.Mix[cc] == value) return;
+                t.Mix[cc] = value;
+                if (t.Device == null) return;
+                foreach (int ch in t.Channels)
+                {
+                    int v = cc == 7 ? EffectiveVolume(t, ch) : value >= 0 ? value : SongValueNow(track, ch, cc);
+                    Send(t.Device, new ControlChangeEvent((SevenBitNumber)cc, (SevenBitNumber)v) { Channel = (FourBitNumber)ch });
+                }
+            }
+        }
+
+        /// <summary>Master volume, 0–1: every track's volume (CC 7) is scaled by it.</summary>
+        public double MasterVolume
+        {
+            get { lock (_gate) return _master; }
+            set
+            {
+                lock (_gate)
+                {
+                    value = Math.Clamp(value, 0, 1);
+                    if (value == _master) return;
+                    _master = value;
+                    foreach (var t in _tracks)
+                    {
+                        if (t.Device == null) continue;
+                        foreach (int ch in t.Channels)
+                            Send(t.Device, new ControlChangeEvent((SevenBitNumber)7, (SevenBitNumber)EffectiveVolume(t, ch)) { Channel = (FourBitNumber)ch });
+                    }
+                }
+            }
+        }
+
+        private int EffectiveVolume(TrackState t, int channel)
+        {
+            int v = t.Mix[7] >= 0 ? t.Mix[7] : t.SongVolume[channel] >= 0 ? t.SongVolume[channel] : DefaultControl(7);
+            return Math.Clamp((int)Math.Round(v * _master), 0, 127);
+        }
+
+        /// <summary>The song's last value of a controller before the play position, or its default.</summary>
+        private int SongValueNow(int track, int channel, int cc)
+        {
+            int end = _state == PlayerState.Playing ? _next : FirstEventAt(TimeUnlocked);
+            for (int i = Math.Min(end, _events.Length) - 1; i >= 0; i--)
+            {
+                var e = _events[i];
+                if (e.Track == track && e.Event is ControlChangeEvent c && c.ControlNumber == cc && c.Channel == channel)
+                    return c.ControlValue;
+            }
+            return DefaultControl(cc);
+        }
+
+        /// <summary>Send a song controller through the mixer: overridden values replace it, CC 7 is scaled.</summary>
+        private void SendControl(TrackState t, ControlChangeEvent cc)
+        {
+            int number = cc.ControlNumber;
+            if (number == 7)
+            {
+                t.SongVolume[cc.Channel] = cc.ControlValue;
+                Send(t.Device, new ControlChangeEvent(cc.ControlNumber, (SevenBitNumber)EffectiveVolume(t, cc.Channel)) { Channel = cc.Channel });
+            }
+            else if (number < 120 && t.Mix[number] >= 0)
+                Send(t.Device, new ControlChangeEvent(cc.ControlNumber, (SevenBitNumber)t.Mix[number]) { Channel = cc.Channel });
+            else
+                Send(t.Device, cc);
+        }
+
+        /// <summary>Send the mixer's overrides (and the master-scaled volume) on the track's channels.</summary>
+        private void ApplyMix(TrackState t)
+        {
+            if (t.Device == null) return;
+            foreach (int ch in t.Channels)
+            {
+                for (int cc = 0; cc < 120; cc++)
+                {
+                    if (cc == 7)
+                    {
+                        if (t.Mix[7] >= 0 || _master < 1)
+                            Send(t.Device, new ControlChangeEvent((SevenBitNumber)7, (SevenBitNumber)EffectiveVolume(t, ch)) { Channel = (FourBitNumber)ch });
+                    }
+                    else if (t.Mix[cc] >= 0)
+                        Send(t.Device, new ControlChangeEvent((SevenBitNumber)cc, (SevenBitNumber)t.Mix[cc]) { Channel = (FourBitNumber)ch });
+                }
             }
         }
 
@@ -465,7 +587,8 @@ namespace nMIDI.Playback
                 return;
             }
 
-            Send(t.Device, ev);
+            if (ev is ControlChangeEvent control) SendControl(t, control);
+            else Send(t.Device, ev);
         }
 
         private static void Send(OutputDevice? device, MidiEvent e)
@@ -513,9 +636,11 @@ namespace nMIDI.Playback
                 }
             }
 
+            Array.Fill(t.SongVolume, -1);
             foreach (var e in programs.Values) Send(t.Device, e);
-            foreach (var e in controls.Values) Send(t.Device, e);
+            foreach (var e in controls.Values) SendControl(t, (ControlChangeEvent)e);
             foreach (var e in bends.Values) Send(t.Device, e);
+            ApplyMix(t);
         }
 
         /// <summary>Note-off for every note the track is holding.</summary>

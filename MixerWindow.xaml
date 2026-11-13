@@ -1,0 +1,228 @@
+<Window x:Class="nMIDI.MixerWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:nc="urn:nmidi-controls"
+        xmlns:ncp="clr-namespace:nMIDI.Controls.Primitives;assembly=nMIDI.Controls"
+        xmlns:ncs="clr-namespace:nMIDI.Controls.Skinning;assembly=nMIDI.Controls"
+        Title="Mixer – nMIDI Editor"
+        Icon="/Assets/mixer.ico"
+        Width="1180" Height="760" MinWidth="420" MinHeight="520"
+        Background="{DynamicResource Bg0}"
+        Foreground="{DynamicResource Text}"
+        FontFamily="{DynamicResource UiFont}" FontSize="12"
+        UseLayoutRounding="True"
+        WindowStartupLocation="CenterOwner">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <!-- Colours of the knobs, faders and meters. -->
+                <ResourceDictionary Source="pack://application:,,,/nMIDI.Controls;component/Skins/Graphite.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+
+            <!-- Small effect-send knob. -->
+            <Style x:Key="SendKnob" TargetType="nc:Knob">
+                <Setter Property="Width" Value="40"/>
+                <Setter Property="Height" Value="54"/>
+                <Setter Property="Minimum" Value="0"/>
+                <Setter Property="Maximum" Value="127"/>
+                <Setter Property="Step" Value="1"/>
+                <Setter Property="ValueFormatter" Value="{x:Static ncp:ValueFormatters.Integer}"/>
+            </Style>
+
+            <Style x:Key="StripLcd" TargetType="ncp:NineFrame">
+                <Setter Property="Bevel" Value="Sunken"/>
+                <Setter Property="Padding" Value="0,1"/>
+                <Setter Property="CornerRadius" Value="3"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="Background" Value="{DynamicResource {x:Static ncs:DawSkinKeys.LcdBackground}}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource {x:Static ncs:DawSkinKeys.LcdBorder}}"/>
+            </Style>
+
+            <Style x:Key="LcdText" TargetType="TextBlock">
+                <Setter Property="HorizontalAlignment" Value="Center"/>
+                <Setter Property="FontFamily" Value="{DynamicResource {x:Static ncs:DawSkinKeys.LcdFontFamily}}"/>
+                <Setter Property="FontSize" Value="11"/>
+                <Setter Property="Foreground" Value="{DynamicResource {x:Static ncs:DawSkinKeys.LcdText}}"/>
+            </Style>
+
+            <!-- One channel strip per track -->
+            <DataTemplate x:Key="StripTemplate">
+                <ncp:NineFrame x:Name="strip" Width="98" Margin="0,0,2,0" Bevel="Flat" CornerRadius="4" BorderThickness="1"
+                               Background="{DynamicResource {x:Static ncs:DawSkinKeys.PanelBackground}}"
+                               BorderBrush="{DynamicResource {x:Static ncs:DawSkinKeys.PanelBorder}}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>   <!-- R / reset -->
+                            <RowDefinition Height="Auto"/>   <!-- M / S -->
+                            <RowDefinition Height="Auto"/>   <!-- pan -->
+                            <RowDefinition Height="Auto"/>   <!-- sends -->
+                            <RowDefinition Height="*"/>      <!-- fader -->
+                            <RowDefinition Height="Auto"/>   <!-- dB -->
+                            <RowDefinition Height="Auto"/>   <!-- name -->
+                        </Grid.RowDefinitions>
+
+                        <UniformGrid Rows="1" Margin="6,8,6,0">
+                            <nc:LedToggleButton Role="RecordArm" Content="R" Height="24" Margin="0,0,2,0"
+                                                IsChecked="{Binding IsActive, Mode=OneWay}"
+                                                PreviewMouseLeftButtonDown="OnArmClick"
+                                                ToolTip="Record and edit this track (the main window's edited track)"/>
+                            <Button Style="{DynamicResource ToolButton}" Height="24" Margin="2,0,0,0" Padding="0"
+                                    IsEnabled="{Binding Mix.HasOverrides}" Click="OnResetStrip"
+                                    ToolTip="Give volume, pan and sends back to the song">
+                                <TextBlock Text="&#xE777;" Style="{DynamicResource Icon}"/>
+                            </Button>
+                        </UniformGrid>
+
+                        <UniformGrid Grid.Row="1" Rows="1" Margin="6,4,6,0">
+                            <nc:LedToggleButton Role="Mute" Content="M" Height="24" Margin="0,0,2,0"
+                                                IsChecked="{Binding IsMuted, Mode=TwoWay}" MouseRightButtonUp="OnMuteRightClick"
+                                                ToolTip="Mute (right-click: mute only this track)"/>
+                            <nc:LedToggleButton Role="Solo" Content="S" Height="24" Margin="2,0,0,0"
+                                                IsChecked="{Binding IsSolo, Mode=TwoWay}" MouseRightButtonUp="OnSoloRightClick"
+                                                ToolTip="Solo (right-click: solo only this track)"/>
+                        </UniformGrid>
+
+                        <nc:Knob Grid.Row="2" Width="54" Height="66" Margin="0,8,0,0" Label="PAN" IsBipolar="True"
+                                 Minimum="-1" Maximum="1" DefaultValue="0" ArcBrush="{Binding Brush}"
+                                 ValueFormatter="{x:Static ncp:ValueFormatters.Pan}"
+                                 Value="{Binding Mix.Pan, Mode=TwoWay}"
+                                 ToolTip="Pan (CC 10). Double-click: centre"/>
+
+                        <UniformGrid Grid.Row="3" Columns="2" Margin="4,2,4,0">
+                            <nc:Knob Style="{StaticResource SendKnob}" Label="REVERB" DefaultValue="40"
+                                     Value="{Binding Mix.Reverb, Mode=TwoWay}" ToolTip="Reverb send (CC 91)"/>
+                            <nc:Knob Style="{StaticResource SendKnob}" Label="CHORUS" DefaultValue="0"
+                                     Value="{Binding Mix.Chorus, Mode=TwoWay}" ToolTip="Chorus send (CC 93)"/>
+                            <nc:Knob Style="{StaticResource SendKnob}" Label="DELAY" DefaultValue="0"
+                                     Value="{Binding Mix.Delay, Mode=TwoWay}" ToolTip="Delay / variation send (CC 94, GS and XG synths)"/>
+                            <nc:Knob Style="{StaticResource SendKnob}" Label="BRIGHT" DefaultValue="64"
+                                     Value="{Binding Mix.Brightness, Mode=TwoWay}" ToolTip="Brightness, filter cutoff (CC 74)"/>
+                        </UniformGrid>
+
+                        <!-- The fader cap is 40 high: scale and meter are padded by 20 so ticks line up with the cap centre. -->
+                        <Grid Grid.Row="4" Margin="2,8,4,4" HorizontalAlignment="Center">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <nc:ValueScale Placement="End" Padding="0,20,0,20" Minimum="-60" Maximum="0" Taper="Decibel"
+                                           MinimumText="-∞" Ticks="0 -3 -6 -12 -20 -30 -60"/>
+                            <nc:Fader x:Name="fader" Grid.Column="1" Width="30" ShowValueText="False"
+                                      Taper="Decibel" Minimum="-60" Maximum="0" DefaultValue="-4.1" MinimumText="-∞"
+                                      ValueFormatter="{x:Static ncp:ValueFormatters.Decibel}"
+                                      Value="{Binding Mix.VolumeDb, Mode=TwoWay}"
+                                      ToolTip="Volume (CC 7). Double-click: the GM default (100)"/>
+                            <nc:LevelMeter Grid.Column="2" Width="7" Margin="4,20,0,20" Peak="{Binding Level}"
+                                           ToolTip="Note activity (loudest velocity)"/>
+                        </Grid>
+
+                        <ncp:NineFrame Grid.Row="5" Style="{StaticResource StripLcd}" Margin="8,0,8,6">
+                            <TextBlock Style="{StaticResource LcdText}" Text="{Binding ValueText, ElementName=fader}"/>
+                        </ncp:NineFrame>
+
+                        <!-- Track colour with name and number; click to edit the track. -->
+                        <Border Grid.Row="6" Background="{Binding Brush}" CornerRadius="0,0,3,3" Padding="4,5"
+                                Cursor="Hand" MouseLeftButtonDown="OnArmClick" ToolTip="{Binding Instrument}">
+                            <StackPanel>
+                                <TextBlock Text="{Binding Name}" HorizontalAlignment="Center" TextTrimming="CharacterEllipsis"
+                                           Foreground="#F4F5F7" FontWeight="SemiBold"/>
+                                <TextBlock Text="{Binding Number}" HorizontalAlignment="Center" Foreground="#E0E3E7"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </ncp:NineFrame>
+                <DataTemplate.Triggers>
+                    <DataTrigger Binding="{Binding IsActive}" Value="True">
+                        <Setter TargetName="strip" Property="Background" Value="{DynamicResource {x:Static ncs:DawSkinKeys.PanelRaised}}"/>
+                        <Setter TargetName="strip" Property="BorderBrush" Value="{DynamicResource {x:Static ncs:DawSkinKeys.Accent}}"/>
+                    </DataTrigger>
+                </DataTemplate.Triggers>
+            </DataTemplate>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <DockPanel>
+        <!-- Header -->
+        <Border DockPanel.Dock="Top" Background="{DynamicResource Bg1}" BorderBrush="{DynamicResource Line}"
+                BorderThickness="0,0,0,1" Padding="12,8">
+            <DockPanel>
+                <TextBlock Text="MIXER" Style="{DynamicResource CapsLabel}" VerticalAlignment="Center"/>
+                <TextBlock x:Name="txtSong" Margin="12,0,0,0" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                <TextBlock Margin="16,0,0,0" VerticalAlignment="Center" Foreground="{DynamicResource TextDim}" TextTrimming="CharacterEllipsis"
+                           Text="Each control follows the song until you move it; then it replaces the song's value. ↺ gives a strip back to the song."/>
+            </DockPanel>
+        </Border>
+
+        <!-- Master -->
+        <ncp:NineFrame DockPanel.Dock="Right" Width="130" Margin="4,6,6,6" Bevel="Raised" CornerRadius="4" BorderThickness="1"
+                       Background="{DynamicResource {x:Static ncs:DawSkinKeys.PanelBackground}}"
+                       BorderBrush="{DynamicResource {x:Static ncs:DawSkinKeys.PanelBorder}}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <nc:LedToggleButton x:Name="tglMasterMute" Role="Mute" Content="M" Height="24" Margin="10,8,10,0"
+                                    Click="OnMasterMuteClick" ToolTip="Mute everything (master volume to zero)"/>
+
+                <StackPanel Grid.Row="1" Margin="10,8,10,0">
+                    <Button Style="{DynamicResource ToolButton}" Height="26" Click="OnResetAll"
+                            ToolTip="Give every strip back to the song">
+                        <TextBlock Text="RESET ALL"/>
+                    </Button>
+                    <Button Style="{DynamicResource ToolButton}" Height="26" Margin="0,4,0,0" Click="OnClearMuteSolo"
+                            ToolTip="Turn every mute and solo off">
+                        <TextBlock Text="CLEAR M / S"/>
+                    </Button>
+                </StackPanel>
+
+                <Grid Grid.Row="2" Margin="2,12,4,4" HorizontalAlignment="Center">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <nc:ValueScale Placement="End" Padding="0,20,0,20" Minimum="-60" Maximum="0" Taper="Decibel"
+                                   MinimumText="-∞" Ticks="0 -3 -6 -12 -20 -30 -60"/>
+                    <nc:Fader x:Name="faderMaster" Grid.Column="1" Width="34" ShowValueText="False"
+                              Taper="Decibel" Minimum="-60" Maximum="0" DefaultValue="0" Value="0" MinimumText="-∞"
+                              ValueFormatter="{x:Static ncp:ValueFormatters.Decibel}"
+                              ValueChanged="OnMasterChanged"
+                              ToolTip="Master volume: scales every track's volume (CC 7). Double-click: 0 dB"/>
+                </Grid>
+
+                <ncp:NineFrame Grid.Row="3" Style="{StaticResource StripLcd}" Margin="12,0,12,6">
+                    <TextBlock Style="{StaticResource LcdText}" Text="{Binding ValueText, ElementName=faderMaster}"/>
+                </ncp:NineFrame>
+
+                <Border Grid.Row="4" Background="{DynamicResource Bg2}" CornerRadius="0,0,3,3" Padding="4,5">
+                    <StackPanel>
+                        <TextBlock Text="Master" HorizontalAlignment="Center" FontWeight="SemiBold"/>
+                        <TextBlock x:Name="txtTracks" HorizontalAlignment="Center" Foreground="{DynamicResource TextDim}"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </ncp:NineFrame>
+
+        <!-- Strips -->
+        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" Padding="6,6,0,6">
+            <ItemsControl x:Name="strips" ItemTemplate="{StaticResource StripTemplate}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.Template>
+                    <ControlTemplate TargetType="ItemsControl">
+                        <ItemsPresenter/>
+                    </ControlTemplate>
+                </ItemsControl.Template>
+            </ItemsControl>
+        </ScrollViewer>
+    </DockPanel>
+</Window>

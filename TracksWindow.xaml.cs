@@ -29,6 +29,7 @@ namespace nMIDI
             InitializeComponent();
             DataContext = this;
             Owner = main;
+            tglPauseMain.IsChecked = main.PauseNoteViewWithLanes;
 
             ruler.Axis = Axis;
             ruler.Seek += (_, tick) => _main.SeekTo(tick);
@@ -180,6 +181,7 @@ namespace nMIDI
         private void OnPlay(object sender, RoutedEventArgs e) => _main.Play();
         private void OnPause(object sender, RoutedEventArgs e) => _main.Pause();
         private void OnStop(object sender, RoutedEventArgs e) => _main.OnStop(sender, e);
+        private void OnPauseMainClick(object sender, RoutedEventArgs e) => _main.PauseNoteViewWithLanes = tglPauseMain.IsChecked == true;
         private void OnRewind(object sender, RoutedEventArgs e) => _main.OnRewind(sender, e);
         private void OnPanic(object sender, RoutedEventArgs e) => _main.OnPanic(sender, e);
 

@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.4 (2026-11-13)
+
+- Mixer window: per track record, mute, solo, pan, reverb, chorus, delay and brightness knobs, a volume fader
+  with dB scale and activity meter, plus a master strip. Controls follow the song until you move them.
+- The knobs, faders and meters come from the nMIDI.Controls library, now part of the repository.
+- "Pause main view" in the Lanes window: the main window's piano roll stops redrawing while you work in the
+  Lanes window, to save CPU.
+- Mixer window icon.
+
 ## 2.3 (2026-11-13)
 
 - Fingering engine 1.1: incremental fingering after edits, finger corrections that are kept, finger

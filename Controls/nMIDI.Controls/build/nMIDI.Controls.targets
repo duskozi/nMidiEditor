@@ -1,0 +1,7 @@
+<Project>
+  <!-- Copies the 64-bit native renderer used by NinePatchWpf next to the app's exe. -->
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)..\runtimes\win-x64\native\NinePatchLib.dll"
+          Link="NinePatchLib.dll" Visible="false" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

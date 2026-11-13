@@ -1,0 +1,141 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="clr-namespace:nMIDI.Controls"
+                    xmlns:p="clr-namespace:nMIDI.Controls.Primitives"
+                    xmlns:s="clr-namespace:nMIDI.Controls.Skinning">
+    <Style TargetType="{x:Type c:TimeDisplay}">
+        <Setter Property="Background" Value="{DynamicResource {x:Static s:DawSkinKeys.LcdBackground}}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.LcdBorder}}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Foreground" Value="{DynamicResource {x:Static s:DawSkinKeys.LcdText}}"/>
+        <Setter Property="FontFamily" Value="{DynamicResource {x:Static s:DawSkinKeys.LcdFontFamily}}"/>
+        <Setter Property="FontSize" Value="17"/>
+        <Setter Property="Padding" Value="10,1,10,2"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="ToolTip" Value="Click to switch bars / time"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type c:TimeDisplay}">
+                    <p:NineFrame Bevel="Sunken" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{DynamicResource {x:Static s:DawSkinKeys.CornerRadius}}"
+                            Padding="{TemplateBinding Padding}">
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="{TemplateBinding Caption}" FontSize="8" Foreground="{DynamicResource {x:Static s:DawSkinKeys.LcdTextDim}}"
+                                       FontFamily="{DynamicResource {x:Static s:DawSkinKeys.FontFamily}}"/>
+                            <TextBlock Text="{TemplateBinding Text}" HorizontalAlignment="Right"/>
+                        </StackPanel>
+                    </p:NineFrame>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="{x:Type c:ValueBox}">
+        <Setter Property="Background" Value="{DynamicResource {x:Static s:DawSkinKeys.LcdBackground}}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.LcdBorder}}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Foreground" Value="{DynamicResource {x:Static s:DawSkinKeys.LcdText}}"/>
+        <Setter Property="FontFamily" Value="{DynamicResource {x:Static s:DawSkinKeys.LcdFontFamily}}"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="Padding" Value="6,2"/>
+        <Setter Property="MinWidth" Value="56"/>
+        <Setter Property="Cursor" Value="SizeNS"/>
+        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type c:ValueBox}">
+                    <p:NineFrame Bevel="Sunken" x:Name="Frame" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{DynamicResource {x:Static s:DawSkinKeys.CornerRadius}}"
+                            Padding="{TemplateBinding Padding}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel x:Name="Display" Orientation="Vertical" VerticalAlignment="Center">
+                                <TextBlock x:Name="LabelText" Text="{TemplateBinding Label}" FontSize="8"
+                                           FontFamily="{DynamicResource {x:Static s:DawSkinKeys.FontFamily}}" Foreground="{DynamicResource {x:Static s:DawSkinKeys.LcdTextDim}}"/>
+                                <TextBlock Text="{TemplateBinding ValueText}" HorizontalAlignment="Right"/>
+                            </StackPanel>
+                            <TextBox x:Name="PART_Editor" Visibility="Collapsed" VerticalAlignment="Center"
+                                     Background="Transparent" BorderThickness="0" Padding="0"
+                                     Foreground="{TemplateBinding Foreground}" CaretBrush="{TemplateBinding Foreground}"
+                                     FontFamily="{TemplateBinding FontFamily}" FontSize="{TemplateBinding FontSize}"
+                                     HorizontalContentAlignment="Right"/>
+                            <TextBlock x:Name="UnitText" Grid.Column="1" Margin="4,0,0,1" VerticalAlignment="Bottom"
+                                       Text="{TemplateBinding Unit}" FontSize="9" FontFamily="{DynamicResource {x:Static s:DawSkinKeys.FontFamily}}" Foreground="{DynamicResource {x:Static s:DawSkinKeys.LcdTextDim}}"/>
+                        </Grid>
+                    </p:NineFrame>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="Label" Value="{x:Null}">
+                            <Setter TargetName="LabelText" Property="Visibility" Value="Collapsed"/>
+                        </Trigger>
+                        <Trigger Property="Unit" Value="{x:Null}">
+                            <Setter TargetName="UnitText" Property="Visibility" Value="Collapsed"/>
+                        </Trigger>
+                        <Trigger Property="IsEditing" Value="True">
+                            <Setter TargetName="PART_Editor" Property="Visibility" Value="Visible"/>
+                            <Setter TargetName="Display" Property="Visibility" Value="Hidden"/>
+                            <Setter Property="Cursor" Value="IBeam"/>
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                            <Setter TargetName="Frame" Property="BorderBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.Focus}}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.4"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="{x:Type c:TransportBar}">
+        <Setter Property="Background" Value="{DynamicResource {x:Static s:DawSkinKeys.PanelBackground}}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.PanelBorder}}"/>
+        <Setter Property="BorderThickness" Value="0,0,0,1"/>
+        <Setter Property="Foreground" Value="{DynamicResource {x:Static s:DawSkinKeys.TextDim}}"/>
+        <Setter Property="FontFamily" Value="{DynamicResource {x:Static s:DawSkinKeys.FontFamily}}"/>
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="Padding" Value="8,6"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type c:TransportBar}">
+                    <p:NineFrame Bevel="Flat" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}">
+                        <StackPanel Orientation="Horizontal">
+                            <c:TransportButton Kind="ToStart" Margin="0,0,2,0" ToolTip="Go to start"/>
+                            <c:TransportButton Kind="Rewind" Margin="0,0,2,0" ToolTip="Rewind"/>
+                            <c:TransportButton Kind="FastForward" Margin="0,0,2,0" ToolTip="Forward"/>
+                            <c:TransportButton Kind="Stop" Margin="8,0,2,0" ToolTip="Stop (twice: return to zero)"/>
+                            <c:TransportButton Kind="Play" Margin="0,0,2,0" ToolTip="Play"
+                                               IsChecked="{Binding IsPlaying, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"/>
+                            <c:TransportButton Kind="Record" Margin="0,0,2,0" ToolTip="Record"
+                                               IsChecked="{Binding IsRecording, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"/>
+                            <c:TransportButton Kind="Loop" Margin="8,0,2,0" ToolTip="Loop"
+                                               IsChecked="{Binding IsLooping, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"/>
+                            <c:TransportButton Kind="Metronome" Margin="0,0,2,0" ToolTip="Metronome"
+                                               IsChecked="{Binding IsMetronomeOn, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"/>
+                            <c:TimeDisplay Margin="12,0,0,0" MinWidth="128"
+                                           Position="{TemplateBinding Position}" Tempo="{TemplateBinding Tempo}"
+                                           BeatsPerBar="{TemplateBinding BeatsPerBar}"/>
+                            <c:ValueBox Margin="6,0,0,0" MinWidth="78" Label="TEMPO" Unit="BPM"
+                                        Minimum="20" Maximum="400" DefaultValue="120" DragSensitivity="760"
+                                        ValueFormatter="{x:Static p:ValueFormatters.Tempo}"
+                                        Value="{Binding Tempo, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"/>
+                            <p:NineFrame Bevel="Sunken" Margin="6,0,0,0" Padding="8,0" CornerRadius="{DynamicResource {x:Static s:DawSkinKeys.CornerRadius}}" Background="{DynamicResource {x:Static s:DawSkinKeys.LcdBackground}}"
+                                    BorderBrush="{DynamicResource {x:Static s:DawSkinKeys.LcdBorder}}" BorderThickness="1">
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="SIG" FontSize="8" Foreground="{DynamicResource {x:Static s:DawSkinKeys.LcdTextDim}}"/>
+                                    <TextBlock FontFamily="{DynamicResource {x:Static s:DawSkinKeys.LcdFontFamily}}" FontSize="13" Foreground="{DynamicResource {x:Static s:DawSkinKeys.LcdText}}">
+                                        <Run Text="{Binding BeatsPerBar, RelativeSource={RelativeSource TemplatedParent}, Mode=OneWay}"/><Run Text="/"/><Run Text="{Binding BeatUnit, RelativeSource={RelativeSource TemplatedParent}, Mode=OneWay}"/>
+                                    </TextBlock>
+                                </StackPanel>
+                            </p:NineFrame>
+                        </StackPanel>
+                    </p:NineFrame>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+</ResourceDictionary>

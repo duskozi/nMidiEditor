@@ -25,6 +25,7 @@ namespace nMIDI
         public bool ShowKeyboard { get; set; } = true;
         public bool ShowPedals { get; set; } = true;
         public bool ShowPedalStrip { get; set; } = true;
+        public bool PauseNoteViewWithLanes { get; set; } = true;
         public int KeyLabels { get; set; }
         public int KeyRange { get; set; }
         public double LaneHeight { get; set; } = 120;

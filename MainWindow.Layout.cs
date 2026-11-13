@@ -26,6 +26,7 @@ namespace nMIDI
                 viewer.InvalidateElements();
                 InvalidateTree(this);
                 if (_tracksWindow != null) InvalidateTree(_tracksWindow);
+                if (_mixerWindow != null) InvalidateTree(_mixerWindow);
                 _keyboardSignature = 0;
             };
         }
@@ -101,9 +102,9 @@ namespace nMIDI
             if (stage == _topStage) return;
             _topStage = stage;
             var labels = stage >= 1 ? Visibility.Collapsed : Visibility.Visible;
-            foreach (var t in new TextBlock[] { lblOpen, lblFollow, lblLoop, lblFit, lblLanes }) t.Visibility = labels;
+            foreach (var t in new TextBlock[] { lblOpen, lblFollow, lblLoop, lblFit, lblLanes, lblMixer }) t.Visibility = labels;
             // Icon-only buttons: drop the gap the label left next to the icon.
-            foreach (var t in new TextBlock[] { lblOpen, lblFollow, lblLoop, lblFit, lblLanes })
+            foreach (var t in new TextBlock[] { lblOpen, lblFollow, lblLoop, lblFit, lblLanes, lblMixer })
                 if (t.Parent is StackPanel sp && sp.Children.Count > 0 && sp.Children[0] is TextBlock icon)
                     icon.Margin = stage >= 1 ? new Thickness(0) : new Thickness(0, 0, 6, 0);
 

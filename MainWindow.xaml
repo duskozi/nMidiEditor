@@ -172,6 +172,13 @@
                             <TextBlock x:Name="lblLanes" Text="Lanes"/>
                         </StackPanel>
                     </Button>
+                    <Button Style="{DynamicResource ToolButton}" Margin="6,0,0,0" Click="OnOpenMixer"
+                            ToolTip="Open the mixer: record, mute, solo, pan, effect sends and volume for every track">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE9E9;" Style="{DynamicResource Icon}" Margin="0,0,6,0"/>
+                            <TextBlock x:Name="lblMixer" Text="Mixer"/>
+                        </StackPanel>
+                    </Button>
                     <TextBlock x:Name="capColor" Text="COLOR" Style="{DynamicResource CapsLabel}" Margin="14,0,6,0"/>
                     <ComboBox x:Name="cmbColorMode" Width="96" SelectedIndex="0" SelectionChanged="OnColorModeChanged">
                         <ComboBoxItem Content="Track"/>
@@ -461,6 +468,13 @@
         </np:NinePatchZoomViewer>
 
         <!-- Shown until a file is loaded. -->
+        <Border x:Name="pnlPaused" Grid.Row="4" Visibility="Collapsed" IsHitTestVisible="False"
+                HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,48,0,0"
+                Background="{DynamicResource PopupBg}" BorderBrush="{DynamicResource Line}" BorderThickness="1" CornerRadius="6" Padding="12,6">
+            <TextBlock Foreground="{DynamicResource TextDim}"
+                       Text="The piano roll is paused while you work in the Lanes window. Click here to catch up."/>
+        </Border>
+
         <StackPanel x:Name="pnlEmpty" Grid.Row="4" HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False">
             <TextBlock Text="&#xE8D6;" Style="{DynamicResource Icon}" FontSize="42" Foreground="{DynamicResource TextFaint}"/>
             <TextBlock Text="Drop a MIDI file here, press Ctrl+O to open one, or Ctrl+N for a new song" Foreground="{DynamicResource TextDim}" FontSize="14"

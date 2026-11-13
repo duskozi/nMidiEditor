@@ -52,6 +52,14 @@
                 BorderThickness="0,0,0,1" Padding="10,6">
             <DockPanel>
                 <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" VerticalAlignment="Center">
+                    <ToggleButton x:Name="tglPauseMain" Style="{DynamicResource ToolToggle}" Margin="0,0,6,0"
+                                  Click="OnPauseMainClick"
+                                  ToolTip="Stop drawing the main window's piano roll and keyboard while you work here, to save CPU. It catches up when you click the main window.">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE769;" Style="{DynamicResource Icon}" Margin="0,0,6,0"/>
+                            <TextBlock Text="Pause main view"/>
+                        </StackPanel>
+                    </ToggleButton>
                     <ToggleButton x:Name="btnFollow" Style="{DynamicResource ToolToggle}" IsChecked="True"
                                   ToolTip="Turn the page when the playhead reaches the right edge">
                         <StackPanel Orientation="Horizontal">

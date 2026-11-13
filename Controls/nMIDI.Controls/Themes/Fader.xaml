@@ -1,0 +1,100 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="clr-namespace:nMIDI.Controls"
+                    xmlns:p="clr-namespace:nMIDI.Controls.Primitives"
+                    xmlns:s="clr-namespace:nMIDI.Controls.Skinning">
+    <BooleanToVisibilityConverter x:Key="DawFaderBoolToVis"/>
+
+    <ControlTemplate x:Key="DawFaderVerticalTemplate" TargetType="{x:Type c:Fader}">
+        <Grid Background="Transparent">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <p:FaderPanel x:Name="PART_Track" Orientation="Vertical" NormalizedValue="{TemplateBinding NormalizedValue}">
+                <p:NineFrame Bevel="Sunken" p:FaderPanel.Role="Track" Width="5" CornerRadius="2.5" HorizontalAlignment="Center" Background="{DynamicResource {x:Static s:DawSkinKeys.FaderGroove}}"/>
+                <p:NineFrame Bevel="Flat" p:FaderPanel.Role="Fill" Width="5" CornerRadius="2.5" HorizontalAlignment="Center" Background="{DynamicResource {x:Static s:DawSkinKeys.FaderFill}}"/>
+                <Grid p:FaderPanel.Role="Thumb" Width="26" Height="40" HorizontalAlignment="Center">
+                    <p:NineFrame Bevel="Raised" x:Name="Cap" CornerRadius="{DynamicResource {x:Static s:DawSkinKeys.CornerRadius}}" Background="{DynamicResource {x:Static s:DawSkinKeys.FaderThumb}}"
+                            BorderBrush="{DynamicResource {x:Static s:DawSkinKeys.FaderThumbBorder}}" BorderThickness="1"/>
+                    <StackPanel VerticalAlignment="Center">
+                        <Rectangle Height="1" Margin="5,0,5,6" Fill="{DynamicResource {x:Static s:DawSkinKeys.FaderThumbBorder}}" Opacity="0.6"/>
+                        <Rectangle Height="2" Margin="3,0" Fill="{DynamicResource {x:Static s:DawSkinKeys.FaderThumbLine}}"/>
+                        <Rectangle Height="1" Margin="5,6,5,0" Fill="{DynamicResource {x:Static s:DawSkinKeys.FaderThumbBorder}}" Opacity="0.6"/>
+                    </StackPanel>
+                    <Border x:Name="FocusRing" CornerRadius="{DynamicResource {x:Static s:DawSkinKeys.CornerRadius}}" BorderBrush="{DynamicResource {x:Static s:DawSkinKeys.Focus}}" BorderThickness="1"
+                            Margin="-2" Visibility="Collapsed"/>
+                </Grid>
+            </p:FaderPanel>
+            <TextBlock Grid.Row="1" Margin="0,4,0,0" HorizontalAlignment="Center" Foreground="{DynamicResource {x:Static s:DawSkinKeys.Text}}"
+                       Text="{TemplateBinding ValueText}"
+                       Visibility="{TemplateBinding ShowValueText, Converter={StaticResource DawFaderBoolToVis}}"/>
+            <TextBlock x:Name="LabelText" Grid.Row="2" HorizontalAlignment="Center" Text="{TemplateBinding Label}"
+                       TextTrimming="CharacterEllipsis"/>
+        </Grid>
+        <ControlTemplate.Triggers>
+            <Trigger Property="Label" Value="{x:Null}">
+                <Setter TargetName="LabelText" Property="Visibility" Value="Collapsed"/>
+            </Trigger>
+            <Trigger Property="IsKeyboardFocused" Value="True">
+                <Setter TargetName="FocusRing" Property="Visibility" Value="Visible"/>
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Opacity" Value="0.4"/>
+            </Trigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+
+    <ControlTemplate x:Key="DawFaderHorizontalTemplate" TargetType="{x:Type c:Fader}">
+        <Grid Background="Transparent">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock x:Name="LabelText" Margin="0,0,6,0" VerticalAlignment="Center" Text="{TemplateBinding Label}"/>
+            <p:FaderPanel x:Name="PART_Track" Grid.Column="1" Orientation="Horizontal" NormalizedValue="{TemplateBinding NormalizedValue}">
+                <p:NineFrame Bevel="Sunken" p:FaderPanel.Role="Track" Height="5" CornerRadius="2.5" VerticalAlignment="Center" Background="{DynamicResource {x:Static s:DawSkinKeys.FaderGroove}}"/>
+                <p:NineFrame Bevel="Flat" p:FaderPanel.Role="Fill" Height="5" CornerRadius="2.5" VerticalAlignment="Center" Background="{DynamicResource {x:Static s:DawSkinKeys.FaderFill}}"/>
+                <Grid p:FaderPanel.Role="Thumb" Width="34" Height="20" VerticalAlignment="Center">
+                    <p:NineFrame Bevel="Raised" CornerRadius="{DynamicResource {x:Static s:DawSkinKeys.CornerRadius}}" Background="{DynamicResource {x:Static s:DawSkinKeys.FaderThumb}}" BorderBrush="{DynamicResource {x:Static s:DawSkinKeys.FaderThumbBorder}}" BorderThickness="1"/>
+                    <Rectangle Width="2" Margin="0,3" HorizontalAlignment="Center" Fill="{DynamicResource {x:Static s:DawSkinKeys.FaderThumbLine}}"/>
+                    <Border x:Name="FocusRing" CornerRadius="{DynamicResource {x:Static s:DawSkinKeys.CornerRadius}}" BorderBrush="{DynamicResource {x:Static s:DawSkinKeys.Focus}}" BorderThickness="1"
+                            Margin="-2" Visibility="Collapsed"/>
+                </Grid>
+            </p:FaderPanel>
+            <TextBlock Grid.Column="2" Margin="6,0,0,0" MinWidth="44" VerticalAlignment="Center" Foreground="{DynamicResource {x:Static s:DawSkinKeys.Text}}"
+                       Text="{TemplateBinding ValueText}"
+                       Visibility="{TemplateBinding ShowValueText, Converter={StaticResource DawFaderBoolToVis}}"/>
+        </Grid>
+        <ControlTemplate.Triggers>
+            <Trigger Property="Label" Value="{x:Null}">
+                <Setter TargetName="LabelText" Property="Visibility" Value="Collapsed"/>
+            </Trigger>
+            <Trigger Property="IsKeyboardFocused" Value="True">
+                <Setter TargetName="FocusRing" Property="Visibility" Value="Visible"/>
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Opacity" Value="0.4"/>
+            </Trigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+
+    <Style TargetType="{x:Type c:Fader}">
+        <Setter Property="Foreground" Value="{DynamicResource {x:Static s:DawSkinKeys.TextDim}}"/>
+        <Setter Property="FontFamily" Value="{DynamicResource {x:Static s:DawSkinKeys.FontFamily}}"/>
+        <Setter Property="FontSize" Value="10"/>
+        <Setter Property="MinWidth" Value="28"/>
+        <Setter Property="MinHeight" Value="60"/>
+        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        <Setter Property="Template" Value="{StaticResource DawFaderVerticalTemplate}"/>
+        <Style.Triggers>
+            <Trigger Property="Orientation" Value="Horizontal">
+                <Setter Property="Template" Value="{StaticResource DawFaderHorizontalTemplate}"/>
+                <Setter Property="MinWidth" Value="80"/>
+                <Setter Property="MinHeight" Value="20"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+</ResourceDictionary>

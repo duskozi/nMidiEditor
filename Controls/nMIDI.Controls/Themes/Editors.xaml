@@ -1,0 +1,147 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="clr-namespace:nMIDI.Controls"
+                    xmlns:p="clr-namespace:nMIDI.Controls.Primitives"
+                    xmlns:s="clr-namespace:nMIDI.Controls.Skinning">
+    <Style TargetType="{x:Type c:PianoKeyboard}">
+        <Setter Property="MinHeight" Value="40"/>
+        <Setter Property="Height" Value="90"/>
+        <Setter Property="Background" Value="{DynamicResource {x:Static s:DawSkinKeys.KeyBorder}}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.KeyBorder}}"/>
+        <Setter Property="Foreground" Value="{DynamicResource {x:Static s:DawSkinKeys.ScaleText}}"/>
+        <Setter Property="WhiteKeyBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.KeyWhite}}"/>
+        <Setter Property="BlackKeyBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.KeyBlack}}"/>
+        <Setter Property="PressedKeyBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.KeyPressed}}"/>
+        <Setter Property="HighlightKeyBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.KeyHighlight}}"/>
+        <Setter Property="FontFamily" Value="{DynamicResource {x:Static s:DawSkinKeys.FontFamily}}"/>
+        <Setter Property="FontSize" Value="9"/>
+        <Setter Property="FocusVisualStyle" Value="{DynamicResource {x:Static s:DawStyleKeys.FocusVisual}}"/>
+    </Style>
+
+    <Style TargetType="{x:Type c:StepSequencer}">
+        <Setter Property="MinHeight" Value="60"/>
+        <Setter Property="Background" Value="{DynamicResource {x:Static s:DawSkinKeys.PanelBackground}}"/>
+        <Setter Property="Foreground" Value="{DynamicResource {x:Static s:DawSkinKeys.TextDim}}"/>
+        <Setter Property="StepOffBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.StepOff}}"/>
+        <Setter Property="StepOnBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.StepOn}}"/>
+        <Setter Property="GroupBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.StepGroupBackground}}"/>
+        <Setter Property="PlayheadBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.StepPlayhead}}"/>
+        <Setter Property="FontFamily" Value="{DynamicResource {x:Static s:DawSkinKeys.FontFamily}}"/>
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="FocusVisualStyle" Value="{DynamicResource {x:Static s:DawStyleKeys.FocusVisual}}"/>
+    </Style>
+
+    <Style TargetType="{x:Type c:XYPad}">
+        <Setter Property="MinWidth" Value="60"/>
+        <Setter Property="MinHeight" Value="60"/>
+        <Setter Property="Background" Value="{DynamicResource {x:Static s:DawSkinKeys.PadBackground}}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.PanelBorder}}"/>
+        <Setter Property="Foreground" Value="{DynamicResource {x:Static s:DawSkinKeys.TextDim}}"/>
+        <Setter Property="GridBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.PadGrid}}"/>
+        <Setter Property="PuckBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.PadPuck}}"/>
+        <Setter Property="CrosshairBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.PadCrosshair}}"/>
+        <Setter Property="FontFamily" Value="{DynamicResource {x:Static s:DawSkinKeys.FontFamily}}"/>
+        <Setter Property="FontSize" Value="10"/>
+        <Setter Property="Cursor" Value="Cross"/>
+        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+    </Style>
+
+    <Style TargetType="{x:Type c:EnvelopeEditor}">
+        <Setter Property="MinWidth" Value="120"/>
+        <Setter Property="MinHeight" Value="70"/>
+        <Setter Property="Background" Value="{DynamicResource {x:Static s:DawSkinKeys.PadBackground}}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.PanelBorder}}"/>
+        <Setter Property="Foreground" Value="{DynamicResource {x:Static s:DawSkinKeys.TextDim}}"/>
+        <Setter Property="GridBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.PadGrid}}"/>
+        <Setter Property="StrokeBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.EnvelopeStroke}}"/>
+        <Setter Property="FillBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.EnvelopeFill}}"/>
+        <Setter Property="HandleBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.PadPuck}}"/>
+        <Setter Property="FontFamily" Value="{DynamicResource {x:Static s:DawSkinKeys.FontFamily}}"/>
+        <Setter Property="FontSize" Value="10"/>
+        <Setter Property="FocusVisualStyle" Value="{DynamicResource {x:Static s:DawStyleKeys.FocusVisual}}"/>
+        <!-- Mouse-only editor: focusable for its own shortcuts, but not a Tab stop. -->
+        <Setter Property="IsTabStop" Value="False"/>
+    </Style>
+
+    <Style TargetType="{x:Type c:PianoRoll}">
+        <Setter Property="Background" Value="{DynamicResource {x:Static s:DawSkinKeys.GridBackground}}"/>
+        <Setter Property="BlackRowBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.GridBlackRow}}"/>
+        <Setter Property="BarLineBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.GridBarLine}}"/>
+        <Setter Property="BeatLineBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.GridBeatLine}}"/>
+        <Setter Property="SubLineBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.GridSubLine}}"/>
+        <Setter Property="NoteBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.NoteFill}}"/>
+        <Setter Property="SelectedNoteBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.NoteSelectedFill}}"/>
+        <Setter Property="NoteBorderBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.NoteBorder}}"/>
+        <Setter Property="NoteTextBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.NoteText}}"/>
+        <Setter Property="PlayheadBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.Playhead}}"/>
+        <Setter Property="RulerBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.RulerBackground}}"/>
+        <Setter Property="Foreground" Value="{DynamicResource {x:Static s:DawSkinKeys.RulerText}}"/>
+        <Setter Property="WhiteKeyBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.KeyWhite}}"/>
+        <Setter Property="BlackKeyBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.KeyBlack}}"/>
+        <Setter Property="PressedKeyBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.KeyPressed}}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.KeyBorder}}"/>
+        <Setter Property="SelectionBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.Selection}}"/>
+        <Setter Property="FontFamily" Value="{DynamicResource {x:Static s:DawSkinKeys.FontFamily}}"/>
+        <Setter Property="FontSize" Value="10"/>
+        <Setter Property="FocusVisualStyle" Value="{DynamicResource {x:Static s:DawStyleKeys.FocusVisual}}"/>
+    </Style>
+
+    <Style TargetType="{x:Type c:PerformanceWheel}">
+        <Setter Property="Width" Value="26"/>
+        <Setter Property="MinHeight" Value="50"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.PanelBorder}}"/>
+        <Setter Property="Foreground" Value="{DynamicResource {x:Static s:DawSkinKeys.TextDim}}"/>
+        <Setter Property="SlotBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.WheelSlot}}"/>
+        <Setter Property="WheelBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.WheelBody}}"/>
+        <Setter Property="RibBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.WheelRib}}"/>
+        <Setter Property="MarkerBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.WheelMarker}}"/>
+        <Setter Property="FontFamily" Value="{DynamicResource {x:Static s:DawSkinKeys.FontFamily}}"/>
+        <Setter Property="FontSize" Value="9"/>
+        <Setter Property="Cursor" Value="SizeNS"/>
+        <Setter Property="FocusVisualStyle" Value="{DynamicResource {x:Static s:DawStyleKeys.FocusVisual}}"/>
+    </Style>
+
+    <Style TargetType="{x:Type c:PianoPedals}">
+        <Setter Property="Height" Value="18"/>
+        <Setter Property="MinWidth" Value="40"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.KeyBorder}}"/>
+        <Setter Property="PedalBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.PedalBody}}"/>
+        <Setter Property="LitBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.PedalLit}}"/>
+    </Style>
+
+    <Style TargetType="{x:Type c:MidiActivityMonitor}">
+        <Setter Property="Background" Value="{DynamicResource {x:Static s:DawSkinKeys.PanelBackground}}"/>
+        <Setter Property="Foreground" Value="{DynamicResource {x:Static s:DawSkinKeys.TextDim}}"/>
+        <Setter Property="NoteBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.ActivityNote}}"/>
+        <Setter Property="ControlBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.ActivityControl}}"/>
+        <Setter Property="LedOffBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.ActivityOff}}"/>
+        <Setter Property="AlternateRowBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.ActivityRowAlt}}"/>
+        <Setter Property="TickBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.ScaleTick}}"/>
+        <Setter Property="FontFamily" Value="{DynamicResource {x:Static s:DawSkinKeys.FontFamily}}"/>
+        <Setter Property="FontSize" Value="10"/>
+        <Style.Triggers>
+            <Trigger Property="Layout" Value="Compact">
+                <Setter Property="Background" Value="{x:Null}"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style TargetType="{x:Type c:ControllerLane}">
+        <Setter Property="MinHeight" Value="40"/>
+        <Setter Property="Height" Value="100"/>
+        <Setter Property="Background" Value="{DynamicResource {x:Static s:DawSkinKeys.GridBackground}}"/>
+        <Setter Property="HeaderBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.RulerBackground}}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.PanelBorder}}"/>
+        <Setter Property="Foreground" Value="{DynamicResource {x:Static s:DawSkinKeys.RulerText}}"/>
+        <Setter Property="GridBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.GridBarLine}}"/>
+        <Setter Property="ValueBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.LaneValue}}"/>
+        <Setter Property="FillBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.LaneFill}}"/>
+        <Setter Property="PlayheadBrush" Value="{DynamicResource {x:Static s:DawSkinKeys.Playhead}}"/>
+        <Setter Property="FontFamily" Value="{DynamicResource {x:Static s:DawSkinKeys.FontFamily}}"/>
+        <Setter Property="FontSize" Value="10"/>
+        <Setter Property="Cursor" Value="Pen"/>
+        <Setter Property="FocusVisualStyle" Value="{DynamicResource {x:Static s:DawStyleKeys.FocusVisual}}"/>
+        <!-- Mouse-only editor: focusable for its own shortcuts, but not a Tab stop. -->
+        <Setter Property="IsTabStop" Value="False"/>
+    </Style>
+</ResourceDictionary>

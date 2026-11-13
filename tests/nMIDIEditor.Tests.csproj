@@ -20,6 +20,7 @@
     <Compile Include="..\Theory\NoteHelper.cs" Link="Theory\NoteHelper.cs" />
     <Compile Include="..\Theory\PianoFingering.cs" Link="Theory\PianoFingering.cs" />
     <Compile Include="..\Model\Pedals.cs" Link="Model\Pedals.cs" />
+    <Compile Include="..\Model\MixerChannel.cs" Link="Model\MixerChannel.cs" />
   </ItemGroup>
 
   <ItemGroup>

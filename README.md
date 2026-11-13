@@ -252,6 +252,25 @@ again (one edit in a part of 3,500 notes takes about 15 ms).
   - A list of bars with their differences (double-click to go there), **Show differences** to outline
     them in red in the piano roll, and **Previous** / **Next** to step through them.
 
+## Mixer
+
+The **Mixer** button opens a mixer with one channel strip per track and a master strip:
+
+- **R** makes the track the edited (and recorded) track; clicking the coloured name does the same.
+- **M** and **S** mute and solo, the same as in the track list (right-click: only this track).
+- **Pan** and four effect knobs: **Reverb** (CC 91), **Chorus** (CC 93), **Delay** (CC 94, GS and XG synths)
+  and **Bright** (filter cutoff, CC 74).
+- A **volume fader** (CC 7) with a dB scale and an activity meter.
+- **↺** gives a strip back to the song; the master strip has **Reset all**, **Clear M / S**, a master mute and a
+  master fader that scales every track's volume.
+
+Each control shows the song's value at the playhead and moves with it while the song plays. Once you move a
+control, the mixer's value replaces the song's events for that controller until you reset the strip. Mixer
+settings are not saved in the MIDI file.
+
+**Pause main view** in the Lanes window stops drawing the main window's piano roll, playhead and keyboard while
+you work in the Lanes window, to save CPU. The main window catches up as soon as you click it.
+
 ## Player features (from nMIDI)
 
 - **Track lanes window** (the **Lanes** button): every track in its own lane, with resizable lanes
@@ -326,6 +345,7 @@ Publishing a release on GitHub (for example with the tag `v2.3.0`) makes the Git
 | `Theory/` | Note names, and the bridge to the fingering engine |
 | `Themes/` | The four themes and the theme switch |
 | `Assets/` | App and window icons |
+| `Controls/` | nMIDI.Controls, the knobs, faders, meters and buttons of the mixer (its own project) |
 | `tests/` | Tests for the song model |
 | `lib/NinePatchWpf/` | Prebuilt NinePatchWpf, which draws the piano roll |
 | `lib/nPianoFingering/` | Prebuilt nPianoFingering engine (hand separation and fingering) |
@@ -335,8 +355,9 @@ commands, shortcuts, saving), `MainWindow.Lanes.cs` (controller lane, note field
 (note processing), `MainWindow.Song.cs` (loop, ruler, tracks, song commands) and `MainWindow.Record.cs`
 (MIDI input, recording, step input, metronome, recent files, autosave, export) and `MainWindow.Settings.cs`
 (settings menu and window, theme switch, remembered layout), `MainWindow.Fingering.cs` (fingering modes,
-pairs, corrections, fingers on notes), `MainWindow.Wheels.cs` and `MainWindow.Pedals.cs` (wheels and pedals)
-and `MainWindow.Layout.cs` (top bar and toolbar at narrow widths).
+pairs, corrections, fingers on notes), `MainWindow.Wheels.cs` and `MainWindow.Pedals.cs` (wheels and pedals),
+`MainWindow.Mixer.cs` (mixer link, pausing the note view) and `MainWindow.Layout.cs` (top bar and toolbar at
+narrow widths). `MixerWindow.xaml` is the mixer, built from the `nMIDI.Controls` library.
 `EventListWindow.cs`, `FingeringReportWindow.cs` and `FormDialog.cs` are built in code. `Model/Fingering.cs`
 fingers the song in the background, and `Model/FingeringReport.cs` computes the report.
 

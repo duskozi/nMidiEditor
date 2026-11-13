@@ -35,6 +35,10 @@ namespace nMIDI.Model
         public event PropertyChangedEventHandler? PropertyChanged;
 
         public SongTrack Track { get; }
+
+        /// <summary>Volume, pan and effect sends of the track in the mixer window.</summary>
+        public MixerChannel Mix { get; } = new();
+
         public int Index => Track.Index;
         public int Number => Track.Index + 1;
         public string Name => Track.Name;
