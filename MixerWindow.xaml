@@ -16,7 +16,8 @@
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <!-- Colours of the knobs, faders and meters. -->
+                <!-- Colours of the knobs, faders and meters. MixerWindow.ApplyTheme puts the app theme's colours over
+                     the panels, text, value displays and accent. -->
                 <ResourceDictionary Source="pack://application:,,,/nMIDI.Controls;component/Skins/Graphite.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
@@ -27,6 +28,7 @@
                 <Setter Property="Minimum" Value="0"/>
                 <Setter Property="Maximum" Value="127"/>
                 <Setter Property="Step" Value="1"/>
+                <Setter Property="Foreground" Value="{DynamicResource TextDim}"/>
                 <Setter Property="ValueFormatter" Value="{x:Static ncp:ValueFormatters.Integer}"/>
             </Style>
 
@@ -84,7 +86,7 @@
                         </UniformGrid>
 
                         <nc:Knob Grid.Row="2" Width="54" Height="66" Margin="0,8,0,0" Label="PAN" IsBipolar="True"
-                                 Minimum="-1" Maximum="1" DefaultValue="0" ArcBrush="{Binding Brush}"
+                                 Minimum="-1" Maximum="1" DefaultValue="0" ArcBrush="{Binding Brush}" Foreground="{DynamicResource TextDim}"
                                  ValueFormatter="{x:Static ncp:ValueFormatters.Pan}"
                                  Value="{Binding Mix.Pan, Mode=TwoWay}"
                                  ToolTip="Pan (CC 10). Double-click: centre"/>

@@ -1,3 +1,4 @@
+using nMIDI.Controls.Skinning;
 using nMIDI.Model;
 using System;
 using System.Collections.Generic;
@@ -31,8 +32,39 @@ namespace nMIDI
             Owner = main;
             strips.ItemsSource = main.Tracks;
             faderMaster.Value = Math.Max(-60, 40 * Math.Log10(Math.Max(1e-6, main.Player.MasterVolume)));
+            ApplyTheme();
+            ThemeManager.Changed += ApplyTheme;
+            Closed += (_, _) => ThemeManager.Changed -= ApplyTheme;
             PreviewKeyDown += (s, e) => { if (Keyboard.FocusedElement is not System.Windows.Controls.TextBox) _main.OnPreviewKeyDown(s, e); };
             UpdateFrame();
+        }
+
+        // Skin colours that follow the app theme: panels, text, value displays and the accent. The knobs, faders,
+        // buttons and meter backgrounds keep the dark Graphite look, like the controls of a hardware mixer.
+        private static readonly (object SkinKey, string ThemeKey)[] ThemedSkin =
+        {
+            (DawSkinKeys.PanelBackground, "Bg1"),
+            (DawSkinKeys.PanelRaised, "Bg2"),
+            (DawSkinKeys.PanelBorder, "Line"),
+            (DawSkinKeys.Text, "Text"),
+            (DawSkinKeys.ScaleText, "TextDim"),
+            (DawSkinKeys.ScaleTick, "Line"),
+            (DawSkinKeys.KnobTrack, "Line"),
+            (DawSkinKeys.Accent, "Accent"),
+            (DawSkinKeys.Focus, "AccentSoft"),
+            (DawSkinKeys.FaderFill, "AccentSoft"),
+            (DawSkinKeys.FaderThumbLine, "Accent"),
+            (DawSkinKeys.MeterSafe, "Accent"),
+            (DawSkinKeys.LcdBackground, "Bg0"),
+            (DawSkinKeys.LcdBorder, "Line"),
+            (DawSkinKeys.LcdText, "Accent"),
+        };
+
+        /// <summary>Takes the current app theme's colours into the mixer's skin.</summary>
+        private void ApplyTheme()
+        {
+            foreach (var (skinKey, themeKey) in ThemedSkin)
+                if (Application.Current.TryFindResource(themeKey) is { } brush) Resources[skinKey] = brush;
         }
 
         /// <summary>Called by the main window every frame: follow the song's values at the playhead.</summary>

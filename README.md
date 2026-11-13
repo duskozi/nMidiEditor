@@ -266,7 +266,8 @@ The **Mixer** button opens a mixer with one channel strip per track and a master
 
 Each control shows the song's value at the playhead and moves with it while the song plays. Once you move a
 control, the mixer's value replaces the song's events for that controller until you reset the strip. Mixer
-settings are not saved in the MIDI file.
+settings are not saved in the MIDI file. The mixer's panels, labels, displays and meters follow the app theme; the
+knobs, faders and buttons keep a dark hardware look in every theme.
 
 **Pause main view** in the Lanes window stops drawing the main window's piano roll, playhead and keyboard while
 you work in the Lanes window, to save CPU. The main window catches up as soon as you click it.

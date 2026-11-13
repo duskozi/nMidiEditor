@@ -7,6 +7,8 @@
 - The knobs, faders and meters come from the nMIDI.Controls library, now part of the repository.
 - "Pause main view" in the Lanes window: the main window's piano roll stops redrawing while you work in the
   Lanes window, to save CPU.
+- The mixer follows the app theme: panels, labels, value displays, meters and the accent take the theme's
+  colours, while the knobs, faders and buttons keep their dark hardware look.
 - Mixer window icon.
 
 ## 2.3 (2026-11-13)
