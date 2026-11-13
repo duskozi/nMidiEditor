@@ -33,7 +33,7 @@
     <PackageReference Include="Melanchall.DryWetMidi" Version="7.1.0" />
   </ItemGroup>
 
-  <!-- Window icons. tools/make-icons.py draws them. -->
+  <!-- App and window icons. -->
   <ItemGroup>
     <Resource Include="Assets\*.ico" />
   </ItemGroup>

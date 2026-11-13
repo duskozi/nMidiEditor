@@ -312,7 +312,7 @@ A release build for distribution:
 dotnet publish nMIDIEditor.csproj -c Release -r win-x64 --self-contained false -o publish
 ```
 
-Pushing a tag such as `v2.3.0` makes the GitHub Actions workflow build, test and attach the zip to a release.
+Publishing a release on GitHub (for example with the tag `v2.3.0`) makes the GitHub Actions workflow build, test and attach the zip to it.
 
 ## Project layout
 
@@ -325,7 +325,7 @@ Pushing a tag such as `v2.3.0` makes the GitHub Actions workflow build, test and
 | `Piano/` | The on-screen piano keyboard, the pitch and modulation wheels and the pedals |
 | `Theory/` | Note names, and the bridge to the fingering engine |
 | `Themes/` | The four themes and the theme switch |
-| `Assets/` | App and window icons (drawn by `tools/make-icons.py`) |
+| `Assets/` | App and window icons |
 | `tests/` | Tests for the song model |
 | `lib/NinePatchWpf/` | Prebuilt NinePatchWpf, which draws the piano roll |
 | `lib/nPianoFingering/` | Prebuilt nPianoFingering engine (hand separation and fingering) |

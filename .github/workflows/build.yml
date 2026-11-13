@@ -3,7 +3,8 @@ name: Build
 on:
   push:
     branches: [ main ]
-    tags: [ 'v*' ]
+  release:
+    types: [ published ]
   pull_request:
   workflow_dispatch:
 
@@ -35,7 +36,7 @@ jobs:
         run: |
           Remove-Item publish/nMIDIEditor/*.pdb -ErrorAction SilentlyContinue
           Copy-Item README.md, LICENSE, CHANGELOG.md publish/nMIDIEditor/
-          $version = if ($env:GITHUB_REF_TYPE -eq 'tag') { $env:GITHUB_REF_NAME.TrimStart('v') } else { 'dev' }
+          $version = if ('${{ github.event_name }}' -eq 'release') { '${{ github.event.release.tag_name }}'.TrimStart('v', 'V') } else { 'dev' }
           Compress-Archive -Path publish/nMIDIEditor -DestinationPath "publish/nMIDIEditor-$version-win-x64.zip"
 
       - uses: actions/upload-artifact@v4
@@ -43,9 +44,9 @@ jobs:
           name: nMIDIEditor-win-x64
           path: publish/*.zip
 
-      - name: Release
-        if: startsWith(github.ref, 'refs/tags/v')
+      - name: Attach to release
+        if: github.event_name == 'release'
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ github.event.release.tag_name }}
           files: publish/*.zip
-          body_path: docs/release-notes.md
