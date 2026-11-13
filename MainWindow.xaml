@@ -5,6 +5,7 @@
         xmlns:roll="clr-namespace:nMIDI.PianoRoll"
         xmlns:kb="clr-namespace:nMIDI.Piano"
         Title="nMIDI Editor"
+        Icon="/Assets/nMIDIEditor.ico"
         Width="1360" Height="900" MinWidth="980" MinHeight="600"
         Background="{DynamicResource Bg0}"
         Foreground="{DynamicResource Text}"

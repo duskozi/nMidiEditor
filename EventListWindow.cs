@@ -63,6 +63,7 @@ namespace nMIDI
             _main = main;
             Owner = main;
             Title = "Event list";
+            Icon = AppIcons.EventList;
             Width = 820;
             Height = 600;
             MinWidth = 520;

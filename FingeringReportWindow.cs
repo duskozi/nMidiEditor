@@ -43,6 +43,7 @@ namespace nMIDI
             _main = main;
             Owner = main;
             Title = "Fingering report";
+            Icon = AppIcons.FingeringReport;
             Width = 760;
             Height = 640;
             MinWidth = 560;

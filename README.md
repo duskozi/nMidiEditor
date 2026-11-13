@@ -325,6 +325,7 @@ Pushing a tag such as `v2.3.0` makes the GitHub Actions workflow build, test and
 | `Piano/` | The on-screen piano keyboard, the pitch and modulation wheels and the pedals |
 | `Theory/` | Note names, and the bridge to the fingering engine |
 | `Themes/` | The four themes and the theme switch |
+| `Assets/` | App and window icons (drawn by `tools/make-icons.py`) |
 | `tests/` | Tests for the song model |
 | `lib/NinePatchWpf/` | Prebuilt NinePatchWpf, which draws the piano roll |
 | `lib/nPianoFingering/` | Prebuilt nPianoFingering engine (hand separation and fingering) |

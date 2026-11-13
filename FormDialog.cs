@@ -26,6 +26,7 @@ namespace nMIDI
         {
             Owner = owner;
             Title = title;
+            Icon = AppIcons.Dialog;
             WindowStartupLocation = WindowStartupLocation.CenterOwner;
             ResizeMode = ResizeMode.NoResize;
             SizeToContent = SizeToContent.WidthAndHeight;

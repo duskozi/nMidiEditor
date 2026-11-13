@@ -16,6 +16,8 @@
 - Four themes: Studio, Light classic, Retro hardware and High contrast (replacing Classic). The piano
   roll, ruler and lanes follow the theme.
 - The All outputs box shows the default MIDI output as soon as the editor opens.
+- App icon, and icons for the Track lanes, Event list and Fingering report windows and the dialogs.
+- Scroll bars in lists, drop-downs and the smaller windows follow the theme.
 - Fixed: buttons in the top bar and edit toolbar were hidden in a normal-size window; the time and
   tempo displays shifted sideways; ruler flags overlapped.
 
