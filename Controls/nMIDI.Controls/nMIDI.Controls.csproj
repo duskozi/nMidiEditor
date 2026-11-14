@@ -23,7 +23,7 @@
   <!-- NuGet package -->
   <PropertyGroup>
     <PackageId>nMIDI.Controls</PackageId>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageLicenseExpression>GPL-3.0-only</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>wpf;midi;daw;audio;controls;knob;fader;meter;piano-roll;piano;mixer</PackageTags>
     <PackageReleaseNotes>First release as nMIDI.Controls (formerly DawControls 1.1.1): nine-patch rendering, Graphite skin, keyboard focus on every control, vector fallback without the native renderer.</PackageReleaseNotes>

@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.4.1 (2026-11-14)
+
+- Microsoft Store package: an MSIX packaging project (`nMIDIEditor.Store.sln`) with tile images, a self-contained
+  build and "Open with" for .mid and .midi files.
+
 ## 2.4 (2026-11-13)
 
 - Mixer window: per track record, mute, solo, pan, reverb, chorus, delay and brightness knobs, a volume fader
