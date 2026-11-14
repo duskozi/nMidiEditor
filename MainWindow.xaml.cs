@@ -50,7 +50,7 @@ namespace nMIDI
 
             pianoKeys.Viewer = viewer;
             keyboard.NoteDown += OnAuditionDown;
-            keyboard.NoteUp += OnAuditionUp;
+            keyboard.NoteUp += OnAuditionUp;           
             ruler.Viewer = viewer;
             ruler.Seek += (_, tick) => SeekTo(tick);
 

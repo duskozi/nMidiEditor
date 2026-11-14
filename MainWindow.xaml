@@ -389,7 +389,7 @@
                     <ComboBox x:Name="cmbLength" Width="92" Height="24" Focusable="False"
                               ToolTip="Length of new notes. 'Last' uses the length of the note you drew or resized last."/>
                     <TextBlock x:Name="capVelocity" Text="VELOCITY" Style="{DynamicResource CapsLabel}" Margin="10,0,6,0"/>
-                    <TextBox x:Name="txtVelocity" Width="38" Height="24" Text="100" Style="{DynamicResource DarkTextBox}"
+                    <TextBox x:Name="txtVelocity" Width="40" Height="24" Text="100" Style="{DynamicResource DarkTextBox}"
                              LostFocus="OnVelocityCommitted" KeyDown="OnVelocityKeyDown"
                              ToolTip="Velocity of new notes (1–127). Clicking a note picks up its velocity."/>
 
@@ -586,7 +586,7 @@
             </Border>
             <kb:WheelPanel x:Name="wheels" DockPanel.Dock="Left"/>
             <kb:PedalPanel x:Name="pedals" DockPanel.Dock="Right"/>
-            <kb:PianoKeyboard x:Name="keyboard" ToolTip="Click or drag to play notes"/>
+            <kb:PianoKeyboard x:Name="keyboard"  ToolTip="Click or drag to play notes" />
         </DockPanel>
 
         <!-- Status bar -->
