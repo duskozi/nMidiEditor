@@ -48,11 +48,15 @@ namespace nMIDI
             if (width <= 0) return;
 
             // Top bar: the first stage at which buttons + transport + view options + a little file name fit.
+            // Going back to a roomier stage needs some extra room, so a width right at the limit doesn't make
+            // the bar switch back and forth while the window is resized.
+            int current = _topStage;
             int stage = 0;
             for (; stage < 3; stage++)
             {
                 SetTopStage(stage);
                 double need = Desired(pnlTopLeft) + Desired(bdTransport) + Desired(pnlTopRight) + 150;
+                if (current >= 0 && stage < current) need += Hysteresis;
                 if (need <= width) break;
             }
             SetTopStage(stage);
@@ -61,11 +65,14 @@ namespace nMIDI
             double editWidth = pnlEdit.ActualWidth;
             if (editWidth > 0)
             {
+                int currentEdit = _editStage;
                 int e = 0;
                 for (; e < 2; e++)
                 {
                     SetEditStage(e);
-                    if (DesiredRow(pnlEditTools) + 180 <= editWidth) break;
+                    double need = DesiredRow(pnlEditTools) + 180;
+                    if (currentEdit >= 0 && e < currentEdit) need += Hysteresis;
+                    if (need <= editWidth) break;
                 }
                 SetEditStage(e);
             }
@@ -78,8 +85,22 @@ namespace nMIDI
             for (int i = 0; i < n; i++) InvalidateTree(System.Windows.Media.VisualTreeHelper.GetChild(root, i));
         }
 
+        private const double Hysteresis = 24;
+
+        /// <summary>
+        /// Marks an element and everything inside it for measuring. Measure() on its own returns the size cached
+        /// before a label was hidden or shown, because WPF only passes such changes up during the next layout pass.
+        /// </summary>
+        private static void InvalidateMeasureTree(DependencyObject root)
+        {
+            if (root is UIElement ui) ui.InvalidateMeasure();
+            int n = System.Windows.Media.VisualTreeHelper.GetChildrenCount(root);
+            for (int i = 0; i < n; i++) InvalidateMeasureTree(System.Windows.Media.VisualTreeHelper.GetChild(root, i));
+        }
+
         private static double Desired(FrameworkElement element)
         {
+            InvalidateMeasureTree(element);
             element.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
             return element.DesiredSize.Width + element.Margin.Left + element.Margin.Right;
         }
@@ -91,6 +112,7 @@ namespace nMIDI
             foreach (UIElement child in panel.Children)
             {
                 if (child.Visibility == Visibility.Collapsed) continue;
+                InvalidateMeasureTree(child);
                 child.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
                 sum += child.DesiredSize.Width;
             }

@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.4.2 (2026-11-14)
+
+- Fixed the top bar switching back and forth between one and two rows, which made the main window jump
+  while it was resized.
+
 ## 2.4.1 (2026-11-14)
 
 - Microsoft Store package: an MSIX packaging project (`nMIDIEditor.Store.sln`) with tile images, a self-contained
