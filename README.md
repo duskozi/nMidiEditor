@@ -314,30 +314,20 @@ You need the .NET 10 SDK (or Visual Studio 2026 with the .NET desktop workload).
 
 ```
 git clone https://github.com/duskozi/nMidiEditor.git
-cd nMIDIEditor
+cd nMidiEditor
 dotnet build nMIDIEditor.sln -c Release
 ```
 
-The program ends up in `bin/Release/net10.0-windows/nMIDIEditor.exe`. Open `nMIDIEditor.sln` in
-Visual Studio or Rider to work on it.
+The program ends up in `bin/Release/net10.0-windows/nMIDIEditor.exe`. Open `nMIDIEditor.sln` in Visual Studio or
+Rider to work on it.
 
-The song model (loading, editing, undo, saving, fingering, pedals) has tests that run on any OS,
-so they also run on Linux or macOS where the WPF app itself can't be built without
-`-p:EnableWindowsTargeting=true`:
+Tests for the song model (loading, editing, undo, saving, fingering, pedals):
 
 ```
 dotnet test tests/nMIDIEditor.Tests.csproj
 ```
 
-A release build for distribution:
-
-```
-dotnet publish nMIDIEditor.csproj -c Release -r win-x64 --self-contained false -o publish
-```
-
-Publishing a release on GitHub (for example with the tag `v2.4.1`) makes the GitHub Actions workflow build, test and attach the zip to it.
-
-The Microsoft Store (MSIX) package is built separately; see [docs/store-package.md](docs/store-package.md).
+They run on any OS. On Linux or macOS, add `-p:EnableWindowsTargeting=true`.
 
 ## Project layout
 
