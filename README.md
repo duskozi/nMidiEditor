@@ -32,6 +32,9 @@ Get the latest `nMIDIEditor-<version>-win-x64.zip` from the
 `nMIDIEditor.exe`. You need Windows 10 or 11 (64-bit) and the
 [.NET 10 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/10.0).
 
+nMIDI Editor is also in the Microsoft Store (search for "nMIDI Editor"). The Store version installs and updates
+itself and doesn't need .NET.
+
 ## Editing
 
 The track you edit is highlighted in the track list and named in the **EDIT** bar. Click a track
@@ -334,21 +337,7 @@ dotnet publish nMIDIEditor.csproj -c Release -r win-x64 --self-contained false -
 
 Publishing a release on GitHub (for example with the tag `v2.4.1`) makes the GitHub Actions workflow build, test and attach the zip to it.
 
-### Microsoft Store package
-
-`nMIDIEditor.Store.sln` adds `Package/nMIDIEditor.Package.wapproj`, which packages the editor as MSIX for the
-Microsoft Store. It needs Visual Studio on Windows with the **MSIX Packaging Tools** component of the .NET desktop
-workload, so it is not part of `nMIDIEditor.sln` or the CI build.
-
-1. Open `nMIDIEditor.Store.sln` and set `nMIDIEditor.Package` as the startup project (F5 installs and runs the
-   package locally).
-2. Right-click it, then **Publish > Associate App with the Store**, and pick the name reserved in Partner Center.
-   This fills in the package identity in `Package.appxmanifest`.
-3. **Publish > Create App Packages > Microsoft Store**, x64, Release. Upload the `.msixupload` file in Partner Center.
-
-The package holds a self-contained build (`Properties/PublishProfiles/win-x64.pubxml`), so Store users don't need
-.NET installed. The Store signs the package. Raise the version in `Package.appxmanifest` together with
-`nMIDIEditor.csproj`; the Store wants the last number to be 0.
+The Microsoft Store (MSIX) package is built separately; see [docs/store-package.md](docs/store-package.md).
 
 ## Project layout
 

@@ -17,5 +17,13 @@ TestResults/
 Thumbs.db
 .DS_Store
 
+# Microsoft Store packaging: local Store association, signing certificates and package output.
+Package.StoreAssociation.xml
+*.pfx
+AppPackages/
+BundleArtifacts/
+*.msixupload
+*.appxupload
+
 # The prebuilt libraries in lib/ are kept on purpose.
 !lib/**/*.dll
