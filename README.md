@@ -32,8 +32,8 @@ Get the latest `nMIDIEditor-<version>-win-x64.zip` from the
 `nMIDIEditor.exe`. You need Windows 10 or 11 (64-bit) and the
 [.NET 10 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/10.0).
 
-nMIDI Editor is also in the Microsoft Store (search for "nMIDI Editor"). The Store version installs and updates
-itself and doesn't need .NET.
+nMIDI Editor is also in the [Microsoft Store](https://apps.microsoft.com/detail/9n9j9gpzx5lw). The Store version
+installs and updates itself and doesn't need .NET.
 
 ## Editing
 
