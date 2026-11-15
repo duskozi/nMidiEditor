@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Updated DryWetMIDI from 7.1.0 to 8.0.3.
+
 ## 2.4.2 (2026-11-14)
 
 - Fixed the top bar switching back and forth between one and two rows, which made the main window jump
