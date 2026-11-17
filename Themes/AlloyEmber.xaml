@@ -37,8 +37,8 @@
     <SolidColorBrush x:Key="StopBrush" Color="#36302A"/>
     <SolidColorBrush x:Key="RecordBrush" Color="#E8302A"/>
     <LinearGradientBrush x:Key="LcdBg" StartPoint="0,0" EndPoint="0,1">
-        <GradientStop Color="#FFC877" Offset="0"/>
-        <GradientStop Color="#8A3A05" Offset="1"/>
+        <GradientStop Color="#E8892A" Offset="0"/>
+        <GradientStop Color="#7A3204" Offset="1"/>
     </LinearGradientBrush>
     <SolidColorBrush x:Key="LcdText" Color="#FFF6E8"/>
     <SolidColorBrush x:Key="ActiveRowBrush" Color="#CFE6FF"/>
