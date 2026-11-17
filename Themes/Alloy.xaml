@@ -2,7 +2,7 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
-    <!-- Alloy theme: lit brushed silver, bevelled metal buttons, dark rubber knobs, blue glass LCD and orange for anything switched on. -->
+    <!-- Alloy theme: lit brushed silver, bevelled metal buttons, dark rubber knobs, dark LCD and orange for anything switched on. -->
 
     <!-- Palette -->
 
@@ -37,10 +37,10 @@
     <SolidColorBrush x:Key="StopBrush" Color="#2B3035"/>
     <SolidColorBrush x:Key="RecordBrush" Color="#E8302A"/>
     <LinearGradientBrush x:Key="LcdBg" StartPoint="0,0" EndPoint="0,1">
-        <GradientStop Color="#2F8CF0" Offset="0"/>
-        <GradientStop Color="#0A3388" Offset="1"/>
+        <GradientStop Color="#15171A" Offset="0"/>
+        <GradientStop Color="#24272C" Offset="1"/>
     </LinearGradientBrush>
-    <SolidColorBrush x:Key="LcdText" Color="#F1F9FF"/>
+    <SolidColorBrush x:Key="LcdText" Color="#9ED8FF"/>
     <SolidColorBrush x:Key="ActiveRowBrush" Color="#FFE2BA"/>
     <LinearGradientBrush x:Key="ToggleOnBg" StartPoint="0,0" EndPoint="0,1">
         <GradientStop Color="#FFC56A" Offset="0"/>

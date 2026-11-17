@@ -2,7 +2,7 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
-    <!-- Alloy ember theme: champagne metal, bevelled buttons, amber glass LCD, blue for selection. -->
+    <!-- Alloy ember theme: champagne metal, bevelled buttons, amber LCD, blue for selection. -->
 
     <!-- Palette -->
 
@@ -37,10 +37,10 @@
     <SolidColorBrush x:Key="StopBrush" Color="#36302A"/>
     <SolidColorBrush x:Key="RecordBrush" Color="#E8302A"/>
     <LinearGradientBrush x:Key="LcdBg" StartPoint="0,0" EndPoint="0,1">
-        <GradientStop Color="#E8892A" Offset="0"/>
-        <GradientStop Color="#7A3204" Offset="1"/>
+        <GradientStop Color="#17130F" Offset="0"/>
+        <GradientStop Color="#26201A" Offset="1"/>
     </LinearGradientBrush>
-    <SolidColorBrush x:Key="LcdText" Color="#FFF6E8"/>
+    <SolidColorBrush x:Key="LcdText" Color="#FFB13B"/>
     <SolidColorBrush x:Key="ActiveRowBrush" Color="#CFE6FF"/>
     <LinearGradientBrush x:Key="ToggleOnBg" StartPoint="0,0" EndPoint="0,1">
         <GradientStop Color="#FFC56A" Offset="0"/>

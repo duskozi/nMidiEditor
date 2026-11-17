@@ -2,7 +2,7 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
-    <!-- Alloy night theme: dark anodised metal with the same light and depth, blue glass LCD, orange accents. -->
+    <!-- Alloy night theme: dark anodised metal with the same light and depth, dark LCD, orange accents. -->
 
     <!-- Palette -->
 
@@ -37,10 +37,10 @@
     <SolidColorBrush x:Key="StopBrush" Color="#E3E7EC"/>
     <SolidColorBrush x:Key="RecordBrush" Color="#FF3B2F"/>
     <LinearGradientBrush x:Key="LcdBg" StartPoint="0,0" EndPoint="0,1">
-        <GradientStop Color="#2690E0" Offset="0"/>
-        <GradientStop Color="#062C66" Offset="1"/>
+        <GradientStop Color="#0E1013" Offset="0"/>
+        <GradientStop Color="#1A1D21" Offset="1"/>
     </LinearGradientBrush>
-    <SolidColorBrush x:Key="LcdText" Color="#EFFAFF"/>
+    <SolidColorBrush x:Key="LcdText" Color="#9ED8FF"/>
     <SolidColorBrush x:Key="ActiveRowBrush" Color="#2A3442"/>
     <LinearGradientBrush x:Key="ToggleOnBg" StartPoint="0,0" EndPoint="0,1">
         <GradientStop Color="#FFC56A" Offset="0"/>

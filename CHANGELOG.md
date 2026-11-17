@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- Three new themes in a hardware style: *Alloy* (lit brushed silver with a blue glass LCD), *Alloy night*
+- Three new themes in a hardware style: *Alloy* (lit brushed silver with a dark LCD), *Alloy night*
   (dark metal) and *Alloy ember* (champagne metal with an amber LCD). The piano keyboard keeps its look.
 - The mixer's displays use the theme's LCD colours, like the time display in the top bar.
 - Updated DryWetMIDI from 7.1.0 to 8.0.3.
