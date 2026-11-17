@@ -144,7 +144,7 @@ namespace nMIDI
             var d = new FormDialog(this, "Settings",
                 "Changes apply when you press OK. The layout (keyboard and lane height, toolbar choices) is also remembered when you close the editor.");
             d.AddHeading("Appearance");
-            var theme = d.AddChoice("Theme", ThemeManager.Names, ThemeManager.Current, "Studio, Light classic, Retro hardware or High contrast");
+            var theme = d.AddChoice("Theme", ThemeManager.Names, ThemeManager.Current, "Studio, Light classic, Retro hardware, High contrast, Alloy, Alloy night or Alloy ember");
 
             d.AddHeading("MIDI");
             var output = d.AddChoice("Default output", outputs, s.OutputDevice != null && outputs.Contains(s.OutputDevice) ? s.OutputDevice : AutomaticPort);

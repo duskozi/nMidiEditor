@@ -12,7 +12,7 @@ namespace nMIDI
     public static class ThemeManager
     {
         /// <summary>The themes, by display name; the file in Themes/ has the name without spaces.</summary>
-        public static readonly string[] Names = ["Studio", "Light classic", "Retro hardware", "High contrast"];
+        public static readonly string[] Names = ["Studio", "Light classic", "Retro hardware", "High contrast", "Alloy", "Alloy night", "Alloy ember"];
 
         public static string Current { get; private set; } = "Studio";
 

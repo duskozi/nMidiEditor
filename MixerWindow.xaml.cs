@@ -55,9 +55,9 @@ namespace nMIDI
             (DawSkinKeys.FaderFill, "AccentSoft"),
             (DawSkinKeys.FaderThumbLine, "Accent"),
             (DawSkinKeys.MeterSafe, "Accent"),
-            (DawSkinKeys.LcdBackground, "Bg0"),
+            (DawSkinKeys.LcdBackground, "LcdBg"),
             (DawSkinKeys.LcdBorder, "Line"),
-            (DawSkinKeys.LcdText, "Accent"),
+            (DawSkinKeys.LcdText, "LcdText"),
         };
 
         /// <summary>Takes the current app theme's colours into the mixer's skin.</summary>

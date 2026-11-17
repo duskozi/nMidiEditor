@@ -13,7 +13,7 @@ output port, speed, follow mode and panic.
 
 ### Themes
 
-Four themes, switched from **Settings ▸ Theme**:
+Seven themes, switched from **Settings ▸ Theme**. Four of them:
 
 | Studio | Light classic |
 | --- | --- |
@@ -204,6 +204,10 @@ The gear button at the right of the top bar opens the settings menu: **Settings�
   - *Light classic*: light grey panels, raised gradient buttons, white fields and a light piano roll.
   - *Retro hardware*: charcoal and brushed metal, an amber LCD, square bevelled buttons and orange accents.
   - *High contrast*: black, white text, yellow selection and hover, thick borders.
+  - *Alloy*: lit brushed silver, bevelled metal buttons, dark knobs, a blue glass LCD and orange for
+    anything switched on.
+  - *Alloy night*: the same hardware look on dark anodised metal.
+  - *Alloy ember*: champagne metal, an amber glass LCD and blue for selection.
 
   The theme changes at once and is remembered.
 - **Settings…**: default MIDI output (optionally applied to every track of the open song), default
