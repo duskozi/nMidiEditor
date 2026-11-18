@@ -584,7 +584,12 @@ namespace nMIDI
         private void OnFrame(object? sender, EventArgs e)
         {
             RecordFrame();
-            if (_song == null) return;
+            if (_song == null)
+            {
+                // No song: still light the key clicked on the keyboard panel.
+                UpdateKeyboard();
+                return;
+            }
             bool playing = _player.State == PlayerState.Playing;
             UpdateNoteViewPause();
 
