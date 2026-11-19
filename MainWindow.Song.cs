@@ -344,6 +344,8 @@ namespace nMIDI
             }
             yield return go;
             yield return Item("Tempo lane", "", true, () => ShowLane(new LaneMode(LaneKind.Tempo)));
+            yield return new Separator();
+            yield return Item("Export audio (WAV / MP3)…", "", _song != null && !_exportingAudio, ExportAudio);
         }
 
         private void GoTo(long tick)

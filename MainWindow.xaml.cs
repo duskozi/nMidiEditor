@@ -822,6 +822,11 @@ namespace nMIDI
         {
             if (Keyboard.FocusedElement is TextBox) return;
             if (Keyboard.FocusedElement is ComboBoxItem || Keyboard.FocusedElement is ComboBox { IsDropDownOpen: true }) return;
+            if (e.Key == Key.Escape && CancelAudioExport())
+            {
+                e.Handled = true;
+                return;
+            }
             if (HandleEditKey(e))
             {
                 e.Handled = true;

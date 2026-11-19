@@ -50,6 +50,10 @@ namespace nMIDI
         public int FingersOnNotes { get; set; } = 1;
         public bool SaveFingering { get; set; } = true;
 
+        // Audio export
+        public string? SoundFontPath { get; set; }
+        public string AudioFormat { get; set; } = "MP3, 192 kbit/s";
+
         // Files
         public int AutosaveMinutes { get; set; } = 1;
         public bool ReopenLast { get; set; }
