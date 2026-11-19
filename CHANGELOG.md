@@ -2,6 +2,15 @@
 
 ## 2.5 (2026-11-19)
 
+- Practice mode: the **Edit / Practice** switch in the top bar (or F9) turns the window into a practice view with a
+  bigger keyboard. Choose the track and the hand (left, right or both); the editor plays everything else.
+  - **Wait for me**: the song stops at each note or chord until you have played its keys (in any order). The keys
+    to play pulse on the keyboard with their finger, turn green when pressed, a wrong key flashes red, and the
+    next step shows faintly so you can prepare.
+  - Without wait mode you play along in time: hits, misses, wrong keys and whether you are early or late.
+  - **Speed up each loop**: with a loop range, start slower (e.g. 60 %) and go a few percent faster each time
+    through, up to 100 %.
+  - A score for every run (and every time through the loop) in the practice bar.
 - Chord names: a strip along the top of the piano roll names the chords of the visible tracks beat by beat
   (broken chords and arpeggios too, passing notes are ignored), and the chord of the keys that sound now (the
   song, a clicked key or the MIDI input) shows above the keyboard. The **Chords** button above the keyboard turns

@@ -65,6 +65,7 @@ namespace nMIDI
             {
                 UpdateTransport();
                 ShowPosition(force: true);
+                OnPracticeSongEnd();
             }));
 
             OutputNames = new ObservableCollection<string>(_outputs.Names);
@@ -212,6 +213,7 @@ namespace nMIDI
             UpdateTransport();
             UpdateEditState();
             ShowPosition(force: true);
+            if (_practiceMode) RebuildPractice();
         }
 
         private string? _fallbackPort;
@@ -587,6 +589,7 @@ namespace nMIDI
         private void OnFrame(object? sender, EventArgs e)
         {
             RecordFrame();
+            PracticeFrame();
             if (_song == null)
             {
                 // No song: still light the key clicked on the keyboard panel.
@@ -674,6 +677,7 @@ namespace nMIDI
             }
 
             ShowLiveChord(keys?.Select(k => k.Note) ?? Enumerable.Empty<int>());
+            if (_practiceMode) signature = AddPracticeKeys(ref keys, signature);
 
             if (signature == _keyboardSignature || tglKeyboard.IsChecked != true) return;
             _keyboardSignature = signature;
@@ -733,6 +737,7 @@ namespace nMIDI
         // Clicking the keyboard plays the note on the edited track's port and channel.
         private void OnAuditionDown(int note)
         {
+            PracticePress(note);
             OnAuditionUp(_auditionNote);
             var vm = _activeVm ?? Tracks.FirstOrDefault();
             var device = _outputs.Get(vm?.OutputDevice ?? NoSongPort);
@@ -828,7 +833,7 @@ namespace nMIDI
                 e.Handled = true;
                 return;
             }
-            if (HandleEditKey(e))
+            if (_practiceMode ? HandlePracticeKey(e) : HandleEditKey(e))
             {
                 e.Handled = true;
                 return;
@@ -845,6 +850,9 @@ namespace nMIDI
                     break;
                 case Key.Escape:
                     Panic();
+                    break;
+                case Key.F9:
+                    SetPracticeMode(!_practiceMode);
                     break;
                 case Key.O when ctrl:
                     ShowOpenDialog();

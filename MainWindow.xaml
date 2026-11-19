@@ -53,6 +53,27 @@
                     <TextBlock VerticalAlignment="Center" FontSize="18" Margin="0,0,14,2">
                         <Run Text="n" Foreground="{DynamicResource Accent}" FontWeight="Bold"/><Run Text="MIDI" FontWeight="SemiBold"/><Run x:Name="runLogoEditor" Text=" Editor" FontWeight="Normal" Foreground="{DynamicResource TextDim}" FontSize="13"/>
                     </TextBlock>
+                    <!-- Edit / Practice -->
+                    <Border CornerRadius="5" Background="{DynamicResource Bg0}" BorderBrush="{DynamicResource Line}" BorderThickness="1"
+                            Padding="2" Margin="0,0,12,0" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal">
+                            <ToggleButton x:Name="tglModeEdit" Style="{DynamicResource ToolToggle}" Height="24" Padding="9,0" IsChecked="True"
+                                          Click="OnModeEdit" Focusable="False" ToolTip="Edit the song (F9 switches)">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE70F;" Style="{DynamicResource Icon}" FontSize="11" Margin="0,0,5,0"/>
+                                    <TextBlock x:Name="lblModeEdit" Text="Edit" FontSize="11"/>
+                                </StackPanel>
+                            </ToggleButton>
+                            <ToggleButton x:Name="tglModePractice" Style="{DynamicResource ToolToggle}" Height="24" Padding="9,0" Margin="2,0,0,0"
+                                          Click="OnModePractice" Focusable="False"
+                                          ToolTip="Practise the song: play a part on your MIDI keyboard while the editor plays the rest (F9 switches)">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE7BE;" Style="{DynamicResource Icon}" FontSize="11" Margin="0,0,5,0"/>
+                                    <TextBlock x:Name="lblModePractice" Text="Practice" FontSize="11"/>
+                                </StackPanel>
+                            </ToggleButton>
+                        </StackPanel>
+                    </Border>
                     <Button Style="{DynamicResource ToolButton}" Click="OnNew" Padding="8,4" ToolTip="New empty song (Ctrl+N)">
                         <TextBlock Text="&#xE8A5;" Style="{DynamicResource Icon}"/>
                     </Button>
@@ -242,7 +263,7 @@
         </Border>
 
         <!-- Track list -->
-        <Border Grid.Row="2" Background="{DynamicResource Bg1}" BorderBrush="{DynamicResource Line}" BorderThickness="0,0,0,1"
+        <Border x:Name="bdTrackList" Grid.Row="2" Background="{DynamicResource Bg1}" BorderBrush="{DynamicResource Line}" BorderThickness="0,0,0,1"
                 Visibility="{Binding IsChecked, ElementName=tglTracks, Converter={StaticResource BoolToVisibility}}">
             <ScrollViewer Style="{DynamicResource ThinScrollViewer}" MaxHeight="232" VerticalScrollBarVisibility="Auto">
                 <ItemsControl x:Name="lstTracks" ItemsSource="{Binding Tracks}">
@@ -336,7 +357,56 @@
         </Border>
 
         <!-- Edit toolbar -->
-        <Border Grid.Row="3" Background="{DynamicResource Bg1}" BorderBrush="{DynamicResource Line}" BorderThickness="0,0,0,1"
+        <!-- Practice bar (Practice mode, in place of the edit toolbar) -->
+        <Border x:Name="bdPracticeBar" Grid.Row="3" Visibility="Collapsed" Background="{DynamicResource Bg1}"
+                BorderBrush="{DynamicResource Line}" BorderThickness="0,0,0,1" Padding="10,5">
+            <DockPanel>
+                <TextBlock x:Name="txtPracticeScore" DockPanel.Dock="Right" VerticalAlignment="Center" Margin="12,0,4,0"
+                           FontWeight="SemiBold" Foreground="{DynamicResource Accent}" TextTrimming="CharacterEllipsis"/>
+                <WrapPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="PRACTICE" Style="{DynamicResource CapsLabel}" Foreground="{DynamicResource Text}" Margin="2,0,8,0" VerticalAlignment="Center"/>
+                    <ComboBox x:Name="cmbPracticeTrack" Width="190" Height="24" Focusable="False" SelectionChanged="OnPracticeTrackChanged"
+                              ToolTip="The track you play (with the track fingered as one part with it)"/>
+                    <TextBlock Text="HANDS" Style="{DynamicResource CapsLabel}" Margin="14,0,6,0" VerticalAlignment="Center"/>
+                    <ToggleButton x:Name="tglHandLeft" Style="{DynamicResource ToolToggle}" Height="26" Padding="8,2" Content="Left"
+                                  Click="OnPracticeHands" Focusable="False" ToolTip="Play the left hand; the editor plays the right hand and the other tracks"/>
+                    <ToggleButton x:Name="tglHandBoth" Style="{DynamicResource ToolToggle}" Height="26" Padding="8,2" Margin="3,0,0,0" Content="Both"
+                                  Click="OnPracticeHands" Focusable="False" IsChecked="True" ToolTip="Play both hands"/>
+                    <ToggleButton x:Name="tglHandRight" Style="{DynamicResource ToolToggle}" Height="26" Padding="8,2" Margin="3,0,0,0" Content="Right"
+                                  Click="OnPracticeHands" Focusable="False" ToolTip="Play the right hand; the editor plays the left hand and the other tracks"/>
+                    <ToggleButton x:Name="tglWait" Style="{DynamicResource ToolToggle}" Height="26" Padding="8,2" Margin="14,0,0,0" IsChecked="True"
+                                  Click="OnPracticeWait" Focusable="False"
+                                  ToolTip="Wait mode: the song stops at each note until you play the right keys. Off: play along in time and get a score">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE916;" Style="{DynamicResource Icon}" FontSize="11" Margin="0,0,5,0"/>
+                            <TextBlock Text="Wait for me" FontSize="11"/>
+                        </StackPanel>
+                    </ToggleButton>
+                    <ToggleButton x:Name="tglRamp" Style="{DynamicResource ToolToggle}" Height="26" Padding="8,2" Margin="14,0,0,0"
+                                  Click="OnPracticeRamp" Focusable="False"
+                                  ToolTip="With a loop range: start slower and speed up a little after each time through the loop, up to 100 %">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xEC48;" Style="{DynamicResource Icon}" FontSize="11" Margin="0,0,5,0"/>
+                            <TextBlock Text="Speed up each loop" FontSize="11"/>
+                        </StackPanel>
+                    </ToggleButton>
+                    <TextBlock Text="FROM" Style="{DynamicResource CapsLabel}" Margin="8,0,4,0" VerticalAlignment="Center"/>
+                    <TextBox x:Name="txtRampFrom" Width="36" Height="24" Text="60" Style="{DynamicResource DarkTextBox}" ToolTip="Speed of the first time through, in %"/>
+                    <TextBlock Text="%  +" Margin="4,0,4,0" VerticalAlignment="Center" Foreground="{DynamicResource TextDim}"/>
+                    <TextBox x:Name="txtRampStep" Width="30" Height="24" Text="5" Style="{DynamicResource DarkTextBox}" ToolTip="Speed added after each time through, in %"/>
+                    <TextBlock Text="%" Margin="4,0,0,0" VerticalAlignment="Center" Foreground="{DynamicResource TextDim}"/>
+                    <Button x:Name="btnPracticeStart" Style="{DynamicResource ToolButton}" Height="26" Padding="10,2" Margin="14,0,0,0"
+                            Click="OnPracticeStart" Focusable="False" ToolTip="Start from the beginning (of the loop range, when the loop is on). Enter does the same">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE768;" Style="{DynamicResource Icon}" FontSize="11" Margin="0,0,5,0"/>
+                            <TextBlock Text="Start" FontSize="11"/>
+                        </StackPanel>
+                    </Button>
+                </WrapPanel>
+            </DockPanel>
+        </Border>
+
+        <Border x:Name="bdEditBar" Grid.Row="3" Background="{DynamicResource Bg1}" BorderBrush="{DynamicResource Line}" BorderThickness="0,0,0,1"
                 Padding="8,4">
             <DockPanel x:Name="pnlEdit" LastChildFill="True">
                 <WrapPanel x:Name="pnlEditTools" Orientation="Horizontal" VerticalAlignment="Center" DockPanel.Dock="Left">
@@ -496,7 +566,7 @@
                       Background="{DynamicResource Bg0}" ResizeDirection="Rows" ShowsPreview="False"
                       ToolTip="Drag to resize the lane"/>
 
-        <DockPanel Grid.Row="6" Background="{DynamicResource Bg1}">
+        <DockPanel x:Name="pnlLane" Grid.Row="6" Background="{DynamicResource Bg1}">
             <Border DockPanel.Dock="Top" Height="30" Padding="8,0" BorderBrush="{DynamicResource Line}" BorderThickness="0,1,0,1">
                 <DockPanel>
                     <ToggleButton x:Name="tglLane" Style="{DynamicResource ExpanderToggle}" IsChecked="True" DockPanel.Dock="Left"

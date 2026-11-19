@@ -284,6 +284,27 @@ knobs, faders and buttons keep a dark hardware look in every theme.
 **Pause main view** in the Lanes window stops drawing the main window's piano roll, playhead and keyboard while
 you work in the Lanes window, to save CPU. The main window catches up as soon as you click it.
 
+## Practice mode
+
+The **Edit / Practice** switch at the left of the top bar (or **F9**) turns the window into a practice view: the
+track list, the editing tools and the lane are hidden, the keyboard gets bigger and the practice bar takes the
+place of the edit toolbar. Editing is off while you practise; switching back to Edit brings everything back.
+
+- **Track and hands**: choose the track you play (a piano on two tracks that is fingered as one part counts as
+  one) and **Left**, **Right** or **Both**. The hand of each note comes from the fingering (notes without one are
+  split at middle C). The editor plays everything else: the other hand and the other tracks.
+- **Start** (or **Enter**) starts from the beginning, or from the start of the loop range when the loop is on.
+  Play on your MIDI keyboard (choose it under MIDI input in the track bar), or click the keyboard panel.
+- **Wait for me**: the song stops just before each note or chord of your part until you have played its keys,
+  in any order. The keys to play pulse in the track colour with their finger number, turn green as you press
+  them, a wrong key flashes red, and the keys of the next step are shown faintly so you can prepare your hand.
+- With **Wait for me** off you play along in time; the keys light up as their notes come near, and each note
+  you play near its start counts as a hit.
+- **Speed up each loop**: with a loop range (right-click the ruler) and Loop on, the first time through plays at
+  the **From** speed and each time after that is a few percent faster, up to 100 %.
+- **Score**: the practice bar shows the score of the run as you play, and the last run's score: clean steps and
+  wrong keys in wait mode; hits, misses, wrong keys and early / late timing when playing along.
+
 ## Chord names
 
 The **Chords** button above the keyboard turns on:

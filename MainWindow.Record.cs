@@ -164,6 +164,11 @@ namespace nMIDI
             ShowInputOnPedals(e);
             if (e is NoteEvent held) TrackInputNote(held.NoteNumber, e is NoteOnEvent && held.Velocity > 0);
             if (_song == null) return;
+            if (_practiceMode)
+            {
+                if (e is NoteOnEvent press && press.Velocity > 0) PracticePress(press.NoteNumber);
+                return;
+            }
             if (e is NoteEvent note)
             {
                 bool down = e is NoteOnEvent && note.Velocity > 0;

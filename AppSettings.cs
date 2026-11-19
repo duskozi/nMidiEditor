@@ -50,6 +50,13 @@ namespace nMIDI
         public int FingersOnNotes { get; set; } = 1;
         public bool SaveFingering { get; set; } = true;
 
+        // Practice
+        public int PracticeHands { get; set; }
+        public bool PracticeWait { get; set; } = true;
+        public bool PracticeRamp { get; set; }
+        public int PracticeRampFrom { get; set; } = 60;
+        public int PracticeRampStep { get; set; } = 5;
+
         // Audio export
         public string? SoundFontPath { get; set; }
         public string AudioFormat { get; set; } = "MP3, 192 kbit/s";
