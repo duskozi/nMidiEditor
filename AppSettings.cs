@@ -50,6 +50,11 @@ namespace nMIDI
         public int FingersOnNotes { get; set; } = 1;
         public bool SaveFingering { get; set; } = true;
 
+        // Falling notes
+        public bool FallingInEdit { get; set; }
+        public bool FallingInPractice { get; set; } = true;
+        public double FallingSeconds { get; set; } = 3;
+
         // Practice
         public int PracticeHands { get; set; }
         public bool PracticeWait { get; set; } = true;

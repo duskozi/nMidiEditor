@@ -118,6 +118,7 @@ namespace nMIDI
             if (name == NoInput) name = null;
             if (name == _input.Name) return;
             _inputNotes.Clear();
+            falling.LiveAllOff();
             if (_input.Open(name))
                 txtStatus.Text = name == null
                     ? "MIDI input closed."
@@ -162,7 +163,13 @@ namespace nMIDI
         {
             ShowInputOnWheels(e);
             ShowInputOnPedals(e);
-            if (e is NoteEvent held) TrackInputNote(held.NoteNumber, e is NoteOnEvent && held.Velocity > 0);
+            if (e is NoteEvent held)
+            {
+                bool isDown = e is NoteOnEvent && held.Velocity > 0;
+                TrackInputNote(held.NoteNumber, isDown);
+                FallingLiveNote(held.NoteNumber, isDown, held.Velocity);
+            }
+            else if (e is ControlChangeEvent pedalCc) FallingLivePedal(pedalCc.ControlNumber, pedalCc.ControlValue);
             if (_song == null) return;
             if (_practiceMode)
             {

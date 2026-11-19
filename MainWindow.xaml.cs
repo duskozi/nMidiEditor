@@ -82,6 +82,7 @@ namespace nMIDI
             InitWheels();
             InitPedals();
             InitChords();
+            InitFalling();
         }
 
         /// <summary>The track list.</summary>
@@ -214,6 +215,7 @@ namespace nMIDI
             UpdateEditState();
             ShowPosition(force: true);
             if (_practiceMode) RebuildPractice();
+            ApplyFalling();
         }
 
         private string? _fallbackPort;
@@ -509,6 +511,7 @@ namespace nMIDI
         {
             _player.Panic();
             _auditionNote = -1;
+            falling.LiveAllOff();
 
             int silenced = 0;
             foreach (var name in _outputs.Names)
@@ -590,6 +593,7 @@ namespace nMIDI
         {
             RecordFrame();
             PracticeFrame();
+            RefreshFalling();
             if (_song == null)
             {
                 // No song: still light the key clicked on the keyboard panel.
@@ -738,6 +742,7 @@ namespace nMIDI
         private void OnAuditionDown(int note)
         {
             PracticePress(note);
+            FallingLiveNote(note, down: true, _velocity);
             OnAuditionUp(_auditionNote);
             var vm = _activeVm ?? Tracks.FirstOrDefault();
             var device = _outputs.Get(vm?.OutputDevice ?? NoSongPort);
@@ -752,6 +757,7 @@ namespace nMIDI
 
         private void OnAuditionUp(int note)
         {
+            if (note >= 0) FallingLiveNote(note, down: false);
             if (note < 0 || note != _auditionNote) return;
             var vm = _activeVm ?? Tracks.FirstOrDefault();
             var device = _outputs.Get(vm?.OutputDevice ?? NoSongPort);

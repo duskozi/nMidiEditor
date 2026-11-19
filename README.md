@@ -284,6 +284,21 @@ knobs, faders and buttons keep a dark hardware look in every theme.
 **Pause main view** in the Lanes window stops drawing the main window's piano roll, playhead and keyboard while
 you work in the Lanes window, to save CPU. The main window catches up as soon as you click it.
 
+## Falling notes
+
+The **Falling notes** button above the keyboard shows falling notes in place of the piano roll. Each key column
+lines up with the keyboard panel; a note reaches its key when it sounds, so you see what comes next.
+
+- Notes are drawn in their track colour with the finger number; the notes sounding now are outlined. In Practice
+  mode the part you play is bright and the accompaniment dim.
+- Bar lines (and fainter beat lines) fall with the notes.
+- **Pedals** fall with the notes too: a column each for soft, sostenuto and sustain at the left of the keys, and
+  a light band across the keys while the sustain pedal is down.
+- **Without a song** the view shows what you play, the other way round: a bar grows up from the key while you
+  hold it (a clicked key or the MIDI input) and then rises away, and the pedals of the MIDI input rise with them.
+- The motion follows the screen's frame rate. The mouse wheel shows more or fewer seconds (1 to 12).
+- Falling notes are on by default in Practice mode; Edit and Practice mode each remember the setting.
+
 ## Practice mode
 
 The **Edit / Practice** switch at the left of the top bar (or **F9**) turns the window into a practice view: the

@@ -93,6 +93,7 @@ namespace nMIDI
 
             if (practice) RebuildPractice();
             else EndPractice();
+            FallingForMode();
             _keyboardSignature = 0;
             txtStatus.Text = practice
                 ? "Practice: choose the track and hand, then press Start (or Enter). F9 goes back to editing."

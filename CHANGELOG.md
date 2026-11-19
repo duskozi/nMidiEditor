@@ -2,6 +2,11 @@
 
 ## 2.5 (2026-11-19)
 
+- Falling notes: the **Falling notes** button above the keyboard shows notes falling onto the keys in place of
+  the piano roll, in the track colours with finger numbers, with bar and beat lines and the pedals (a column each
+  for soft, sostenuto and sustain, and a light band while sustain is down). Smooth motion at the screen's frame
+  rate; the mouse wheel shows more or fewer seconds. Without a song it shows what you play (clicked keys and the
+  MIDI input, pedals included) rising up from the keys. On by default in Practice mode; each mode remembers it.
 - Practice mode: the **Edit / Practice** switch in the top bar (or F9) turns the window into a practice view with a
   bigger keyboard. Choose the track and the hand (left, right or both); the editor plays everything else.
   - **Wait for me**: the song stops at each note or chord until you have played its keys (in any order). The keys

@@ -545,6 +545,10 @@
             </np:NinePatchZoomViewer.OverlayContent>
         </np:NinePatchZoomViewer>
 
+        <!-- Falling notes, in place of the piano roll when they are on. -->
+        <kb:FallingNotesView x:Name="falling" Grid.Row="4" Visibility="Collapsed"
+                             ToolTip="Falling notes: the mouse wheel shows more or fewer seconds"/>
+
         <!-- Shown until a file is loaded. -->
         <Border x:Name="pnlPaused" Grid.Row="4" Visibility="Collapsed" IsHitTestVisible="False"
                 HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,48,0,0"
@@ -632,6 +636,14 @@
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="&#xE7FC;" Style="{DynamicResource Icon}" FontSize="11" Margin="0,0,5,0"/>
                                 <TextBlock Text="Pedals" FontSize="11"/>
+                            </StackPanel>
+                        </ToggleButton>
+                        <ToggleButton x:Name="tglFalling" Style="{DynamicResource ToolToggle}" Height="24" Padding="8,0" Margin="0,0,8,0"
+                                      Focusable="False" Click="OnFallingToggled"
+                                      ToolTip="Falling notes in place of the piano roll: notes fall onto the keys, with the pedals. Without a song, what you play rises from the keys">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE74B;" Style="{DynamicResource Icon}" FontSize="11" Margin="0,0,5,0"/>
+                                <TextBlock Text="Falling notes" FontSize="11"/>
                             </StackPanel>
                         </ToggleButton>
                         <ToggleButton x:Name="tglChords" Style="{DynamicResource ToolToggle}" Height="24" Padding="8,0" Margin="0,0,8,0"
