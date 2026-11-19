@@ -179,6 +179,13 @@
                             <TextBlock x:Name="lblMixer" Text="Mixer"/>
                         </StackPanel>
                     </Button>
+                    <Button Style="{DynamicResource ToolButton}" Margin="6,0,0,0" Click="OnOpenMonitor"
+                            ToolTip="Open the MIDI activity window: notes and controllers on every channel of the MIDI output and input">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE9D9;" Style="{DynamicResource Icon}" Margin="0,0,6,0"/>
+                            <TextBlock x:Name="lblMonitor" Text="Monitor"/>
+                        </StackPanel>
+                    </Button>
                     <TextBlock x:Name="capColor" Text="COLOR" Style="{DynamicResource CapsLabel}" Margin="14,0,6,0"/>
                     <ComboBox x:Name="cmbColorMode" Width="96" SelectedIndex="0" SelectionChanged="OnColorModeChanged">
                         <ComboBoxItem Content="Track"/>

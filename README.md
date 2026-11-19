@@ -189,6 +189,11 @@ key signature and marker events. Type in a cell and press Enter to change an eve
 - **Recent files**: the button next to Open.
 - **Export**: Tracks ▾ → export the edited track, or only its selected notes, as a MIDI file of its
   own (with the song's tempo map).
+- **Export audio**: Song ▾ → **Export audio (WAV / MP3)…** plays the whole song, or the loop range, through a
+  SoundFont (.sf2) and saves it as MP3 (128, 192 or 320 kbit/s) or 16-bit WAV. What you hear is what you get:
+  mute, solo and the mixer settings apply. Pick the SoundFont once and the editor remembers it; a free General
+  MIDI SoundFont such as *GeneralUser GS* sounds good. The status bar shows the progress, and **Esc** cancels.
+  MP3 uses the encoder built into Windows (on Windows N editions, install the Media Feature Pack).
 - **Autosave**: unsaved changes are saved every minute to `%AppData%\nMIDIEditor\autosave`. If the
   editor ends without closing normally, it offers to recover the work the next time it starts.
 - Settings (recent files, MIDI input, recording options) are kept in `%AppData%\nMIDIEditor\settings.json`.
@@ -278,6 +283,28 @@ knobs, faders and buttons keep a dark hardware look in every theme.
 
 **Pause main view** in the Lanes window stops drawing the main window's piano roll, playhead and keyboard while
 you work in the Lanes window, to save CPU. The main window catches up as soon as you click it.
+
+## Chord names
+
+The **Chords** button above the keyboard turns on:
+
+- a **chord strip** along the top of the piano roll with the chords of the visible tracks (drums left out). The
+  chords are found beat by beat from the keys that sound for a good part of the beat, so broken chords and
+  arpeggios are named too and a short passing note does not change the chord. The chord at the playhead is
+  highlighted.
+- the **chord that sounds now** above the keyboard: the song at the playhead, a key you click, or the keys you
+  hold on the MIDI input.
+
+Names follow lead-sheet style: C, Am, G7, Cmaj7, F♯m7♭5, Bdim, Dsus4, C6, add9, 9, 11, 13 … and a slash for an
+inversion (C/E, G7/B).
+
+## MIDI activity
+
+The **Monitor** button opens the MIDI activity window. For every channel of the MIDI output (the song, the
+mixer, clicked keys and the thru of the input) it shows a note LED that flashes with the velocity, a control LED
+for controllers, programs and pitch bend, a live note map of the held keys and the last control message. The MIDI
+input is shown as a row of LEDs underneath. **Note map** and **Last control** hide those columns; **Clear** clears
+the display.
 
 ## Player features (from nMIDI)
 
@@ -373,6 +400,11 @@ fingers the song in the background, and `Model/FingeringReport.cs` computes the 
   "right" … stays in one hand), and a Viterbi-style search with standard scale charts fingers each
   hand. It is included as a prebuilt DLL (version 1.1) in `lib/nPianoFingering`; the editor uses its
   incremental `FingeringSession`, so only the notes around an edit are fingered again.
+
+- [MeltySynth](https://github.com/sinshu/meltysynth) by Nobuaki Tanaka (MIT) plays the song through a SoundFont
+  for the audio export.
+- [NAudio](https://github.com/naudio/NAudio) by Mark Heath (MIT) writes the WAV files and encodes MP3 with Windows
+  Media Foundation.
 
 ## Changes
 

@@ -1,5 +1,6 @@
 using nMIDI.Model;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 
@@ -28,6 +29,34 @@ namespace nMIDI
             {
                 if (_mixerWindow.WindowState == WindowState.Minimized) _mixerWindow.WindowState = WindowState.Normal;
                 _mixerWindow.Activate();
+            }
+        }
+
+        // --- MIDI activity window ---
+
+        private MidiMonitorWindow? _monitorWindow;
+
+        /// <summary>Names of the open MIDI output ports, for the activity window.</summary>
+        internal IReadOnlyList<string> OpenOutputNames => _outputs.OpenNames;
+
+        /// <summary>The open MIDI input port, or null.</summary>
+        internal string? InputName => _input.Name;
+
+        /// <summary>Open the MIDI activity window, or bring it to the front if it is already open.</summary>
+        private void OnOpenMonitor(object sender, RoutedEventArgs e)
+        {
+            if (_monitorWindow == null)
+            {
+                var window = new MidiMonitorWindow(this);
+                window.Closed += (_, _) => _monitorWindow = null;
+                window.Loaded += (s, _) => StyleScrollBars((DependencyObject)s!);
+                _monitorWindow = window;
+                window.Show();
+            }
+            else
+            {
+                if (_monitorWindow.WindowState == WindowState.Minimized) _monitorWindow.WindowState = WindowState.Normal;
+                _monitorWindow.Activate();
             }
         }
 

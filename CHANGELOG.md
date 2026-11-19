@@ -1,7 +1,16 @@
 # Changelog
 
-## Unreleased
+## 2.5 (2026-11-19)
 
+- Chord names: a strip along the top of the piano roll names the chords of the visible tracks beat by beat
+  (broken chords and arpeggios too, passing notes are ignored), and the chord of the keys that sound now (the
+  song, a clicked key or the MIDI input) shows above the keyboard. The **Chords** button above the keyboard turns
+  both on and off.
+- Export audio: Song ▾ → **Export audio (WAV / MP3)…** plays the song (or the loop range) through a SoundFont
+  (.sf2) and saves it as MP3 (128, 192 or 320 kbit/s) or 16-bit WAV. Mute, solo and the mixer settings apply.
+- MIDI activity window (the **Monitor** button): a note LED, a control LED, a live note map and the last control
+  message for every channel of the MIDI output, and a row of LEDs for the MIDI input.
+- Keys held on the MIDI input light up on the keyboard.
 - Three new themes in a hardware style: *Alloy* (lit brushed silver with a dark LCD), *Alloy night*
   (dark metal) and *Alloy ember* (champagne metal with an amber LCD). The piano keyboard keeps its look.
 - The mixer's displays use the theme's LCD colours, like the time display in the top bar.

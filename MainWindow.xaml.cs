@@ -75,6 +75,7 @@ namespace nMIDI
             DragOver += OnDragOver;
             SourceInitialized += (_, _) => UseDarkTitleBar();
             CompositionTarget.Rendering += OnFrame;
+            _outputs.Sent += e => _monitorWindow?.ShowOut(e);
             InitEditing();
             InitBarLayout();
             InitWheels();

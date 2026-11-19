@@ -130,6 +130,7 @@ namespace nMIDI
             }
             _settings.InputDevice = name;
             _settings.Save();
+            _monitorWindow?.UpdatePorts();
         }
 
         private void OnThruClick(object sender, RoutedEventArgs e)
@@ -142,6 +143,7 @@ namespace nMIDI
         /// <summary>On the input device's thread: play the event through at once, then hand it to the UI.</summary>
         private void OnInputReceived(ChannelEvent e)
         {
+            _monitorWindow?.ShowIn(e);
             if (_thruOn && _thruDevice is { } device)
             {
                 try
