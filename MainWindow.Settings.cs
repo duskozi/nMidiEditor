@@ -35,6 +35,8 @@ namespace nMIDI
             tglKeyboard.IsChecked = s.ShowKeyboard;
             tglPedals.IsChecked = s.ShowPedals;
             UpdatePedalPanelVisibility();
+            tglChords.IsChecked = s.ShowChords;
+            UpdateChordVisibility();
 
             _laneHeight = new GridLength(Math.Clamp(s.LaneHeight, 60, 500));
             if (tglLane.IsChecked == true) rowLane.Height = _laneHeight;
@@ -75,6 +77,7 @@ namespace nMIDI
             var s = _settings;
             s.ShowKeyboard = tglKeyboard.IsChecked == true;
             s.ShowPedals = tglPedals.IsChecked == true;
+            s.ShowChords = tglChords.IsChecked == true;
             s.KeyboardHeight = s.ShowKeyboard ? rowKeyboard.ActualHeight : _keyboardHeight.Value;
             s.ShowLane = tglLane.IsChecked == true;
             s.LaneHeight = s.ShowLane ? rowLane.ActualHeight : _laneHeight.Value;
@@ -230,6 +233,8 @@ namespace nMIDI
             s.ShowPedals = showPedals();
             tglPedals.IsChecked = s.ShowPedals;
             UpdatePedalPanelVisibility();
+            tglChords.IsChecked = s.ShowChords;
+            UpdateChordVisibility();
             s.KeyboardHeight = keyboardHeight();
             s.KeyLabels = Array.IndexOf(KeyLabelNames, labels());
             s.KeyRange = Array.IndexOf(KeyRangeNames, range());

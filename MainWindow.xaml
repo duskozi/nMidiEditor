@@ -454,6 +454,7 @@
                 <Grid IsHitTestVisible="False">
                 <roll:FingerOverlay x:Name="fingerOverlay"/>
                 <roll:PedalOverlay x:Name="pedalOverlay"/>
+                <roll:ChordOverlay x:Name="chordOverlay"/>
                 <Canvas IsHitTestVisible="False">
                     <Line x:Name="playheadGlow" Y1="0" Y2="20000" Stroke="#FF4D4D" StrokeThickness="6" Opacity="0.16"/>
                     <Line x:Name="playheadLine" Y1="0" Y2="20000" Stroke="#FF4D4D" StrokeThickness="1" SnapsToDevicePixels="True"/>
@@ -541,6 +542,12 @@
                                   Checked="OnKeyboardToggled" Unchecked="OnKeyboardToggled" ToolTip="Show or hide the keyboard">
                         <TextBlock Text="KEYBOARD" Style="{DynamicResource CapsLabel}" Foreground="{DynamicResource Text}"/>
                     </ToggleButton>
+                    <StackPanel x:Name="pnlChord" DockPanel.Dock="Left" Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0,0,0"
+                                ToolTip="The chord of the keys that sound now: the song, a clicked key or the MIDI input">
+                        <TextBlock Text="CHORD" Style="{DynamicResource CapsLabel}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                        <TextBlock x:Name="txtChord" Text="–" FontWeight="SemiBold" FontSize="14" MinWidth="70"
+                                   Foreground="{DynamicResource Accent}" VerticalAlignment="Center"/>
+                    </StackPanel>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                         <ToggleButton x:Name="tglPedals" Style="{DynamicResource ToolToggle}" Height="24" Padding="8,0" Margin="0,0,8,0"
                                       Focusable="False" IsChecked="True" Click="OnPedalsToggled"
@@ -548,6 +555,14 @@
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="&#xE7FC;" Style="{DynamicResource Icon}" FontSize="11" Margin="0,0,5,0"/>
                                 <TextBlock Text="Pedals" FontSize="11"/>
+                            </StackPanel>
+                        </ToggleButton>
+                        <ToggleButton x:Name="tglChords" Style="{DynamicResource ToolToggle}" Height="24" Padding="8,0" Margin="0,0,8,0"
+                                      Focusable="False" IsChecked="True" Click="OnChordsToggled"
+                                      ToolTip="Chord names: a strip along the top of the piano roll and the chord that sounds now above the keyboard">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE8D6;" Style="{DynamicResource Icon}" FontSize="11" Margin="0,0,5,0"/>
+                                <TextBlock Text="Chords" FontSize="11"/>
                             </StackPanel>
                         </ToggleButton>
                         <Button x:Name="btnFingering" Style="{DynamicResource ToolButton}" Height="24" Padding="8,0" Margin="0,0,14,0"

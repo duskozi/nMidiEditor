@@ -79,6 +79,7 @@ namespace nMIDI
             InitBarLayout();
             InitWheels();
             InitPedals();
+            InitChords();
         }
 
         /// <summary>The track list.</summary>
@@ -355,6 +356,7 @@ namespace nMIDI
             lane.InvalidateVisual();
             fingerOverlay.InvalidateVisual();
             RefreshPedals();
+            RefreshChords(force: false);
         }
 
         private readonly List<NinePatchElement>[] _rowBuckets = Enumerable.Range(0, MaxNote + 1).Select(_ => new List<NinePatchElement>()).ToArray();
@@ -611,6 +613,7 @@ namespace nMIDI
             UpdateKeyboard();
             UpdateWheels();
             UpdatePedals();
+            UpdateChordStrip();
             pianoKeys.RefreshKeys();
         }
 
@@ -660,6 +663,16 @@ namespace nMIDI
                 keys.Add(new KeyHighlight(_auditionNote, ((SolidColorBrush)FindResource("Accent")).Color, 1.0));
                 signature = signature * 31 + 100_000 + _auditionNote;
             }
+
+            // Keys held on the MIDI input.
+            foreach (int n in _inputNotes)
+            {
+                keys ??= new List<KeyHighlight>();
+                keys.Add(new KeyHighlight(n, ((SolidColorBrush)FindResource("Accent")).Color, 1.0));
+                signature = signature * 31 + 200_000 + n;
+            }
+
+            ShowLiveChord(keys?.Select(k => k.Note) ?? Enumerable.Empty<int>());
 
             if (signature == _keyboardSignature || tglKeyboard.IsChecked != true) return;
             _keyboardSignature = signature;
@@ -773,6 +786,7 @@ namespace nMIDI
             pianoKeys.InvalidateVisual();
             fingerOverlay.InvalidateVisual();
             pedalOverlay.InvalidateVisual();
+            chordOverlay.InvalidateVisual();
         }
 
         private void ShowRenderInfo()

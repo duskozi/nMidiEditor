@@ -117,6 +117,7 @@ namespace nMIDI
             string? name = cmbInput.SelectedItem as string;
             if (name == NoInput) name = null;
             if (name == _input.Name) return;
+            _inputNotes.Clear();
             if (_input.Open(name))
                 txtStatus.Text = name == null
                     ? "MIDI input closed."
@@ -159,6 +160,7 @@ namespace nMIDI
         {
             ShowInputOnWheels(e);
             ShowInputOnPedals(e);
+            if (e is NoteEvent held) TrackInputNote(held.NoteNumber, e is NoteOnEvent && held.Velocity > 0);
             if (_song == null) return;
             if (e is NoteEvent note)
             {
