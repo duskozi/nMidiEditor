@@ -84,10 +84,10 @@ namespace nMIDI
             }
 
             var edit = practice ? Visibility.Collapsed : Visibility.Visible;
-            bdTrackList.Visibility = edit;
+            UpdateTrackListVisibility();
             bdEditBar.Visibility = edit;
             pnlLane.Visibility = edit;
-            splitLane.Visibility = edit;
+            splitLane.Visibility = practice ? Visibility.Collapsed : lane.Visibility;
             bdPracticeBar.Visibility = practice ? Visibility.Visible : Visibility.Collapsed;
             runLogoEditor.Text = practice ? " Practice" : " Editor";
 
@@ -98,6 +98,18 @@ namespace nMIDI
             txtStatus.Text = practice
                 ? "Practice: choose the track and hand, then press Start (or Enter). F9 goes back to editing."
                 : "Editing.";
+        }
+
+        private void OnTracksToggled(object sender, RoutedEventArgs e) => UpdateTrackListVisibility();
+
+        /// <summary>
+        /// The track list shows in edit mode when its toggle is on. Set in code, not bound: setting the visibility
+        /// for practice mode would replace a binding, and the toggle would stop working after the first switch.
+        /// </summary>
+        private void UpdateTrackListVisibility()
+        {
+            if (bdTrackList == null || tglTracks == null) return;
+            bdTrackList.Visibility = !_practiceMode && tglTracks.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
         }
 
         /// <summary>Work out the part to play and give the player the rest of the song.</summary>

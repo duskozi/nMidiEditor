@@ -225,6 +225,7 @@
                 Padding="8,0" Height="32">
             <DockPanel>
                 <ToggleButton x:Name="tglTracks" Style="{DynamicResource ExpanderToggle}" IsChecked="True" DockPanel.Dock="Left"
+                              Checked="OnTracksToggled" Unchecked="OnTracksToggled"
                               ToolTip="Show or hide the track list">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="TRACKS" Style="{DynamicResource CapsLabel}" Foreground="{DynamicResource Text}"/>
@@ -263,8 +264,7 @@
         </Border>
 
         <!-- Track list -->
-        <Border x:Name="bdTrackList" Grid.Row="2" Background="{DynamicResource Bg1}" BorderBrush="{DynamicResource Line}" BorderThickness="0,0,0,1"
-                Visibility="{Binding IsChecked, ElementName=tglTracks, Converter={StaticResource BoolToVisibility}}">
+        <Border x:Name="bdTrackList" Grid.Row="2" Background="{DynamicResource Bg1}" BorderBrush="{DynamicResource Line}" BorderThickness="0,0,0,1">
             <ScrollViewer Style="{DynamicResource ThinScrollViewer}" MaxHeight="232" VerticalScrollBarVisibility="Auto">
                 <ItemsControl x:Name="lstTracks" ItemsSource="{Binding Tracks}">
                     <ItemsControl.ItemTemplate>
