@@ -83,6 +83,7 @@ namespace nMIDI
             InitPedals();
             InitChords();
             InitFalling();
+            InitInstruments();
         }
 
         /// <summary>The track list.</summary>

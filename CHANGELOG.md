@@ -2,6 +2,12 @@
 
 ## 2.5 (2026-11-19)
 
+- Instrument picker with banks: choose a sound by bank and name (General MIDI by family, GS / GM2 / XG drum
+  kits, the presets of a SoundFont), search by name, try it, or type bank MSB / LSB and program. Used by track
+  settings, the program change lane (a click opens it) and the event list. Bank select is written with the
+  program change and always sent before it.
+- The track list toggle works again after switching to Practice mode and back.
+
 - Falling notes: the **Falling notes** button above the keyboard shows notes falling onto the keys in place of
   the piano roll, in the track colours with finger numbers, with bar and beat lines and the pedals (a column each
   for soft, sostenuto and sustain, and a light band while sustain is down). Smooth motion at the screen's frame

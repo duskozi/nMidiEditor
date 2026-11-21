@@ -257,10 +257,10 @@ namespace nMIDI
             if (_song == null) return;
             var track = vm.Track;
             var channels = Enumerable.Range(0, 16).Select(c => new Choice<int>(c, c == 9 ? "10 (drums)" : $"{c + 1}")).ToList();
-            var instruments = GeneralMidi.Instruments.Select((n, i) => new Choice<int>(i, $"{i + 1}. {n}")).ToList();
             string[] colorNames = ["Blue", "Orange", "Green", "Red", "Violet", "Cyan", "Yellow", "Pink", "Lime", "Indigo", "Apricot", "Teal"];
             var colors = NoteSkins.TrackColors.Select((c, i) => new ColorChoice(c, colorNames[i])).ToList();
-            int program = SongOps.GetInitial(track, CtrlKind.Program, 0) ?? 0;
+            var sound = SongOps.InstrumentAt(track, track.Channel, 0);
+            var newSound = sound ?? new InstrumentChoice(null, null, 0);
             int volume = SongOps.GetInitial(track, CtrlKind.Controller, 7) ?? 100;
             int pan = SongOps.GetInitial(track, CtrlKind.Controller, 10) ?? 64;
 
@@ -268,7 +268,12 @@ namespace nMIDI
             var name = d.AddText("Name", track.Name);
             var channel = d.AddChoice("Channel", channels, channels[track.Channel]);
             var moveAll = d.AddCheck("", true, "Move all the track's notes and controllers to this channel");
-            var instrument = d.AddChoice("Instrument", instruments, instruments[Math.Clamp(program, 0, 127)], "General MIDI");
+            d.AddPicker("Instrument", InstrumentCatalog.Label(newSound, track.IsDrums), () =>
+            {
+                if (AskInstrument(track, track.Channel, newSound, $"Instrument of {track.Name}") is not { } c) return null;
+                newSound = c;
+                return InstrumentCatalog.Label(c, track.IsDrums);
+            }, "bank and program");
             var vol = d.AddNumber("Volume", volume, 0, 127, "CC 7, 0 to 127");
             var panValue = d.AddNumber("Pan", pan - 64, -64, 63, "−64 left, 0 centre, 63 right");
             var color = d.AddChoice("Colour", colors, colors.FirstOrDefault(c => c.Color == vm.Color) ?? colors[0]);
@@ -276,8 +281,9 @@ namespace nMIDI
 
             string newName = name().Trim().Length > 0 ? name().Trim() : track.Name;
             int newChannel = channel().Value;
-            int newProgram = instrument().Value, newVolume = vol(), newPan = panValue() + 64;
-            bool changed = newName != track.Name || newChannel != track.Channel || newProgram != program || newVolume != volume || newPan != pan;
+            int newVolume = vol(), newPan = panValue() + 64;
+            bool soundChanged = sound != newSound;
+            bool changed = newName != track.Name || newChannel != track.Channel || soundChanged || newVolume != volume || newPan != pan;
             if (changed)
             {
                 Commit("Track settings", () =>
@@ -288,8 +294,8 @@ namespace nMIDI
                         if (moveAll()) SongOps.SetChannel(track, newChannel);
                         else track.Channel = newChannel;
                     }
-                    if (newProgram != program || SongOps.GetInitial(track, CtrlKind.Program, 0) == null)
-                        SongOps.SetInitial(track, CtrlKind.Program, 0, newProgram);
+                    if (soundChanged || SongOps.GetInitial(track, CtrlKind.Program, 0) == null)
+                        SongOps.SetInstrument(track, track.Channel, 0, newSound);
                     if (newVolume != volume) SongOps.SetInitial(track, CtrlKind.Controller, 7, newVolume);
                     if (newPan != pan) SongOps.SetInitial(track, CtrlKind.Controller, 10, newPan);
                 });

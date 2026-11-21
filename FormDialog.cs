@@ -215,6 +215,27 @@ namespace nMIDI
             return () => (T)combo.SelectedItem!;
         }
 
+        /// <summary>A button that shows a value and opens another dialog to change it; <paramref name="pick"/> returns the new text, or null.</summary>
+        public void AddPicker(string label, string text, Func<string?> pick, string? hint = null)
+        {
+            var button = new Button
+            {
+                Content = text,
+                Height = 26,
+                MinWidth = 220,
+                HorizontalAlignment = HorizontalAlignment.Left,
+                HorizontalContentAlignment = HorizontalAlignment.Left,
+                Padding = new Thickness(10, 0, 10, 0),
+                Style = (Style)Application.Current.FindResource("ToolButton"),
+            };
+            button.Click += (_, _) =>
+            {
+                if (pick() is string chosen) button.Content = chosen;
+            };
+            _first ??= button;
+            AddRow(label, button, hint);
+        }
+
         public Func<bool> AddCheck(string label, bool value, string? hint = null)
         {
             var check = new CheckBox { IsChecked = value, VerticalAlignment = VerticalAlignment.Center, Content = hint ?? "" };

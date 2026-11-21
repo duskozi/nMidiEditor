@@ -115,6 +115,8 @@ or the song's tempo. Controllers the track already uses are marked ●.
   are any.
 - **Shift-drag** draws a straight line (a ramp). In the velocity lane a right-drag does the same.
 - **Right-drag** erases controller events.
+- In the program change lane a **click** opens the instrument picker at the grid line (or on the program
+  change under the mouse); erasing a program change also removes its bank select.
 - The value under the mouse shows in the lane header.
 
 The **note fields** in the lane header (pitch, start, length, velocity, release velocity, channel) show
@@ -138,6 +140,22 @@ when nothing is selected. Each command is one undo step.
 
 **SCALE** picks a key and scale (major, minor, modes, pentatonic, blues and more). The piano roll
 shades the notes outside the scale; with **Snap** on, drawn and moved notes stay in the scale.
+
+## Instruments and banks
+
+The **instrument picker** chooses a sound by name instead of a number from 1 to 128. It opens from the
+Instrument button in track settings, a click in the program change lane, and **Add → Instrument** in the
+event list.
+
+- Pick a **bank** on the left: *General MIDI* (16 families of 8), the drum kits of *GS* (also the Windows
+  GS synth), *GM2* (bank 120) and *XG* (bank 127), and the banks of your **SoundFont** (the same .sf2 as the
+  audio export; **SoundFont…** picks another). On a drum track (channel 10) the drum banks come first.
+- **Find** searches every bank by name. Double-click a sound to take it; **Try** (or Space) plays a note
+  with it on the track's output.
+- **Bank select** writes CC 0 (MSB) and CC 32 (LSB) right before the program change. Type MSB, LSB and the
+  program for a device whose banks are not listed.
+- Bank select always goes out before the program change at the same moment: when playing, when starting
+  mid-song, in the audio export and in saved files.
 
 ## Song and tracks
 
