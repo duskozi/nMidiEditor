@@ -25,6 +25,10 @@ namespace nMIDI.Tests
         [InlineData("C/E", 52, 60, 67)]
         [InlineData("G7/B", 47, 62, 65, 67)]
         [InlineData("E5", 40, 47)]
+        [InlineData("G♯m", 56, 59, 63)]           // minor chords spelled with sharps
+        [InlineData("C♯m7", 49, 52, 56, 59)]
+        [InlineData("E♭m", 51, 54, 58)]
+        [InlineData("A♭", 56, 60, 63)]            // major keeps the flat
         public void Names_common_chords(string expected, params int[] notes)
         {
             Assert.Equal(expected, ChordNamer.Name(notes));
@@ -38,6 +42,24 @@ namespace nMIDI.Tests
         public void No_name_for_single_keys_or_clusters(params int[] notes)
         {
             Assert.Null(ChordNamer.Name(notes));
+        }
+
+        [Fact]
+        public void Names_single_notes()
+        {
+            Assert.Equal("C4 E4", ChordNamer.NoteNames(new[] { 64, 60, 60 }));
+            Assert.Equal("B♭3", ChordNamer.NoteNames(new[] { 58 }));
+            Assert.Null(ChordNamer.NoteNames(Array.Empty<int>()));
+        }
+
+        [Fact]
+        public void Timeline_shows_notes_where_there_is_no_chord()
+        {
+            // Bar 1: a single E held for a beat, then C and E (a third, not a chord) for a beat.
+            var song = SongWith(new SongNote(64, 0, 0, 480, 90), new SongNote(60, 0, 480, 960, 90), new SongNote(64, 0, 480, 960, 90));
+            var chords = new ChordTimeline(song.Tracks, song);
+            Assert.Equal(new ChordSpan(0, 480, "E4", IsNotes: true), chords.Spans[0]);
+            Assert.Equal(new ChordSpan(480, 960, "C4 E4", IsNotes: true), chords.Spans[1]);
         }
 
         private static Song SongWith(params SongNote[] notes)

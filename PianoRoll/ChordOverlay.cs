@@ -16,6 +16,7 @@ namespace nMIDI.PianoRoll
         public const double StripHeight = 18;
 
         private static readonly Typeface Face = new(new FontFamily("Segoe UI"), FontStyles.Normal, FontWeights.SemiBold, FontStretches.Normal);
+        private static readonly Typeface NotesFace = new(new FontFamily("Segoe UI"), FontStyles.Italic, FontWeights.Normal, FontStretches.Normal);
 
         public NinePatchZoomViewer? Viewer { get; set; }
 
@@ -45,6 +46,8 @@ namespace nMIDI.PianoRoll
             var box = new SolidColorBrush(Color.FromArgb(0x40, 0xFF, 0xFF, 0xFF));
             var current = new SolidColorBrush(Color.FromArgb(0xC0, Accent.R, Accent.G, Accent.B));
             var text = new SolidColorBrush(Color.FromArgb(0xF0, 0xFF, 0xFF, 0xFF));
+            var notesText = new SolidColorBrush(Color.FromArgb(0xA8, 0xFF, 0xFF, 0xFF));
+            var notesBox = new SolidColorBrush(Color.FromArgb(0x1C, 0xFF, 0xFF, 0xFF));
             double lastTextEnd = double.NegativeInfinity;
 
             foreach (var span in chords.Between(left, right))
@@ -53,9 +56,11 @@ namespace nMIDI.PianoRoll
                 double bx1 = Math.Max(-2, x1), bx2 = Math.Min(size.Width + 2, x2);
                 if (bx2 - bx1 < 1) continue;
                 bool playing = PlayheadTick >= span.Start && PlayheadTick < span.End;
-                dc.DrawRoundedRectangle(playing ? current : box, null, new Rect(bx1 + 1, 2, Math.Max(1, bx2 - bx1 - 2), StripHeight - 5), 3, 3);
+                // Single notes (no chord) are drawn fainter and smaller, so they do not read as chord names.
+                dc.DrawRoundedRectangle(playing ? current : span.IsNotes ? notesBox : box, null, new Rect(bx1 + 1, 2, Math.Max(1, bx2 - bx1 - 2), StripHeight - 5), 3, 3);
 
-                var label = new FormattedText(span.Name, CultureInfo.InvariantCulture, FlowDirection.LeftToRight, Face, 11, text, ppd);
+                var label = new FormattedText(span.Name, CultureInfo.InvariantCulture, FlowDirection.LeftToRight,
+                                              span.IsNotes ? NotesFace : Face, span.IsNotes ? 10 : 11, span.IsNotes && !playing ? notesText : text, ppd);
                 // Keep the name in view while its chord is, and skip it when there is no room.
                 double tx = Math.Max(bx1 + 4, Math.Min(x1 + 4, bx2 - label.Width - 4));
                 if (tx < lastTextEnd + 4 || tx + label.Width > bx2 - 1) continue;

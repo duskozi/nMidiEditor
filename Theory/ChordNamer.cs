@@ -93,12 +93,30 @@ namespace nMIDI.Theory
                     if (score < bestScore)
                     {
                         bestScore = score;
-                        string name = NoteHelper.Pretty(root) + shape.Suffix;
+                        string name = RootName(root, shape.Suffix) + shape.Suffix;
                         best = root == bass ? name : name + "/" + NoteHelper.Pretty(bass);
                     }
                 }
             }
             return best;
+        }
+
+        // Minor and diminished chords are usually spelled with sharps (C♯m, G♯m, not D♭m, A♭m); E♭m and B♭m stay.
+        private static readonly string[] MinorRoots = { "C", "C♯", "D", "E♭", "E", "F", "F♯", "G", "G♯", "A", "B♭", "B" };
+
+        private static string RootName(int root, string suffix)
+        {
+            bool minor = suffix.StartsWith("m", StringComparison.Ordinal) && !suffix.StartsWith("maj", StringComparison.Ordinal) || suffix.StartsWith("dim", StringComparison.Ordinal);
+            return minor ? MinorRoots[root] : NoteHelper.Pretty(root);
+        }
+
+        /// <summary>Note names with octaves, low to high and without repeats: "C4 E4". Null for no keys.</summary>
+        public static string? NoteNames(IEnumerable<int> notes, int max = 8)
+        {
+            var list = notes.Where(n => n is >= 0 and < 128).Distinct().OrderBy(n => n).ToList();
+            if (list.Count == 0) return null;
+            var names = list.Take(max).Select(n => NoteHelper.Pretty(n) + NoteHelper.Octave(n));
+            return string.Join(" ", names) + (list.Count > max ? " …" : "");
         }
 
         private static int Rotate(int mask, int root)

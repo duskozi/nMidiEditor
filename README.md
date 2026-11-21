@@ -345,12 +345,16 @@ The **Chords** button above the keyboard turns on:
 - a **chord strip** along the top of the piano roll with the chords of the visible tracks (drums left out). The
   chords are found beat by beat from the keys that sound for a good part of the beat, so broken chords and
   arpeggios are named too and a short passing note does not change the chord. The chord at the playhead is
-  highlighted.
+  highlighted. Where the notes make no chord (a single note, an interval), the strip shows the notes themselves
+  in small italics, e.g. *E4* or *C4 E4*.
 - the **chord that sounds now** above the keyboard: the song at the playhead, a key you click, or the keys you
-  hold on the MIDI input.
+  hold on the MIDI input, with the keys by name beside it. In Settings → Piano keyboard → **Chord name** choose
+  *Real time* (the chord of what sounds now, or the notes when they make no chord) or *Hold the last chord
+  until the next* (the chord stays when you let go or play single notes, until you play another chord).
 
 Names follow lead-sheet style: C, Am, G7, Cmaj7, F♯m7♭5, Bdim, Dsus4, C6, add9, 9, 11, 13 … and a slash for an
-inversion (C/E, G7/B).
+inversion (C/E, G7/B). Major chords use flats (D♭, E♭, A♭, B♭), minor chords sharps where that is usual
+(C♯m, G♯m, but E♭m, B♭m).
 
 ## MIDI activity
 

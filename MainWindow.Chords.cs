@@ -32,6 +32,7 @@ namespace nMIDI
         {
             _settings.ShowChords = tglChords.IsChecked == true;
             UpdateChordVisibility();
+            ResetLiveChord();
             RefreshChords();
         }
 
@@ -88,13 +89,48 @@ namespace nMIDI
             chordOverlay.InvalidateVisual();
         }
 
-        /// <summary>Show the chord of the keys that sound now above the keyboard.</summary>
+        private string? _heldChord;
+        private string? _liveNotes;
+
+        /// <summary>
+        /// Show the chord of the keys that sound now above the keyboard, and the keys by name beside it. When the
+        /// keys make no chord, the big text shows the notes (real time) or keeps the last chord (hold).
+        /// </summary>
         private void ShowLiveChord(IEnumerable<int> keys)
         {
-            string? name = tglChords.IsChecked == true ? ChordNamer.Name(keys) : null;
-            if (name == _liveChord) return;
-            _liveChord = name;
-            txtChord.Text = name ?? "–";
+            if (tglChords.IsChecked != true)
+            {
+                SetLiveChord(null, null);
+                return;
+            }
+            var list = keys as IReadOnlyCollection<int> ?? keys.ToList();
+            string? chord = ChordNamer.Name(list);
+            string? notes = ChordNamer.NoteNames(list);
+            if (chord != null) _heldChord = chord;
+
+            if (_settings.ChordHold)
+                SetLiveChord(_heldChord ?? notes, _heldChord != null ? notes : null);
+            else
+                SetLiveChord(chord ?? notes, chord != null ? notes : null);
+        }
+
+        private void SetLiveChord(string? big, string? small)
+        {
+            if (big == _liveChord && small == _liveNotes) return;
+            _liveChord = big;
+            _liveNotes = small;
+            txtChord.Text = big ?? "–";
+            txtChordNotes.Text = small ?? "";
+        }
+
+        /// <summary>Forget the held chord (new song, settings changed, chords turned on or off).</summary>
+        private void ResetLiveChord()
+        {
+            _heldChord = null;
+            _liveChord = _liveNotes = "\0";   // force the next update to redraw
+            txtChord.Text = "–";
+            txtChordNotes.Text = "";
+            _keyboardSignature = 0;
         }
 
         private void TrackInputNote(int note, bool down)

@@ -5,8 +5,8 @@ using System.Linq;
 
 namespace nMIDI.Model
 {
-    /// <summary>A chord over a stretch of the song.</summary>
-    public readonly record struct ChordSpan(long Start, long End, string Name);
+    /// <summary>A chord over a stretch of the song; with <paramref name="IsNotes"/>, the names of single notes that make no chord.</summary>
+    public readonly record struct ChordSpan(long Start, long End, string Name, bool IsNotes = false);
 
     /// <summary>
     /// The chords of a song, found beat by beat from the notes of the given tracks (drum tracks are left out).
@@ -47,11 +47,18 @@ namespace nMIDI.Model
                             if (!barDone) { barName = NameOf(active, barTick, barEnd); barDone = true; }
                             name = barName;
                         }
+                        // No chord in the beat or the bar: the notes themselves, when there are only a few.
+                        bool isNotes = false;
+                        if (name == null)
+                        {
+                            name = NotesOf(active, from, to);
+                            isNotes = true;
+                        }
                         if (name == null) continue;
-                        if (spans.Count > 0 && spans[^1].Name == name && spans[^1].End == from)
+                        if (spans.Count > 0 && spans[^1].Name == name && spans[^1].IsNotes == isNotes && spans[^1].End == from)
                             spans[^1] = spans[^1] with { End = to };
                         else
-                            spans.Add(new ChordSpan(from, to, name));
+                            spans.Add(new ChordSpan(from, to, name, isNotes));
                     }
                 }
             }
@@ -81,6 +88,13 @@ namespace nMIDI.Model
             if (i < 0) i = Math.Max(0, ~i - 1);
             for (; i < _spans.Length && _spans[i].Start < to; i++)
                 if (_spans[i].End > from) yield return _spans[i];
+        }
+
+        /// <summary>The names of the notes in a beat that make no chord (up to four keys), e.g. "E4" or "C4 E4".</summary>
+        internal static string? NotesOf(IReadOnlyList<SongNote> notes, long from, long to)
+        {
+            var keys = notes.Where(n => n.Start < to && n.End > from).Select(n => n.Number).Distinct().ToList();
+            return keys.Count is >= 1 and <= 4 ? ChordNamer.NoteNames(keys) : null;
         }
 
         /// <summary>The chord of the notes in one beat.</summary>

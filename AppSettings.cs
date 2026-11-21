@@ -25,6 +25,9 @@ namespace nMIDI
         public bool ShowKeyboard { get; set; } = true;
         public bool ShowPedals { get; set; } = true;
         public bool ShowPedalStrip { get; set; } = true;
+        /// <summary>Keep the last chord above the keyboard until the next one (false: show what sounds now).</summary>
+        public bool ChordHold { get; set; }
+
         public bool ShowChords { get; set; } = true;
         public bool PauseNoteViewWithLanes { get; set; } = true;
         public int KeyLabels { get; set; }

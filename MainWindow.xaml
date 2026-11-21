@@ -624,10 +624,12 @@
                         <TextBlock Text="KEYBOARD" Style="{DynamicResource CapsLabel}" Foreground="{DynamicResource Text}"/>
                     </ToggleButton>
                     <StackPanel x:Name="pnlChord" DockPanel.Dock="Left" Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0,0,0"
-                                ToolTip="The chord of the keys that sound now: the song, a clicked key or the MIDI input">
+                                ToolTip="The chord of the keys that sound now (the song, a clicked key or the MIDI input), and the keys themselves. Settings choose whether the last chord stays until the next one.">
                         <TextBlock Text="CHORD" Style="{DynamicResource CapsLabel}" VerticalAlignment="Center" Margin="0,0,8,0"/>
                         <TextBlock x:Name="txtChord" Text="–" FontWeight="SemiBold" FontSize="14" MinWidth="70"
                                    Foreground="{DynamicResource Accent}" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="txtChordNotes" Text="" FontSize="11" MinWidth="90" Margin="4,0,0,0"
+                                   Foreground="{DynamicResource TextDim}" VerticalAlignment="Center"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                         <ToggleButton x:Name="tglPedals" Style="{DynamicResource ToolToggle}" Height="24" Padding="8,0" Margin="0,0,8,0"

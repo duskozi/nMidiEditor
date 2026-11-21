@@ -217,6 +217,7 @@ namespace nMIDI
             ShowPosition(force: true);
             if (_practiceMode) RebuildPractice();
             ApplyFalling();
+            ResetLiveChord();
         }
 
         private string? _fallbackPort;
