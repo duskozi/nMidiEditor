@@ -117,6 +117,8 @@ namespace nMIDI
             string? name = cmbInput.SelectedItem as string;
             if (name == NoInput) name = null;
             if (name == _input.Name) return;
+            _inputNotes.Clear();
+            falling.LiveAllOff();
             if (_input.Open(name))
                 txtStatus.Text = name == null
                     ? "MIDI input closed."
@@ -129,6 +131,7 @@ namespace nMIDI
             }
             _settings.InputDevice = name;
             _settings.Save();
+            _monitorWindow?.UpdatePorts();
         }
 
         private void OnThruClick(object sender, RoutedEventArgs e)
@@ -141,6 +144,7 @@ namespace nMIDI
         /// <summary>On the input device's thread: play the event through at once, then hand it to the UI.</summary>
         private void OnInputReceived(ChannelEvent e)
         {
+            _monitorWindow?.ShowIn(e);
             if (_thruOn && _thruDevice is { } device)
             {
                 try
@@ -159,7 +163,19 @@ namespace nMIDI
         {
             ShowInputOnWheels(e);
             ShowInputOnPedals(e);
+            if (e is NoteEvent held)
+            {
+                bool isDown = e is NoteOnEvent && held.Velocity > 0;
+                TrackInputNote(held.NoteNumber, isDown);
+                FallingLiveNote(held.NoteNumber, isDown, held.Velocity);
+            }
+            else if (e is ControlChangeEvent pedalCc) FallingLivePedal(pedalCc.ControlNumber, pedalCc.ControlValue);
             if (_song == null) return;
+            if (_practiceMode)
+            {
+                if (e is NoteOnEvent press && press.Velocity > 0) PracticePress(press.NoteNumber);
+                return;
+            }
             if (e is NoteEvent note)
             {
                 bool down = e is NoteOnEvent && note.Velocity > 0;

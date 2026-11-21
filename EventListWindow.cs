@@ -272,6 +272,14 @@ namespace nMIDI
                 : $"{rows.Count:N0} events. Type in a cell and press Enter to change it; notes take names like C4 or F#3, pitch bend is −8192 to 8191.";
         }
 
+        /// <summary>The sound a program change selects, with the bank select in effect at it.</summary>
+        private static string ProgramName(SongTrack track, SongCtrl c)
+        {
+            var choice = SongOps.InstrumentAt(track, c.Channel, c.Tick) is { } at && at.Program == c.Value ? at : new InstrumentChoice(null, null, c.Value);
+            string name = InstrumentCatalog.Name(choice.Msb, choice.Lsb, c.Value, c.Channel == 9);
+            return choice.HasBank ? $"{name} (bank {choice.Msb ?? 0}/{choice.Lsb ?? 0})" : name;
+        }
+
         private static List<Row> TrackRows(Song song, SongTrack track, int view)
         {
             var rows = new List<(Row Row, int Rank)>();
@@ -293,7 +301,7 @@ namespace nMIDI
                             Make(song, c.Tick, RowKind.Controller, c, "Controller", ch, Num(c.Number), Num(c.Value), "", ControllerNames.Label(c.Number)),
                         CtrlKind.Program =>
                             Make(song, c.Tick, RowKind.Program, c, "Program", ch, Num(c.Value + 1), "", "",
-                                 GeneralMidi.Instruments[Math.Clamp(c.Value, 0, 127)]),
+                                 ProgramName(track, c)),
                         CtrlKind.PitchBend =>
                             Make(song, c.Tick, RowKind.PitchBend, c, "Pitch bend", ch, "", Num(c.Value - 8192), "", c.Value == 8192 ? "centre" : ""),
                         CtrlKind.ChannelPressure =>
@@ -591,6 +599,7 @@ namespace nMIDI
                     _main.Commit("Add note", () => track.Notes = NoteOps.Replace(track.Notes, Array.Empty<SongNote>(), new[] { note }));
                     _main.SelectNotes(new[] { note });
                 });
+                Add($"Instrument (bank and program) at {where}…", () => _main.PickInstrument(track, tick));
                 Add($"Controller or program change at {where}…", () => AddControl(track, tick));
             }
             menu.PlacementTarget = _add;

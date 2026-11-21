@@ -124,9 +124,9 @@ namespace nMIDI
             if (stage == _topStage) return;
             _topStage = stage;
             var labels = stage >= 1 ? Visibility.Collapsed : Visibility.Visible;
-            foreach (var t in new TextBlock[] { lblOpen, lblFollow, lblLoop, lblFit, lblLanes, lblMixer }) t.Visibility = labels;
+            foreach (var t in new TextBlock[] { lblOpen, lblFollow, lblLoop, lblFit, lblLanes, lblMixer, lblMonitor }) t.Visibility = labels;
             // Icon-only buttons: drop the gap the label left next to the icon.
-            foreach (var t in new TextBlock[] { lblOpen, lblFollow, lblLoop, lblFit, lblLanes, lblMixer })
+            foreach (var t in new TextBlock[] { lblOpen, lblFollow, lblLoop, lblFit, lblLanes, lblMixer, lblMonitor })
                 if (t.Parent is StackPanel sp && sp.Children.Count > 0 && sp.Children[0] is TextBlock icon)
                     icon.Margin = stage >= 1 ? new Thickness(0) : new Thickness(0, 0, 6, 0);
 

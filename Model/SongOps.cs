@@ -292,5 +292,49 @@ namespace nMIDI.Model
         public static int? GetInitial(SongTrack track, CtrlKind kind, int number) =>
             track.Controls.Where(c => c.Kind == kind && c.Number == number && c.Channel == track.Channel)
                           .Select(c => (int?)c.Value).FirstOrDefault();
+
+        private static bool IsBank(SongCtrl c) => c.Kind == CtrlKind.Controller && c.Number is 0 or 32;
+
+        /// <summary>
+        /// The sound in effect on a channel at a tick: the last program and bank select at or before it. With no
+        /// program before the tick, the first program of the channel (it is what a player starting there hears).
+        /// </summary>
+        public static InstrumentChoice? InstrumentAt(SongTrack track, int channel, long tick)
+        {
+            var on = track.Controls.Where(c => c.Channel == channel).ToList();
+            var program = on.LastOrDefault(c => c.Kind == CtrlKind.Program && c.Tick <= tick)
+                          ?? on.FirstOrDefault(c => c.Kind == CtrlKind.Program);
+            if (program == null) return null;
+            long at = Math.Max(tick, program.Tick);
+            int? msb = on.LastOrDefault(c => IsBank(c) && c.Number == 0 && c.Tick <= at)?.Value;
+            int? lsb = on.LastOrDefault(c => IsBank(c) && c.Number == 32 && c.Tick <= at)?.Value;
+            return new InstrumentChoice(msb, lsb, program.Value);
+        }
+
+        /// <summary>
+        /// Put a program change, with its bank select when the choice has one, at the tick on the channel. A program
+        /// change and bank select already at that tick are replaced. The bank select comes first, as devices need it.
+        /// </summary>
+        public static void SetInstrument(SongTrack track, int channel, long tick, InstrumentChoice choice)
+        {
+            var keep = track.Controls.Where(c => !(c.Tick == tick && c.Channel == channel && (c.Kind == CtrlKind.Program || IsBank(c)))).ToList();
+            var added = new List<SongCtrl>();
+            if (choice.Msb is int msb) added.Add(new SongCtrl(tick, channel, CtrlKind.Controller, 0, Math.Clamp(msb, 0, 127)));
+            if (choice.Lsb is int lsb) added.Add(new SongCtrl(tick, channel, CtrlKind.Controller, 32, Math.Clamp(lsb, 0, 127)));
+            added.Add(new SongCtrl(tick, channel, CtrlKind.Program, 0, Math.Clamp(choice.Program, 0, 127)));
+            // Stable sort: the new events go before the others at the same tick, bank select first.
+            track.Controls = added.Concat(keep).OrderBy(c => c.Tick).ToList();
+        }
+
+        /// <summary>Program changes in the range, and the bank select at the same ticks on the same channels.</summary>
+        public static List<SongCtrl> ProgramsWithBanks(SongTrack track, long from, long to)
+        {
+            var programs = track.Controls.Where(c => c.Kind == CtrlKind.Program && c.Tick >= from && c.Tick <= to).ToList();
+            var at = programs.Select(p => (p.Tick, p.Channel)).ToHashSet();
+            return track.Controls.Where(c => c.Kind == CtrlKind.Program ? programs.Contains(c) : IsBank(c) && at.Contains((c.Tick, c.Channel))).ToList();
+        }
+
+        /// <summary>The order of controllers at the same tick when they are sent: bank select before everything else.</summary>
+        public static int SendRank(SongCtrl c) => IsBank(c) ? 0 : 1;
     }
 }

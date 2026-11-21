@@ -89,6 +89,12 @@ namespace nMIDI.PianoRoll
 
         /// <summary>Show a value under the mouse (or null to clear).</summary>
         void ShowLaneValue(string? text);
+
+        /// <summary>Choose a sound (bank and program) for a program change at the tick on the active track.</summary>
+        void PickInstrument(long tick);
+
+        /// <summary>The text of a program change: its sound, with the bank in effect at the tick.</summary>
+        string ProgramLabel(long tick, int program);
     }
 
     /// <summary>
@@ -137,7 +143,7 @@ namespace nMIDI.PianoRoll
                 : mode.Kind == LaneKind.Tempo
                     ? "Tempo of the whole song, in BPM. Drag to draw tempo changes, Shift+drag for a gradual change, right-drag to erase."
                 : mode.Kind == LaneKind.Program
-                    ? "Click to put a program change at the grid line (the height picks the program). Right-drag erases."
+                    ? "Click to choose an instrument (bank and program) at the grid line, or click a program change to change it. Right-drag erases."
                     : "Drag to draw values on the grid, Shift+drag for a straight line, right-drag to erase. Alt turns snapping off.";
             InvalidateVisual();
         }
@@ -270,7 +276,7 @@ namespace nMIDI.PianoRoll
 
                 if (Mode.Kind == LaneKind.Program && x2 - x > 40)
                 {
-                    var text = new FormattedText(Mode.Format(points[i].Value), CultureInfo.InvariantCulture, FlowDirection.LeftToRight,
+                    var text = new FormattedText(_host!.ProgramLabel(points[i].Tick, points[i].Value), CultureInfo.InvariantCulture, FlowDirection.LeftToRight,
                                                  PianoRollStyle.Typeface, 10, LaneBrushes.Text, ppd);
                     text.MaxTextWidth = Math.Max(1, x2 - x - 8);
                     text.MaxLineCount = 1;
@@ -315,6 +321,18 @@ namespace nMIDI.PianoRoll
             _downPoint = _lastPoint = p;
             bool shift = Keyboard.Modifiers.HasFlag(ModifierKeys.Shift);
 
+            if (Mode.Kind == LaneKind.Program && !right)
+            {
+                // A click opens the instrument picker: on a program change near the mouse, or at the grid line.
+                var track = _host.ActiveTrack!;
+                long tick = NoteOps.Snap(XToTick(p.X), Step(false));
+                var near = track.Controls.Where(Mode.Matches).Select(c => c.Tick)
+                                .Where(t => Math.Abs(TickToX(t) - p.X) <= 6).OrderBy(t => Math.Abs(TickToX(t) - p.X)).ToList();
+                if (near.Count > 0) tick = near[0];
+                _host.PickInstrument(Math.Max(0, tick));
+                return;
+            }
+
             if (Mode.Kind == LaneKind.Velocity) _drag = right || shift ? Drag.Line : Drag.Paint;
             else if (right) _drag = Drag.Erase;
             else _drag = shift && Mode.Kind != LaneKind.Program ? Drag.Line : Drag.Paint;
@@ -328,7 +346,9 @@ namespace nMIDI.PianoRoll
             var p = e.GetPosition(this);
             if (_drag == Drag.None)
             {
-                _host?.ShowLaneValue(p.X >= AreaLeft && _host.ActiveTrack != null ? $"{Mode.Name}: {Mode.Format(YToValue(p.Y))}" : null);
+                _host?.ShowLaneValue(p.X < AreaLeft || _host.ActiveTrack == null ? null
+                                     : Mode.Kind == LaneKind.Program ? "Click to choose an instrument (bank and program). Right-drag erases."
+                                     : $"{Mode.Name}: {Mode.Format(YToValue(p.Y))}");
                 return;
             }
             Update(p);
@@ -468,7 +488,9 @@ namespace nMIDI.PianoRoll
             else if (drag == Drag.Erase && _eraseRange is { } r)
             {
                 long from = Math.Min(r.From, r.To), to = Math.Max(r.From, r.To);
-                var gone = track.Controls.Where(c => Mode.Matches(c) && c.Tick >= from && c.Tick <= to).ToList();
+                // Erasing a program change takes its bank select with it.
+                var gone = Mode.Kind == LaneKind.Program ? SongOps.ProgramsWithBanks(track, from, to)
+                         : track.Controls.Where(c => Mode.Matches(c) && c.Tick >= from && c.Tick <= to).ToList();
                 if (gone.Count > 0)
                     _host.Commit($"Erase {Mode.Name.ToLowerInvariant()}",
                                  () => track.Controls = Without(track.Controls, gone));

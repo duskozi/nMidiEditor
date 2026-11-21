@@ -65,6 +65,7 @@ namespace nMIDI
             {
                 UpdateTransport();
                 ShowPosition(force: true);
+                OnPracticeSongEnd();
             }));
 
             OutputNames = new ObservableCollection<string>(_outputs.Names);
@@ -75,10 +76,14 @@ namespace nMIDI
             DragOver += OnDragOver;
             SourceInitialized += (_, _) => UseDarkTitleBar();
             CompositionTarget.Rendering += OnFrame;
+            _outputs.Sent += e => _monitorWindow?.ShowOut(e);
             InitEditing();
             InitBarLayout();
             InitWheels();
             InitPedals();
+            InitChords();
+            InitFalling();
+            InitInstruments();
         }
 
         /// <summary>The track list.</summary>
@@ -210,6 +215,9 @@ namespace nMIDI
             UpdateTransport();
             UpdateEditState();
             ShowPosition(force: true);
+            if (_practiceMode) RebuildPractice();
+            ApplyFalling();
+            ResetLiveChord();
         }
 
         private string? _fallbackPort;
@@ -355,6 +363,7 @@ namespace nMIDI
             lane.InvalidateVisual();
             fingerOverlay.InvalidateVisual();
             RefreshPedals();
+            RefreshChords(force: false);
         }
 
         private readonly List<NinePatchElement>[] _rowBuckets = Enumerable.Range(0, MaxNote + 1).Select(_ => new List<NinePatchElement>()).ToArray();
@@ -504,6 +513,7 @@ namespace nMIDI
         {
             _player.Panic();
             _auditionNote = -1;
+            falling.LiveAllOff();
 
             int silenced = 0;
             foreach (var name in _outputs.Names)
@@ -584,6 +594,8 @@ namespace nMIDI
         private void OnFrame(object? sender, EventArgs e)
         {
             RecordFrame();
+            PracticeFrame();
+            RefreshFalling();
             if (_song == null)
             {
                 // No song: still light the key clicked on the keyboard panel.
@@ -611,6 +623,7 @@ namespace nMIDI
             UpdateKeyboard();
             UpdateWheels();
             UpdatePedals();
+            UpdateChordStrip();
             pianoKeys.RefreshKeys();
         }
 
@@ -660,6 +673,17 @@ namespace nMIDI
                 keys.Add(new KeyHighlight(_auditionNote, ((SolidColorBrush)FindResource("Accent")).Color, 1.0));
                 signature = signature * 31 + 100_000 + _auditionNote;
             }
+
+            // Keys held on the MIDI input.
+            foreach (int n in _inputNotes)
+            {
+                keys ??= new List<KeyHighlight>();
+                keys.Add(new KeyHighlight(n, ((SolidColorBrush)FindResource("Accent")).Color, 1.0));
+                signature = signature * 31 + 200_000 + n;
+            }
+
+            ShowLiveChord(keys?.Select(k => k.Note) ?? Enumerable.Empty<int>());
+            if (_practiceMode) signature = AddPracticeKeys(ref keys, signature);
 
             if (signature == _keyboardSignature || tglKeyboard.IsChecked != true) return;
             _keyboardSignature = signature;
@@ -719,6 +743,8 @@ namespace nMIDI
         // Clicking the keyboard plays the note on the edited track's port and channel.
         private void OnAuditionDown(int note)
         {
+            PracticePress(note);
+            FallingLiveNote(note, down: true, _velocity);
             OnAuditionUp(_auditionNote);
             var vm = _activeVm ?? Tracks.FirstOrDefault();
             var device = _outputs.Get(vm?.OutputDevice ?? NoSongPort);
@@ -733,6 +759,7 @@ namespace nMIDI
 
         private void OnAuditionUp(int note)
         {
+            if (note >= 0) FallingLiveNote(note, down: false);
             if (note < 0 || note != _auditionNote) return;
             var vm = _activeVm ?? Tracks.FirstOrDefault();
             var device = _outputs.Get(vm?.OutputDevice ?? NoSongPort);
@@ -773,6 +800,7 @@ namespace nMIDI
             pianoKeys.InvalidateVisual();
             fingerOverlay.InvalidateVisual();
             pedalOverlay.InvalidateVisual();
+            chordOverlay.InvalidateVisual();
         }
 
         private void ShowRenderInfo()
@@ -808,7 +836,12 @@ namespace nMIDI
         {
             if (Keyboard.FocusedElement is TextBox) return;
             if (Keyboard.FocusedElement is ComboBoxItem || Keyboard.FocusedElement is ComboBox { IsDropDownOpen: true }) return;
-            if (HandleEditKey(e))
+            if (e.Key == Key.Escape && CancelAudioExport())
+            {
+                e.Handled = true;
+                return;
+            }
+            if (_practiceMode ? HandlePracticeKey(e) : HandleEditKey(e))
             {
                 e.Handled = true;
                 return;
@@ -825,6 +858,9 @@ namespace nMIDI
                     break;
                 case Key.Escape:
                     Panic();
+                    break;
+                case Key.F9:
+                    SetPracticeMode(!_practiceMode);
                     break;
                 case Key.O when ctrl:
                     ShowOpenDialog();

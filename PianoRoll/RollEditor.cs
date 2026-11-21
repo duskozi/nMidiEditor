@@ -193,10 +193,13 @@ namespace nMIDI.PianoRoll
 
         // --- Mouse ---
 
+        /// <summary>False while practising: the mouse does not edit.</summary>
+        public bool Enabled { get; set; } = true;
+
         private void OnLeftDown(object sender, MouseButtonEventArgs e)
         {
             var p = e.GetPosition(_surface);
-            if (!IsInside(p) || _host.Song == null || _host.ActiveTrack == null) return;
+            if (!Enabled || !IsInside(p) || _host.Song == null || _host.ActiveTrack == null) return;
             e.Handled = true;
             _viewer.Focus();
 
@@ -271,7 +274,7 @@ namespace nMIDI.PianoRoll
         private void OnRightDown(object sender, MouseButtonEventArgs e)
         {
             var p = e.GetPosition(_surface);
-            if (!IsInside(p) || _host.Song == null || _host.ActiveTrack == null) return;
+            if (!Enabled || !IsInside(p) || _host.Song == null || _host.ActiveTrack == null) return;
             e.Handled = true;
             _viewer.Focus();
             if (_drag != Drag.None) return;

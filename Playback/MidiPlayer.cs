@@ -637,8 +637,10 @@ namespace nMIDI.Playback
             }
 
             Array.Fill(t.SongVolume, -1);
+            // Bank select first: it only takes effect with the program change after it.
+            foreach (var e in controls.Values) if (e is ControlChangeEvent { ControlNumber: var n } && (n == 0 || n == 32)) SendControl(t, (ControlChangeEvent)e);
             foreach (var e in programs.Values) Send(t.Device, e);
-            foreach (var e in controls.Values) SendControl(t, (ControlChangeEvent)e);
+            foreach (var e in controls.Values) if (e is ControlChangeEvent { ControlNumber: var n } && n != 0 && n != 32) SendControl(t, (ControlChangeEvent)e);
             foreach (var e in bends.Values) Send(t.Device, e);
             ApplyMix(t);
         }

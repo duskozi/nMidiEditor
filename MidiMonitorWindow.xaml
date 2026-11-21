@@ -1,0 +1,71 @@
+<Window x:Class="nMIDI.MidiMonitorWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:nc="urn:nmidi-controls"
+        Title="MIDI activity – nMIDI Editor"
+        Icon="/Assets/nMIDIEditor.ico"
+        Width="760" Height="640" MinWidth="380" MinHeight="300"
+        Background="{DynamicResource Bg0}"
+        Foreground="{DynamicResource Text}"
+        FontFamily="{DynamicResource UiFont}" FontSize="12"
+        UseLayoutRounding="True"
+        WindowStartupLocation="CenterOwner">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <!-- Colours of the LEDs and note maps. ApplyTheme puts the app theme's colours over the panels, text and accent. -->
+                <ResourceDictionary Source="pack://application:,,,/nMIDI.Controls;component/Skins/Graphite.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <DockPanel>
+        <!-- Options -->
+        <Border DockPanel.Dock="Top" Background="{DynamicResource Bg1}" BorderBrush="{DynamicResource Line}" BorderThickness="0,0,0,1"
+                Padding="12,8">
+            <DockPanel>
+                <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" VerticalAlignment="Center">
+                    <ToggleButton x:Name="tglNoteMap" Style="{DynamicResource ToolToggle}" Height="24" Padding="8,0" IsChecked="True"
+                                  Content="Note map" Click="OnOptionChanged" Focusable="False"
+                                  ToolTip="Show which keys are held on each channel"/>
+                    <ToggleButton x:Name="tglControl" Style="{DynamicResource ToolToggle}" Height="24" Padding="8,0" Margin="4,0,0,0" IsChecked="True"
+                                  Content="Last control" Click="OnOptionChanged" Focusable="False"
+                                  ToolTip="Show the last controller, program or pitch bend message of each channel"/>
+                    <Button Style="{DynamicResource ToolButton}" Height="24" Padding="8,0" Margin="8,0,0,0" Content="Clear"
+                            Click="OnClear" Focusable="False" ToolTip="Clear the held notes and messages shown"/>
+                </StackPanel>
+                <TextBlock VerticalAlignment="Center" Foreground="{DynamicResource TextDim}" FontSize="11" TextWrapping="Wrap"
+                           Text="Top LED: notes (brightness = velocity). Bottom LED: controllers, programs and pitch bend."/>
+            </DockPanel>
+        </Border>
+
+        <Grid Margin="10">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <DockPanel Grid.Row="0" Margin="2,0,2,6">
+                <TextBlock x:Name="txtOutPorts" DockPanel.Dock="Right" Foreground="{DynamicResource TextDim}" FontSize="11"
+                           VerticalAlignment="Center" TextTrimming="CharacterEllipsis" MaxWidth="420"/>
+                <TextBlock Text="MIDI OUT · WHAT THE EDITOR PLAYS" Style="{DynamicResource CapsLabel}" Foreground="{DynamicResource Text}"
+                           VerticalAlignment="Center"/>
+            </DockPanel>
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                <nc:MidiActivityMonitor x:Name="monitorOut" Source="Channels" RowHeight="18" LowestNote="21" HighestNote="108"
+                                        VerticalAlignment="Top"/>
+            </ScrollViewer>
+
+            <DockPanel Grid.Row="2" Margin="2,12,2,6">
+                <TextBlock x:Name="txtInPort" DockPanel.Dock="Right" Foreground="{DynamicResource TextDim}" FontSize="11"
+                           VerticalAlignment="Center" TextTrimming="CharacterEllipsis" MaxWidth="420"/>
+                <TextBlock Text="MIDI IN" Style="{DynamicResource CapsLabel}" Foreground="{DynamicResource Text}" VerticalAlignment="Center"/>
+            </DockPanel>
+            <nc:MidiActivityMonitor x:Name="monitorIn" Grid.Row="3" Source="Channels" Layout="Compact" Height="26"
+                                    ToolTip="MIDI input, 16 channels · top = notes, bottom = controllers"/>
+        </Grid>
+    </DockPanel>
+</Window>
