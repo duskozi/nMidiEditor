@@ -314,7 +314,10 @@ lines up with the keyboard panel; a note reaches its key when it sounds, so you 
   a light band across the keys while the sustain pedal is down.
 - **Without a song** the view shows what you play, the other way round: a bar grows up from the key while you
   hold it (a clicked key or the MIDI input) and then rises away, and the pedals of the MIDI input rise with them.
-- The motion follows the screen's frame rate. The mouse wheel shows more or fewer seconds (1 to 12).
+- **Note length**: the **− / +** buttons next to the Falling notes button (or the mouse wheel over the notes) show
+  more or fewer seconds, from 0.5 to 30, so long notes can be made shorter on screen.
+- The motion follows the screen's frame rate and moves the same distance every frame. The notes are drawn once
+  in strips of a few seconds and only moved while playing, so even dense songs stay smooth.
 - Falling notes are on by default in Practice mode; Edit and Practice mode each remember the setting.
 
 ## Practice mode

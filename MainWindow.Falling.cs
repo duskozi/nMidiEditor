@@ -23,8 +23,20 @@ namespace nMIDI
         {
             falling.Keyboard = keyboard;
             falling.Seconds = _settings.FallingSeconds;
-            falling.SecondsChanged += s => _settings.FallingSeconds = s;
+            falling.SecondsChanged += s =>
+            {
+                _settings.FallingSeconds = s;
+                ShowFallingSeconds();
+            };
+            ShowFallingSeconds();
         }
+
+        private void ShowFallingSeconds() =>
+            txtFallingSeconds.Text = falling.Seconds.ToString(falling.Seconds < 10 ? "0.0" : "0", System.Globalization.CultureInfo.InvariantCulture) + " s";
+
+        private void OnFallingShorter(object sender, RoutedEventArgs e) => falling.Zoom(-1);
+
+        private void OnFallingLonger(object sender, RoutedEventArgs e) => falling.Zoom(1);
 
         private void OnFallingToggled(object sender, RoutedEventArgs e)
         {
@@ -38,6 +50,7 @@ namespace nMIDI
         {
             bool on = tglFalling.IsChecked == true;
             falling.Visibility = on ? Visibility.Visible : Visibility.Collapsed;
+            pnlFallingZoom.Visibility = falling.Visibility;
             viewer.Visibility = on ? Visibility.Hidden : Visibility.Visible;
             pnlEmpty.Visibility = on || _song != null ? Visibility.Collapsed : Visibility.Visible;
             if (on && tglKeyboard.IsChecked != true) tglKeyboard.IsChecked = true;
@@ -82,7 +95,8 @@ namespace nMIDI
                 }
                 return;
             }
-            falling.SongClock ??= () => _song is { } s ? s.Timeline.TickToTime(_player.PositionTicks) / 1e6 : 0;
+            falling.SongClock ??= () => _player.Position / 1e6;
+            falling.SongRate ??= () => _player.State == Playback.PlayerState.Playing ? _player.Speed : 0;
 
             int signature = FallingSignature();
             // The fingering finishes in the background: let finger numbers catch up, but not more than twice a second.

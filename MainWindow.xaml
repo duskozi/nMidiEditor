@@ -640,6 +640,19 @@
                                 <TextBlock Text="Pedals" FontSize="11"/>
                             </StackPanel>
                         </ToggleButton>
+                        <StackPanel x:Name="pnlFallingZoom" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,6,0" Visibility="Collapsed"
+                                    ToolTip="Note length in the falling notes: how many seconds fit from the keys to the top (the mouse wheel over the notes does the same)">
+                            <Button Style="{DynamicResource ToolButton}" Height="24" Width="24" Padding="0" Focusable="False" Click="OnFallingShorter"
+                                    ToolTip="Shorter notes (show more seconds)">
+                                <TextBlock Text="−" FontSize="13"/>
+                            </Button>
+                            <TextBlock x:Name="txtFallingSeconds" Text="3.0 s" FontSize="11" MinWidth="38" TextAlignment="Center"
+                                       Foreground="{DynamicResource TextDim}" VerticalAlignment="Center"/>
+                            <Button Style="{DynamicResource ToolButton}" Height="24" Width="24" Padding="0" Focusable="False" Click="OnFallingLonger"
+                                    ToolTip="Longer notes (show fewer seconds)">
+                                <TextBlock Text="+" FontSize="13"/>
+                            </Button>
+                        </StackPanel>
                         <ToggleButton x:Name="tglFalling" Style="{DynamicResource ToolToggle}" Height="24" Padding="8,0" Margin="0,0,8,0"
                                       Focusable="False" Click="OnFallingToggled"
                                       ToolTip="Falling notes in place of the piano roll: notes fall onto the keys, with the pedals. Without a song, what you play rises from the keys">

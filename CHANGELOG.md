@@ -9,6 +9,8 @@
 - Chord names show single notes where there is no chord (in the strip and above the keyboard), the keys by name
   beside the chord, and a setting to hold the last chord until the next one or show what sounds in real time.
   Minor chords are spelled with sharps where usual (C♯m, G♯m).
+- Falling notes: smoother motion (notes drawn once and moved, even steps from the frame clock, no per-note
+  brushes every frame) and **− / +** buttons for the note length, now 0.5 to 30 seconds on screen.
 - The track list toggle works again after switching to Practice mode and back.
 
 - Falling notes: the **Falling notes** button above the keyboard shows notes falling onto the keys in place of
