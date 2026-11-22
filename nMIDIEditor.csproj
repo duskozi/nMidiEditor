@@ -15,7 +15,7 @@
 
     <ApplicationIcon>Assets\nMIDIEditor.ico</ApplicationIcon>
 
-    <Version>2.5.0</Version>
+    <Version>2.5.1</Version>
     <Product>nMIDI Editor</Product>
     <Description>MIDI editor and player with a piano roll, track lanes and a piano keyboard.</Description>
     <Authors>Duško</Authors>

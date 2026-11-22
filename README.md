@@ -75,7 +75,8 @@ Edits are heard straight away, also while the song is playing.
 | Ctrl+N / Ctrl+O | New song / open a file |
 | Ctrl+S / Ctrl+Shift+S | Save / save as (format 1 or format 0) |
 | Ctrl+Z / Ctrl+Y (or Ctrl+Shift+Z) | Undo / redo |
-| Ctrl+A | Select all notes of the edited track |
+| Ctrl+A | Select all notes of the edited tracks |
+| Ctrl+Shift+A | Select all notes of the active track only (all its channels) |
 | Ctrl+C / Ctrl+X / Ctrl+V | Copy / cut / paste at the playhead |
 | Ctrl+D | Duplicate the selection right after itself |
 | Ctrl+T | Add a track |
@@ -156,11 +157,17 @@ event list.
   program for a device whose banks are not listed.
 - Bank select always goes out before the program change at the same moment: when playing, when starting
   mid-song, in the audio export and in saved files.
+- A channel with no program change plays **Acoustic Grand Piano** (the standard kit on channel 10), whatever
+  the output was left on before.
+- The on-screen keyboard, the computer keys and MIDI Thru play with the **edited track's instrument** at the
+  playhead, on its output and channel.
+- Opening a file (or starting a new song) resets every open MIDI output: all controllers, pitch bend, volume,
+  pan, reverb and chorus to their defaults and every channel back to piano, so nothing carries over.
 
 ## Song and tracks
 
 - **Tracks ▾** (or right-click a track): track settings (name, channel, instrument, volume, pan),
-  add, duplicate, delete and reorder tracks, merge tracks, split by channel, split by pitch (left and
+  select all notes in the track (Ctrl+Shift+A), add, duplicate, delete and reorder tracks, merge tracks, split by channel, split by pitch (left and
   right hand), the event list, and export. Ctrl+T adds a track.
 - **Song ▾**: insert or delete bars, cut / copy / paste / delete / clear the loop range across all
   tracks (with or without removing the time), insert silence, and tempo, time signature, key signature
@@ -227,7 +234,7 @@ The gear button at the right of the top bar opens the settings menu: **Settings�
   - *Light classic*: light grey panels, raised gradient buttons, white fields and a light piano roll.
   - *Retro hardware*: charcoal and brushed metal, an amber LCD, square bevelled buttons and orange accents.
   - *High contrast*: black, white text, yellow selection and hover, thick borders.
-  - *Alloy*: lit brushed silver, bevelled metal buttons, dark knobs, a dark LCD and orange for
+  - *Alloy*: lit brushed silver, rounded metal buttons with a lit top edge, dark knobs, a dark LCD and orange for
     anything switched on.
   - *Alloy night*: the same hardware look on dark anodised metal.
   - *Alloy ember*: champagne metal, an amber LCD and blue for selection.

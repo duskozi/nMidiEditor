@@ -209,6 +209,7 @@ namespace nMIDI
         /// </summary>
         private void RecordFrame()
         {
+            EnsureKeyboardSound();
             var vm = _activeVm ?? Tracks.FirstOrDefault();
             string? port = vm?.OutputDevice ?? NoSongPort;
             if (port != _thruPortName)
