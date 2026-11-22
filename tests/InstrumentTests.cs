@@ -49,6 +49,22 @@ namespace nMIDI.Tests
         }
 
         [Fact]
+        public void KeyboardSoundComesFromTheTrackThenFromASetupTrack()
+        {
+            var setup = new SongTrack("Setup", 2);
+            setup.SetControls(new[] { new SongCtrl(0, 2, CtrlKind.Program, 0, 48), new SongCtrl(0, 3, CtrlKind.Program, 0, 33) });
+            var strings = new SongTrack("Strings", 2);
+            var own = new SongTrack("Flute", 3);
+            own.SetControls(new[] { new SongCtrl(0, 3, CtrlKind.Program, 0, 73) });
+            var piano = new SongTrack("Piano", 5);
+            var all = new[] { setup, strings, own, piano };
+
+            Assert.Equal(48, SongOps.KeyboardSoundAt(strings, all, 0)?.Program);   // from the setup track
+            Assert.Equal(73, SongOps.KeyboardSoundAt(own, all, 0)?.Program);       // its own program wins
+            Assert.Null(SongOps.KeyboardSoundAt(piano, all, 0));                   // none: the default piano
+        }
+
+        [Fact]
         public void SetInstrumentPutsBankSelectBeforeTheProgram()
         {
             var t = new SongTrack("Drums", 9);

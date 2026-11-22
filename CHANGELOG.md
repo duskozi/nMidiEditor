@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.5.2 (2026-11-22)
+
+- The keyboard also finds a track's instrument when the song keeps its program changes in another track on the
+  same channel (a setup track), as many files do. 2.5.1 played those tracks with a piano.
+
 ## 2.5.1 (2026-11-22)
 
 - The keyboard (on screen, computer keys and MIDI Thru) plays with the edited track's instrument at the playhead.
