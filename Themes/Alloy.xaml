@@ -70,6 +70,11 @@
         <GradientStop Color="#9AA1A9" Offset="0.5"/>
         <GradientStop Color="#5E656D" Offset="1"/>
     </LinearGradientBrush>
+    <!-- Lit top edge inside the Alloy buttons, which sets them apart from Retro hardware's flat square ones. -->
+    <LinearGradientBrush x:Key="ButtonHighlight" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#D0FFFFFF" Offset="0"/>
+        <GradientStop Color="#00FFFFFF" Offset="0.6"/>
+    </LinearGradientBrush>
     <SolidColorBrush x:Key="HoverBorder" Color="#FF9414"/>
     <SolidColorBrush x:Key="TooltipBg" Color="#F4F6F8"/>
     <SolidColorBrush x:Key="TooltipBorder" Color="#7D848C"/>
@@ -207,8 +212,10 @@
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
                     <Border x:Name="bd" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="1" SnapsToDevicePixels="True">
-                        <ContentPresenter Margin="{TemplateBinding Padding}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="4" SnapsToDevicePixels="True">
+                        <Border CornerRadius="3" BorderThickness="1,1,1,0" BorderBrush="{StaticResource ButtonHighlight}">
+                            <ContentPresenter Margin="{TemplateBinding Padding}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
@@ -242,8 +249,10 @@
             <Setter.Value>
                 <ControlTemplate TargetType="ToggleButton">
                     <Border x:Name="bd" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="1" SnapsToDevicePixels="True">
-                        <ContentPresenter x:Name="cp" Margin="{TemplateBinding Padding}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="4" SnapsToDevicePixels="True">
+                        <Border CornerRadius="3" BorderThickness="1,1,1,0" BorderBrush="{StaticResource ButtonHighlight}">
+                            <ContentPresenter x:Name="cp" Margin="{TemplateBinding Padding}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
@@ -281,10 +290,11 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ToggleButton">
-                    <Border x:Name="bd" Background="{TemplateBinding Background}" CornerRadius="2"
+                    <Border x:Name="bd" Background="{TemplateBinding Background}" CornerRadius="6"
                             BorderBrush="{StaticResource ButtonBorder}" BorderThickness="1" SnapsToDevicePixels="True">
                         <Grid>
-                            <Border x:Name="glow" CornerRadius="2" Opacity="0" Background="{Binding Tag, RelativeSource={RelativeSource TemplatedParent}}"/>
+                            <Border x:Name="glow" CornerRadius="5" Opacity="0" Background="{Binding Tag, RelativeSource={RelativeSource TemplatedParent}}"/>
+                            <Border CornerRadius="5" BorderThickness="1,1,1,0" BorderBrush="{StaticResource ButtonHighlight}" IsHitTestVisible="False"/>
                             <ContentPresenter x:Name="cp" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Grid>
                     </Border>
@@ -324,9 +334,12 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ToggleButton">
-                    <Border x:Name="bd" Background="{TemplateBinding Background}" CornerRadius="1"
+                    <Border x:Name="bd" Background="{TemplateBinding Background}" CornerRadius="3"
                             BorderBrush="{StaticResource ButtonBorder}" BorderThickness="1" SnapsToDevicePixels="True">
-                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <Grid>
+                            <Border CornerRadius="2" BorderThickness="1,1,1,0" BorderBrush="{StaticResource ButtonHighlight}" IsHitTestVisible="False"/>
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Grid>
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
@@ -389,7 +402,7 @@
             <Setter.Value>
                 <ControlTemplate TargetType="ToggleButton">
                     <Border x:Name="bd" Background="{StaticResource ButtonFace}" BorderBrush="{StaticResource ButtonBorder}"
-                            BorderThickness="1" CornerRadius="1" SnapsToDevicePixels="True">
+                            BorderThickness="1" CornerRadius="4" SnapsToDevicePixels="True">
                         <TextBlock Text="&#xE70D;" Style="{StaticResource Icon}" FontSize="9"
                                    Foreground="{StaticResource TextDim}" HorizontalAlignment="Right" Margin="0,0,8,0"/>
                     </Border>

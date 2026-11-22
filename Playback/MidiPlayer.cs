@@ -147,7 +147,7 @@ namespace nMIDI.Playback
                 {
                     _next = FirstEventAt(_anchorTime);
                     _nextClick = FirstClickAt(_anchorTime);
-                    for (int i = 0; i < _tracks.Length; i++) Chase(i);
+                    ChaseAll();
                 }
             }
         }
@@ -228,7 +228,11 @@ namespace nMIDI.Playback
                 ReleaseNotes(t);
                 t.Device = device;
                 if (device != null) _usedDevices.Add(device);
-                if (_state == PlayerState.Playing) Chase(track);
+                if (_state == PlayerState.Playing)
+                {
+                    SendDefaultPrograms(device);
+                    Chase(track);
+                }
             }
         }
 
@@ -355,7 +359,7 @@ namespace nMIDI.Playback
 
                 _next = FirstEventAt(_anchorTime);
                 _nextClick = FirstClickAt(_anchorTime);
-                for (int i = 0; i < _tracks.Length; i++) Chase(i);
+                ChaseAll();
 
                 _anchorClock = _clock.Elapsed;
                 _clock.Start();
@@ -407,7 +411,7 @@ namespace nMIDI.Playback
                 foreach (var t in _tracks) ReleaseNotes(t);
                 _next = FirstEventAt(time);
                 _nextClick = FirstClickAt(time);
-                for (int i = 0; i < _tracks.Length; i++) Chase(i);
+                ChaseAll();
             }
         }
 
@@ -512,7 +516,7 @@ namespace nMIDI.Playback
                                 _anchorClock = _clock.Elapsed;
                                 _next = FirstEventAt(_anchorTime);
                                 _nextClick = FirstClickAt(_anchorTime);
-                                for (int i = 0; i < _tracks.Length; i++) Chase(i);
+                                ChaseAll();
                                 now = _anchorTime;
                             }
                         }
@@ -607,6 +611,72 @@ namespace nMIDI.Playback
                 if (_events[mid].Time < time) lo = mid + 1; else hi = mid;
             }
             return lo;
+        }
+
+        /// <summary>
+        /// Chase every track. Channels that have no program change before the play position first get the
+        /// default sound, so nothing is left over from an earlier song or from trying sounds.
+        /// </summary>
+        private void ChaseAll()
+        {
+            SendDefaultPrograms(null);
+            for (int i = 0; i < _tracks.Length; i++) Chase(i);
+        }
+
+        /// <summary>
+        /// Send bank 0 and program 0 (Acoustic Grand Piano; the standard kit on channel 10) on every channel that
+        /// plays notes but has no program change before the play position, on one port or on all of them.
+        /// Tracks that share a port and channel count together, so one track's program is not undone by another.
+        /// </summary>
+        private void SendDefaultPrograms(OutputDevice? only)
+        {
+            var playing = new HashSet<(OutputDevice Device, int Channel)>();
+            var programmed = new HashSet<(OutputDevice Device, int Channel)>();
+            for (int i = 0; i < _events.Length; i++)
+            {
+                var e = _events[i];
+                if ((uint)e.Track >= (uint)_tracks.Length) continue;
+                var device = _tracks[e.Track].Device;
+                if (device == null || (only != null && !ReferenceEquals(device, only))) continue;
+                if (e.Event is ProgramChangeEvent) { if (i < _next) programmed.Add((device, (int)e.Event.Channel)); }
+                else if (e.Event is NoteOnEvent) playing.Add((device, (int)e.Event.Channel));
+            }
+            foreach (var (device, channel) in playing)
+            {
+                if (programmed.Contains((device, channel))) continue;
+                var ch = (FourBitNumber)channel;
+                Send(device, new ControlChangeEvent((SevenBitNumber)0, (SevenBitNumber)0) { Channel = ch });
+                Send(device, new ControlChangeEvent((SevenBitNumber)32, (SevenBitNumber)0) { Channel = ch });
+                Send(device, new ProgramChangeEvent((SevenBitNumber)0) { Channel = ch });
+            }
+        }
+
+        /// <summary>
+        /// Put a port back to its power-on state before another song: sound off, all controllers reset (with the
+        /// GM defaults sent too, for synths that ignore Reset All Controllers), pitch bend centred, and bank 0,
+        /// program 0 (Acoustic Grand Piano) on all 16 channels.
+        /// </summary>
+        public static void ResetPort(OutputDevice device)
+        {
+            for (int c = 0; c < 16; c++)
+            {
+                var ch = (FourBitNumber)c;
+                void Cc(int number, int value) => Send(device, new ControlChangeEvent((SevenBitNumber)number, (SevenBitNumber)value) { Channel = ch });
+                Cc(64, 0);     // sustain off
+                Cc(120, 0);    // all sound off
+                Cc(123, 0);    // all notes off
+                Cc(121, 0);    // reset all controllers
+                Cc(1, 0);      // modulation
+                Cc(7, DefaultControl(7));
+                Cc(10, DefaultControl(10));
+                Cc(11, DefaultControl(11));
+                Cc(91, DefaultControl(91));
+                Cc(93, DefaultControl(93));
+                Cc(0, 0);      // bank select
+                Cc(32, 0);
+                Send(device, new ProgramChangeEvent((SevenBitNumber)0) { Channel = ch });
+                Send(device, new PitchBendEvent(8192) { Channel = ch });
+            }
         }
 
         /// <summary>Send a track's last program, controller and pitch-bend values before the current event.</summary>

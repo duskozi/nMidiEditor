@@ -1,5 +1,19 @@
 # Changelog
 
+## 2.5.1 (2026-11-22)
+
+- The keyboard (on screen, computer keys and MIDI Thru) plays with the edited track's instrument at the playhead.
+  Before, it only did so after the song had played up to the track's program change, so it usually sounded
+  like a piano.
+- **Select all in track** (Ctrl+Shift+A, in the piano roll menu and the Tracks menu) selects every note of the
+  active track, on all its channels, without the tracks edited with it.
+- Channels with no program change play Acoustic Grand Piano (the standard kit on channel 10) instead of the
+  last sound the output was left on.
+- Opening a file or starting a new song resets every open MIDI output: Reset All Controllers, pitch bend,
+  modulation, sustain, volume, pan, expression, reverb, chorus, bank and program, on all 16 channels.
+- Alloy, Alloy night and Alloy ember have their own buttons (rounded, with a lit top edge). They had the square
+  buttons of Retro hardware, since they were made from that theme.
+
 ## 2.5 (2026-11-19)
 
 - Instrument picker with banks: choose a sound by bank and name (General MIDI by family, GS / GM2 / XG drum

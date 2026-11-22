@@ -172,6 +172,7 @@ namespace nMIDI
             _history.Reset(song);
             _lastLength = song.TicksPerQuarter;
             _player.Load(song);
+            ResetOutputs();
             _song = song;
             _lastShownTick = -1;
             AttachFingering(song);
@@ -749,6 +750,7 @@ namespace nMIDI
             var vm = _activeVm ?? Tracks.FirstOrDefault();
             var device = _outputs.Get(vm?.OutputDevice ?? NoSongPort);
             int channel = vm?.Track.Channel ?? 0;
+            EnsureKeyboardSound();
             try { device?.SendEvent(new NoteOnEvent((SevenBitNumber)note, (SevenBitNumber)_velocity) { Channel = (FourBitNumber)channel }); }
             catch (MidiDeviceException) { }
             _auditionNote = note;

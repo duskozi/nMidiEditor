@@ -422,6 +422,16 @@ namespace nMIDI
             _editor.SetSelection(EditTracks.SelectMany(t => t.Notes));
         }
 
+        /// <summary>Select every note of the active track, on all its channels (not those of the tracks edited with it).</summary>
+        private void SelectAllInTrack()
+        {
+            if (!CanEdit) return;
+            var track = _activeVm!.Track;
+            _editor.SetSelection(track.Notes);
+            string name = string.IsNullOrWhiteSpace(track.Name) ? $"track {track.Index + 1}" : track.Name.Trim();
+            txtStatus.Text = $"{_editor.Selection.Count:N0} notes selected in {name}.";
+        }
+
         private void DeleteSelection(string label = "Delete notes")
         {
             var track = ActiveTrack;
@@ -541,6 +551,7 @@ namespace nMIDI
             menu.Items.Add(Item("Delete", "Del", any, () => DeleteSelection()));
             menu.Items.Add(new Separator());
             menu.Items.Add(Item("Select all", "Ctrl+A", true, SelectAll));
+            menu.Items.Add(Item("Select all in track", "Ctrl+Shift+A", true, SelectAllInTrack));
             menu.Items.Add(Item("Select none", "Esc", any, _editor.ClearSelection));
             menu.Items.Add(new Separator());
 
@@ -603,6 +614,7 @@ namespace nMIDI
                 case Key.Z when ctrl && shift: Redo(); return true;
                 case Key.Z when ctrl: Undo(); return true;
                 case Key.Y when ctrl: Redo(); return true;
+                case Key.A when ctrl && shift: SelectAllInTrack(); return true;
                 case Key.A when ctrl: SelectAll(); return true;
                 case Key.C when ctrl: CopySelection(); return true;
                 case Key.X when ctrl: CutSelection(); return true;

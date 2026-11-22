@@ -167,6 +167,11 @@ namespace nMIDI
             bool has = track != null;
             var menu = new ContextMenu();
             menu.Items.Add(Item("Track settings…", "", has, () => ShowTrackSettings(vm!)));
+            menu.Items.Add(Item("Select all notes in track", "Ctrl+Shift+A", has && track!.Notes.Count > 0, () =>
+            {
+                SetActiveTrack(vm);
+                SelectAllInTrack();
+            }));
             menu.Items.Add(new Separator());
             menu.Items.Add(Item("Add track", "", true, AddTrack));
             menu.Items.Add(Item("Duplicate track", "", has, () => TrackCommand("Duplicate track", () => SongOps.DuplicateTrack(_song!, track!))));

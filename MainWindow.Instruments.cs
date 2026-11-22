@@ -51,6 +51,7 @@ namespace nMIDI
                                               ChooseSoundFont);
             bool ok = dialog.Ask();
             StopTrying();
+            _keyboardSound = null;   // trying sounds changed the channel; the keyboard's sound is sent again
             if (device != null && _player.State != PlayerState.Playing)
             {
                 var back = SongOps.InstrumentAt(track, channel, (long)_player.PositionTicks);
@@ -58,6 +59,55 @@ namespace nMIDI
             }
             foreach (var v in Tracks) v.Refresh();
             return ok ? dialog.Result : null;
+        }
+
+        private (OutputDevice Device, int Channel, InstrumentChoice Sound)? _keyboardSound;
+        private (object? Controls, long Tick, OutputDevice? Device, int Channel) _keyboardSoundKey;
+
+        /// <summary>
+        /// The keyboard (on screen, computer keys and MIDI thru) plays on the edited track's port and channel. Give
+        /// that channel the track's sound at the playhead, or Acoustic Grand Piano when the track has no program
+        /// change, so it does not play whatever the port was left on. Sent only when it changes; while the song
+        /// plays, its own program changes are in charge.
+        /// </summary>
+        private void EnsureKeyboardSound()
+        {
+            if (_player.State == PlayerState.Playing)
+            {
+                _keyboardSound = null;
+                _keyboardSoundKey = default;
+                return;
+            }
+            var vm = _activeVm ?? Tracks.FirstOrDefault();
+            if (vm == null) return;
+            var device = _outputs.Get(vm.OutputDevice ?? NoSongPort);
+            if (device == null) return;
+            var track = vm.Track;
+            int channel = track.Channel;
+            long tick = (long)_player.PositionTicks;
+            // Every frame calls this: skip the lookup while nothing it depends on has changed.
+            var key = ((object?)track.Controls, tick, (OutputDevice?)device, channel);
+            if (_keyboardSound != null && key.Equals(_keyboardSoundKey)) return;
+            _keyboardSoundKey = key;
+
+            var found = SongOps.InstrumentAt(track, channel, tick);
+            // A track whose program changes are on another channel than its own (as the track list names it).
+            if (found == null && channel != 9 && track.Controls.FirstOrDefault(c => c.Kind == CtrlKind.Program) is { } other)
+                found = SongOps.InstrumentAt(track, other.Channel, tick);
+            var sound = found ?? new InstrumentChoice(null, null, 0);
+            if (channel != 9) sound = sound with { Msb = sound.Msb ?? 0, Lsb = sound.Lsb ?? 0 };
+            if (_keyboardSound is { } last && ReferenceEquals(last.Device, device) && last.Channel == channel && last.Sound == sound) return;
+            SendInstrument(device, channel, sound);
+            _keyboardSound = (device, channel, sound);
+        }
+
+        /// <summary>Reset every open port before a new song, so controllers and sounds of the last one do not carry over.</summary>
+        private void ResetOutputs()
+        {
+            foreach (var name in _outputs.OpenNames)
+                if (_outputs.Get(name) is { } device) MidiPlayer.ResetPort(device);
+            _keyboardSound = null;
+            _keyboardSoundKey = default;
         }
 
         /// <summary>Pick a SoundFont for the picker (the same one the audio export uses). Returns an error, or null.</summary>
