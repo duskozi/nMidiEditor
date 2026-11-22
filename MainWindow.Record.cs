@@ -584,15 +584,43 @@ namespace nMIDI
                 return;
             }
             if (_editVersion == _autosavedVersion) return;
+            WriteAutosave();
+        }
+
+        /// <summary>
+        /// After an unexpected error: save unsaved changes to the autosave file now, whatever the editor is doing.
+        /// Returns true if there was something to save and it was saved.
+        /// </summary>
+        internal bool EmergencyAutosave()
+        {
+            try
+            {
+                return _song != null && _history.IsDirty && WriteAutosave();
+            }
+            catch (Exception ex) when (ex is not OutOfMemoryException)
+            {
+                AppLog.Error("Emergency autosave", ex);
+                return false;
+            }
+        }
+
+        private bool WriteAutosave()
+        {
+            if (_song == null) return false;
             try
             {
                 Directory.CreateDirectory(AutosaveFolder);
                 _song.Save(AutosaveBase + ".mid", 1);
-                File.WriteAllText(AutosaveBase + ".json",
+                AtomicFile.WriteAllText(AutosaveBase + ".json",
                     System.Text.Json.JsonSerializer.Serialize(new AutosaveInfo(_song.Path, _song.SourceFormat, DateTime.Now)));
                 _autosavedVersion = _editVersion;
+                return true;
             }
-            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException) { }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException)
+            {
+                AppLog.Error("Autosave", ex);
+                return false;
+            }
         }
 
         private void DeleteAutosave()

@@ -44,8 +44,7 @@ namespace nMIDI.Playback
             {
                 foreach (var device in OutputDevice.GetAll())
                 {
-                    names.Add(device.Name);
-                    device.Dispose();
+                    using (device) names.Add(device.Name);
                 }
             }
             catch (Exception ex) when (ex is MidiDeviceException or InvalidOperationException)
@@ -61,6 +60,7 @@ namespace nMIDI.Playback
             if (string.IsNullOrEmpty(name)) return null;
             if (_open.TryGetValue(name, out var device)) return device;
 
+            device = null;
             try
             {
                 device = OutputDevice.GetByName(name);
@@ -72,6 +72,13 @@ namespace nMIDI.Playback
             }
             catch (Exception ex) when (ex is MidiDeviceException or ArgumentException or InvalidOperationException)
             {
+                // Found but could not be prepared (in use by another program, driver error): release it.
+                if (device != null)
+                {
+                    device.EventSent -= OnEventSent;
+                    try { device.Dispose(); }
+                    catch (MidiDeviceException) { }
+                }
                 LastError = $"Cannot open '{name}': {ex.Message}";
                 return null;
             }

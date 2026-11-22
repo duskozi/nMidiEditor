@@ -1,5 +1,24 @@
 # Changelog
 
+## Unreleased
+
+Reliability:
+
+- An unexpected error no longer closes the editor without a word: it is written to
+  `%AppData%\nMIDIEditor\logs\nMIDIEditor.log`, unsaved changes go to the autosave file, and a message says what
+  happened. Errors on background threads (playback, fingering, audio export) are logged too.
+- An error on the playback thread pauses playback and silences the outputs instead of ending the app.
+- A MIDI port that is slow to respond can no longer leave a second playback thread running next to the new one.
+- Cancelling or failing an audio export no longer deletes an existing file of the same name: the export is
+  written to a temporary file and only replaces the target when it is complete.
+- Settings, autosave and MIDI files are written atomically, so a crash or a full disk while saving cannot leave
+  a broken file. A failed MIDI save no longer leaves a `.saving` file behind.
+- A clicked key's note-off goes to the port and channel its note-on went to, so changing the edited track while
+  holding a key cannot leave a note hanging.
+- MIDI ports that open but fail to start (in use by another program) are released instead of staying open.
+- The fingering keeps updating after an unexpected error in one run (before, it stopped for the rest of the session).
+- The build treats compiler warnings as errors.
+
 ## 2.5.2 (2026-11-22)
 
 - The keyboard also finds a track's instrument when the song keeps its program changes in another track on the

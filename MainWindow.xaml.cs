@@ -67,6 +67,12 @@ namespace nMIDI
                 ShowPosition(force: true);
                 OnPracticeSongEnd();
             }));
+            _player.Failed += ex => Dispatcher.BeginInvoke(new Action(() =>
+            {
+                UpdateTransport();
+                ShowPosition(force: true);
+                txtStatus.Text = $"Playback stopped after an error: {ex.Message}";
+            }));
 
             OutputNames = new ObservableCollection<string>(_outputs.Names);
             Loaded += OnLoaded;
@@ -755,19 +761,21 @@ namespace nMIDI
             catch (MidiDeviceException) { }
             _auditionNote = note;
             _auditionChannel = channel;
+            _auditionDevice = device;
         }
 
+        // Where the clicked key sounds, so its note-off goes to the same port and channel even if the edited track changes meanwhile.
         private int _auditionChannel;
+        private Melanchall.DryWetMidi.Multimedia.OutputDevice? _auditionDevice;
 
         private void OnAuditionUp(int note)
         {
             if (note >= 0) FallingLiveNote(note, down: false);
             if (note < 0 || note != _auditionNote) return;
-            var vm = _activeVm ?? Tracks.FirstOrDefault();
-            var device = _outputs.Get(vm?.OutputDevice ?? NoSongPort);
-            try { device?.SendEvent(new NoteOffEvent((SevenBitNumber)note, (SevenBitNumber)0) { Channel = (FourBitNumber)_auditionChannel }); }
+            try { _auditionDevice?.SendEvent(new NoteOffEvent((SevenBitNumber)note, (SevenBitNumber)0) { Channel = (FourBitNumber)_auditionChannel }); }
             catch (MidiDeviceException) { }
             _auditionNote = -1;
+            _auditionDevice = null;
         }
 
         private void ShowPosition(bool force)
@@ -882,6 +890,10 @@ namespace nMIDI
         {
             CompositionTarget.Rendering -= OnFrame;
             StopAudition();
+            OnAuditionUp(_auditionNote);
+            _exportCancel?.Cancel();
+            // Close the input first: its thread plays the thru on the output ports, which are closed below.
+            _input.Dispose();
             _player.Dispose();
             _outputs.Dispose();
             viewer.Elements = null;

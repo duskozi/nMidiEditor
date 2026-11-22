@@ -84,7 +84,10 @@ namespace nMIDI
                 if (File.Exists(FilePath))
                     return JsonSerializer.Deserialize<AppSettings>(File.ReadAllText(FilePath)) ?? new AppSettings();
             }
-            catch (Exception ex) when (ex is IOException or JsonException or UnauthorizedAccessException) { }
+            catch (Exception ex) when (ex is IOException or JsonException or UnauthorizedAccessException or NotSupportedException)
+            {
+                AppLog.Error("Reading settings (using the defaults)", ex);
+            }
             return new AppSettings();
         }
 
@@ -95,9 +98,13 @@ namespace nMIDI
             try
             {
                 Directory.CreateDirectory(Folder);
-                File.WriteAllText(FilePath, JsonSerializer.Serialize(this, JsonOptions));
+                // Atomic, so a crash while saving cannot leave a broken file that resets every setting.
+                AtomicFile.WriteAllText(FilePath, JsonSerializer.Serialize(this, JsonOptions));
             }
-            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                AppLog.Error("Saving settings", ex);
+            }
         }
 
         /// <summary>Put a file at the top of the recent list (at most 12).</summary>

@@ -488,12 +488,18 @@ namespace nMIDI.Model
                     Updated?.Invoke(this, EventArgs.Empty);
                 }
                 catch (OperationCanceledException) { }
-                catch (Exception ex) when (ex is InvalidOperationException or ArgumentException or IndexOutOfRangeException)
+                catch (Exception ex) when (ex is not OutOfMemoryException)
                 {
-                    // Never let the fingering break the editor: the tracks keep their previous fingers.
+                    // Never let the fingering break the editor: the tracks keep their previous fingers. Any exception
+                    // is caught (not only the expected ones), or this worker would end with _running still true and
+                    // the fingering would stop updating for the rest of the session.
+                    Failed?.Invoke(ex);
                 }
             }
         }
+
+        /// <summary>Raised on a background thread when a fingering run failed unexpectedly (the previous fingers stay).</summary>
+        public static event Action<Exception>? Failed;
 
         private void Run(Job job, CancellationToken token)
         {

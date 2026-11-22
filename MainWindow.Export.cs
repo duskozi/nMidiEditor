@@ -4,6 +4,7 @@ using Microsoft.Win32;
 using nMIDI.Playback;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -39,7 +40,7 @@ namespace nMIDI
             _settings.SoundFontPath = soundFont();
             _settings.AudioFormat = format();
             bool mp3 = _settings.AudioFormat.StartsWith("MP3", StringComparison.Ordinal);
-            int bitrate = mp3 ? int.Parse(_settings.AudioFormat.Split(' ')[1]) * 1000 : 0;
+            int bitrate = mp3 ? int.Parse(_settings.AudioFormat.Split(' ')[1], CultureInfo.InvariantCulture) * 1000 : 0;
             bool loopOnly = range() == "Loop range";
 
             var save = new SaveFileDialog
@@ -86,35 +87,40 @@ namespace nMIDI
                     cancel.ThrowIfCancellationRequested();
                     var pcm = audio.ToPcm16();
                     var wave = new WaveFormat(audio.SampleRate, 16, 2);
-                    if (mp3)
+                    // Written to a temporary file first: a failed or cancelled export never destroys a file it would replace.
+                    AtomicFile.Write(path, temp =>
                     {
-                        MediaFoundationApi.Startup();
-                        using var source = new RawSourceWaveStream(new MemoryStream(pcm), wave);
-                        MediaFoundationEncoder.EncodeToMp3(source, path, bitrate);
-                    }
-                    else
-                    {
-                        using var writer = new WaveFileWriter(path, wave);
-                        writer.Write(pcm, 0, pcm.Length);
-                    }
+                        if (mp3)
+                        {
+                            MediaFoundationApi.Startup();
+                            using var source = new RawSourceWaveStream(new MemoryStream(pcm), wave);
+                            MediaFoundationEncoder.EncodeToMp3(source, temp, bitrate);
+                        }
+                        else
+                        {
+                            using var writer = new WaveFileWriter(temp, wave);
+                            writer.Write(pcm, 0, pcm.Length);
+                        }
+                        cancel.ThrowIfCancellationRequested();
+                    });
                 }, cancel);
                 txtStatus.Text = $"Exported {name}.";
             }
             catch (OperationCanceledException)
             {
                 txtStatus.Text = "Audio export cancelled.";
-                TryDelete(path);
             }
             catch (Exception ex) when (ex is not OutOfMemoryException)
             {
+                AppLog.Error("Audio export", ex);
                 txtStatus.Text = "Audio export failed.";
-                TryDelete(path);
                 string hint = mp3 ? "\n\nIf the MP3 encoder is missing (Windows N editions), install the Media Feature Pack or export as WAV." : "";
                 MessageBox.Show(this, $"Could not export the audio:\n{ex.Message}{hint}", "nMIDI Editor", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
             finally
             {
                 _exportingAudio = false;
+                _exportCancel?.Dispose();
                 _exportCancel = null;
             }
         }
@@ -125,13 +131,6 @@ namespace nMIDI
             if (_exportCancel == null) return false;
             _exportCancel.Cancel();
             return true;
-        }
-
-        private static void TryDelete(string path)
-        {
-            try { if (File.Exists(path)) File.Delete(path); }
-            catch (IOException) { }
-            catch (UnauthorizedAccessException) { }
         }
     }
 }
