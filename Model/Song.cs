@@ -91,15 +91,20 @@ namespace nMIDI.Model
 
         public bool IsDrums => Channel == 9;
 
-        /// <summary>The first program of the track's channel, as a General MIDI name, or "Drums".</summary>
+        /// <summary>The first sound of the track's channel (with its bank), by name; "Drums" for a drum track without a kit.</summary>
         public string Instrument
         {
             get
             {
-                if (IsDrums) return "Drums";
-                var program = Controls.FirstOrDefault(c => c.Kind == CtrlKind.Program && c.Channel == Channel)
-                              ?? Controls.FirstOrDefault(c => c.Kind == CtrlKind.Program);
-                return GeneralMidi.Instruments[Math.Clamp(program?.Value ?? 0, 0, 127)];
+                var first = SongOps.InstrumentAt(this, Channel, 0);
+                if (first == null && !IsDrums)
+                {
+                    // A track whose programs are on another channel.
+                    var other = Controls.FirstOrDefault(c => c.Kind == CtrlKind.Program);
+                    if (other != null) first = SongOps.InstrumentAt(this, other.Channel, 0);
+                }
+                if (first is not { } c) return IsDrums ? "Drums" : GeneralMidi.Instruments[0];
+                return InstrumentCatalog.Name(c.Msb, c.Lsb, c.Program, IsDrums);
             }
         }
 
@@ -342,7 +347,8 @@ namespace nMIDI.Model
 
                 foreach (var c in track.Controls)
                 {
-                    all.Add((new SongEvent(c.Tick, timeline.TickToTime(c.Tick), index, ToMidi(c)), 0, order++));
+                    // Bank select (rank -1) goes out before a program change at the same tick.
+                    all.Add((new SongEvent(c.Tick, timeline.TickToTime(c.Tick), index, ToMidi(c)), SongOps.SendRank(c) - 1, order++));
                     length = Math.Max(length, c.Tick);
                 }
 
@@ -627,7 +633,7 @@ namespace nMIDI.Model
 
         public MidiFile ToMidiFile(int format = 1)
         {
-            // Rank orders events at the same tick: meta first, then controllers, note-offs, note-ons.
+            // Rank orders events at the same tick: meta first, then bank select, other controllers, note-offs, note-ons.
             var conductor = new List<(long Tick, int Rank, MidiEvent Event)>();
             foreach (var t in Tempos) conductor.Add((t.Tick, 0, new SetTempoEvent(t.MicrosecondsPerQuarter)));
             foreach (var s in TimeSignatures) conductor.Add((s.Tick, 0, new TimeSignatureEvent((byte)s.Numerator, (byte)s.Denominator)));
@@ -640,11 +646,11 @@ namespace nMIDI.Model
                 if (format != 0) events.Add((0, -1, new SequenceTrackNameEvent(track.Name)));
                 foreach (var m in track.Meta)
                     if (!TrackFingeringInfo.IsOwnEvent(m.Event) || KeepFingeringEvent(track, m)) events.Add((m.Tick, 0, m.Event.Clone()));
-                foreach (var c in track.Controls) events.Add((c.Tick, 1, ToMidi(c)));
+                foreach (var c in track.Controls) events.Add((c.Tick, 1 + SongOps.SendRank(c), ToMidi(c)));
                 foreach (var n in track.Notes)
                 {
-                    events.Add((n.Start, 3, NoteOn(n)));
-                    events.Add((n.End, 2, NoteOff(n)));
+                    events.Add((n.Start, 4, NoteOn(n)));
+                    events.Add((n.End, 3, NoteOff(n)));
                 }
                 tracks.Add(events);
             }

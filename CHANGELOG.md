@@ -1,7 +1,41 @@
 # Changelog
 
-## Unreleased
+## 2.5 (2026-11-19)
 
+- Instrument picker with banks: choose a sound by bank and name (General MIDI by family, GS / GM2 / XG drum
+  kits, the presets of a SoundFont), search by name, try it, or type bank MSB / LSB and program. Used by track
+  settings, the program change lane (a click opens it) and the event list. Bank select is written with the
+  program change and always sent before it.
+- Chord names show single notes where there is no chord (in the strip and above the keyboard), the keys by name
+  beside the chord, and a setting to hold the last chord until the next one or show what sounds in real time.
+  Minor chords are spelled with sharps where usual (C♯m, G♯m).
+- Falling notes: smoother motion (notes drawn once and moved, even steps from the frame clock, no per-note
+  brushes every frame) and **− / +** buttons for the note length, now 0.5 to 30 seconds on screen.
+- The track list toggle works again after switching to Practice mode and back.
+
+- Falling notes: the **Falling notes** button above the keyboard shows notes falling onto the keys in place of
+  the piano roll, in the track colours with finger numbers, with bar and beat lines and the pedals (a column each
+  for soft, sostenuto and sustain, and a light band while sustain is down). Smooth motion at the screen's frame
+  rate; the mouse wheel shows more or fewer seconds. Without a song it shows what you play (clicked keys and the
+  MIDI input, pedals included) rising up from the keys. On by default in Practice mode; each mode remembers it.
+- Practice mode: the **Edit / Practice** switch in the top bar (or F9) turns the window into a practice view with a
+  bigger keyboard. Choose the track and the hand (left, right or both); the editor plays everything else.
+  - **Wait for me**: the song stops at each note or chord until you have played its keys (in any order). The keys
+    to play pulse on the keyboard with their finger, turn green when pressed, a wrong key flashes red, and the
+    next step shows faintly so you can prepare.
+  - Without wait mode you play along in time: hits, misses, wrong keys and whether you are early or late.
+  - **Speed up each loop**: with a loop range, start slower (e.g. 60 %) and go a few percent faster each time
+    through, up to 100 %.
+  - A score for every run (and every time through the loop) in the practice bar.
+- Chord names: a strip along the top of the piano roll names the chords of the visible tracks beat by beat
+  (broken chords and arpeggios too, passing notes are ignored), and the chord of the keys that sound now (the
+  song, a clicked key or the MIDI input) shows above the keyboard. The **Chords** button above the keyboard turns
+  both on and off.
+- Export audio: Song ▾ → **Export audio (WAV / MP3)…** plays the song (or the loop range) through a SoundFont
+  (.sf2) and saves it as MP3 (128, 192 or 320 kbit/s) or 16-bit WAV. Mute, solo and the mixer settings apply.
+- MIDI activity window (the **Monitor** button): a note LED, a control LED, a live note map and the last control
+  message for every channel of the MIDI output, and a row of LEDs for the MIDI input.
+- Keys held on the MIDI input light up on the keyboard.
 - Three new themes in a hardware style: *Alloy* (lit brushed silver with a dark LCD), *Alloy night*
   (dark metal) and *Alloy ember* (champagne metal with an amber LCD). The piano keyboard keeps its look.
 - The mixer's displays use the theme's LCD colours, like the time display in the top bar.

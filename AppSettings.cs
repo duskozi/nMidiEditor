@@ -25,6 +25,10 @@ namespace nMIDI
         public bool ShowKeyboard { get; set; } = true;
         public bool ShowPedals { get; set; } = true;
         public bool ShowPedalStrip { get; set; } = true;
+        /// <summary>Keep the last chord above the keyboard until the next one (false: show what sounds now).</summary>
+        public bool ChordHold { get; set; }
+
+        public bool ShowChords { get; set; } = true;
         public bool PauseNoteViewWithLanes { get; set; } = true;
         public int KeyLabels { get; set; }
         public int KeyRange { get; set; }
@@ -48,6 +52,22 @@ namespace nMIDI
         /// <summary>0 = off, 1 = edited track, 2 = all fingered tracks.</summary>
         public int FingersOnNotes { get; set; } = 1;
         public bool SaveFingering { get; set; } = true;
+
+        // Falling notes
+        public bool FallingInEdit { get; set; }
+        public bool FallingInPractice { get; set; } = true;
+        public double FallingSeconds { get; set; } = 3;
+
+        // Practice
+        public int PracticeHands { get; set; }
+        public bool PracticeWait { get; set; } = true;
+        public bool PracticeRamp { get; set; }
+        public int PracticeRampFrom { get; set; } = 60;
+        public int PracticeRampStep { get; set; } = 5;
+
+        // Audio export
+        public string? SoundFontPath { get; set; }
+        public string AudioFormat { get; set; } = "MP3, 192 kbit/s";
 
         // Files
         public int AutosaveMinutes { get; set; } = 1;

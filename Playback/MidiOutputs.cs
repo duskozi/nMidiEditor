@@ -1,3 +1,4 @@
+using Melanchall.DryWetMidi.Core;
 using Melanchall.DryWetMidi.Multimedia;
 using System;
 using System.Collections.Generic;
@@ -26,6 +27,12 @@ namespace nMIDI.Playback
             (Preferred != null && Names.Contains(Preferred) ? Preferred : null)
             ?? Names.FirstOrDefault(n => n.Contains("GS Wavetable", StringComparison.OrdinalIgnoreCase))
             ?? (Names.Count > 0 ? Names[0] : null);
+
+        /// <summary>A channel event was sent to one of the open ports (raised on the sending thread).</summary>
+        public event Action<ChannelEvent>? Sent;
+
+        /// <summary>Names of the ports that are open.</summary>
+        public IReadOnlyList<string> OpenNames => _open.Keys.ToList();
 
         /// <summary>The last error from opening a port, or null.</summary>
         public string? LastError { get; private set; }
@@ -58,6 +65,7 @@ namespace nMIDI.Playback
             {
                 device = OutputDevice.GetByName(name);
                 device.PrepareForEventsSending();
+                device.EventSent += OnEventSent;
                 _open[name] = device;
                 LastError = null;
                 return device;
@@ -67,6 +75,11 @@ namespace nMIDI.Playback
                 LastError = $"Cannot open '{name}': {ex.Message}";
                 return null;
             }
+        }
+
+        private void OnEventSent(object? sender, MidiEventSentEventArgs e)
+        {
+            if (e.Event is ChannelEvent channelEvent) Sent?.Invoke(channelEvent);
         }
 
         public void Dispose()

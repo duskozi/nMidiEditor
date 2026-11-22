@@ -115,6 +115,8 @@ or the song's tempo. Controllers the track already uses are marked ●.
   are any.
 - **Shift-drag** draws a straight line (a ramp). In the velocity lane a right-drag does the same.
 - **Right-drag** erases controller events.
+- In the program change lane a **click** opens the instrument picker at the grid line (or on the program
+  change under the mouse); erasing a program change also removes its bank select.
 - The value under the mouse shows in the lane header.
 
 The **note fields** in the lane header (pitch, start, length, velocity, release velocity, channel) show
@@ -138,6 +140,22 @@ when nothing is selected. Each command is one undo step.
 
 **SCALE** picks a key and scale (major, minor, modes, pentatonic, blues and more). The piano roll
 shades the notes outside the scale; with **Snap** on, drawn and moved notes stay in the scale.
+
+## Instruments and banks
+
+The **instrument picker** chooses a sound by name instead of a number from 1 to 128. It opens from the
+Instrument button in track settings, a click in the program change lane, and **Add → Instrument** in the
+event list.
+
+- Pick a **bank** on the left: *General MIDI* (16 families of 8), the drum kits of *GS* (also the Windows
+  GS synth), *GM2* (bank 120) and *XG* (bank 127), and the banks of your **SoundFont** (the same .sf2 as the
+  audio export; **SoundFont…** picks another). On a drum track (channel 10) the drum banks come first.
+- **Find** searches every bank by name. Double-click a sound to take it; **Try** (or Space) plays a note
+  with it on the track's output.
+- **Bank select** writes CC 0 (MSB) and CC 32 (LSB) right before the program change. Type MSB, LSB and the
+  program for a device whose banks are not listed.
+- Bank select always goes out before the program change at the same moment: when playing, when starting
+  mid-song, in the audio export and in saved files.
 
 ## Song and tracks
 
@@ -189,6 +207,11 @@ key signature and marker events. Type in a cell and press Enter to change an eve
 - **Recent files**: the button next to Open.
 - **Export**: Tracks ▾ → export the edited track, or only its selected notes, as a MIDI file of its
   own (with the song's tempo map).
+- **Export audio**: Song ▾ → **Export audio (WAV / MP3)…** plays the whole song, or the loop range, through a
+  SoundFont (.sf2) and saves it as MP3 (128, 192 or 320 kbit/s) or 16-bit WAV. What you hear is what you get:
+  mute, solo and the mixer settings apply. Pick the SoundFont once and the editor remembers it; a free General
+  MIDI SoundFont such as *GeneralUser GS* sounds good. The status bar shows the progress, and **Esc** cancels.
+  MP3 uses the encoder built into Windows (on Windows N editions, install the Media Feature Pack).
 - **Autosave**: unsaved changes are saved every minute to `%AppData%\nMIDIEditor\autosave`. If the
   editor ends without closing normally, it offers to recover the work the next time it starts.
 - Settings (recent files, MIDI input, recording options) are kept in `%AppData%\nMIDIEditor\settings.json`.
@@ -278,6 +301,71 @@ knobs, faders and buttons keep a dark hardware look in every theme.
 
 **Pause main view** in the Lanes window stops drawing the main window's piano roll, playhead and keyboard while
 you work in the Lanes window, to save CPU. The main window catches up as soon as you click it.
+
+## Falling notes
+
+The **Falling notes** button above the keyboard shows falling notes in place of the piano roll. Each key column
+lines up with the keyboard panel; a note reaches its key when it sounds, so you see what comes next.
+
+- Notes are drawn in their track colour with the finger number; the notes sounding now are outlined. In Practice
+  mode the part you play is bright and the accompaniment dim.
+- Bar lines (and fainter beat lines) fall with the notes.
+- **Pedals** fall with the notes too: a column each for soft, sostenuto and sustain at the left of the keys, and
+  a light band across the keys while the sustain pedal is down.
+- **Without a song** the view shows what you play, the other way round: a bar grows up from the key while you
+  hold it (a clicked key or the MIDI input) and then rises away, and the pedals of the MIDI input rise with them.
+- **Note length**: the **− / +** buttons next to the Falling notes button (or the mouse wheel over the notes) show
+  more or fewer seconds, from 0.5 to 30, so long notes can be made shorter on screen.
+- The motion follows the screen's frame rate and moves the same distance every frame. The notes are drawn once
+  in strips of a few seconds and only moved while playing, so even dense songs stay smooth.
+- Falling notes are on by default in Practice mode; Edit and Practice mode each remember the setting.
+
+## Practice mode
+
+The **Edit / Practice** switch at the left of the top bar (or **F9**) turns the window into a practice view: the
+track list, the editing tools and the lane are hidden, the keyboard gets bigger and the practice bar takes the
+place of the edit toolbar. Editing is off while you practise; switching back to Edit brings everything back.
+
+- **Track and hands**: choose the track you play (a piano on two tracks that is fingered as one part counts as
+  one) and **Left**, **Right** or **Both**. The hand of each note comes from the fingering (notes without one are
+  split at middle C). The editor plays everything else: the other hand and the other tracks.
+- **Start** (or **Enter**) starts from the beginning, or from the start of the loop range when the loop is on.
+  Play on your MIDI keyboard (choose it under MIDI input in the track bar), or click the keyboard panel.
+- **Wait for me**: the song stops just before each note or chord of your part until you have played its keys,
+  in any order. The keys to play pulse in the track colour with their finger number, turn green as you press
+  them, a wrong key flashes red, and the keys of the next step are shown faintly so you can prepare your hand.
+- With **Wait for me** off you play along in time; the keys light up as their notes come near, and each note
+  you play near its start counts as a hit.
+- **Speed up each loop**: with a loop range (right-click the ruler) and Loop on, the first time through plays at
+  the **From** speed and each time after that is a few percent faster, up to 100 %.
+- **Score**: the practice bar shows the score of the run as you play, and the last run's score: clean steps and
+  wrong keys in wait mode; hits, misses, wrong keys and early / late timing when playing along.
+
+## Chord names
+
+The **Chords** button above the keyboard turns on:
+
+- a **chord strip** along the top of the piano roll with the chords of the visible tracks (drums left out). The
+  chords are found beat by beat from the keys that sound for a good part of the beat, so broken chords and
+  arpeggios are named too and a short passing note does not change the chord. The chord at the playhead is
+  highlighted. Where the notes make no chord (a single note, an interval), the strip shows the notes themselves
+  in small italics, e.g. *E4* or *C4 E4*.
+- the **chord that sounds now** above the keyboard: the song at the playhead, a key you click, or the keys you
+  hold on the MIDI input, with the keys by name beside it. In Settings → Piano keyboard → **Chord name** choose
+  *Real time* (the chord of what sounds now, or the notes when they make no chord) or *Hold the last chord
+  until the next* (the chord stays when you let go or play single notes, until you play another chord).
+
+Names follow lead-sheet style: C, Am, G7, Cmaj7, F♯m7♭5, Bdim, Dsus4, C6, add9, 9, 11, 13 … and a slash for an
+inversion (C/E, G7/B). Major chords use flats (D♭, E♭, A♭, B♭), minor chords sharps where that is usual
+(C♯m, G♯m, but E♭m, B♭m).
+
+## MIDI activity
+
+The **Monitor** button opens the MIDI activity window. For every channel of the MIDI output (the song, the
+mixer, clicked keys and the thru of the input) it shows a note LED that flashes with the velocity, a control LED
+for controllers, programs and pitch bend, a live note map of the held keys and the last control message. The MIDI
+input is shown as a row of LEDs underneath. **Note map** and **Last control** hide those columns; **Clear** clears
+the display.
 
 ## Player features (from nMIDI)
 
@@ -373,6 +461,11 @@ fingers the song in the background, and `Model/FingeringReport.cs` computes the 
   "right" … stays in one hand), and a Viterbi-style search with standard scale charts fingers each
   hand. It is included as a prebuilt DLL (version 1.1) in `lib/nPianoFingering`; the editor uses its
   incremental `FingeringSession`, so only the notes around an edit are fingered again.
+
+- [MeltySynth](https://github.com/sinshu/meltysynth) by Nobuaki Tanaka (MIT) plays the song through a SoundFont
+  for the audio export.
+- [NAudio](https://github.com/naudio/NAudio) by Mark Heath (MIT) writes the WAV files and encodes MP3 with Windows
+  Media Foundation.
 
 ## Changes
 

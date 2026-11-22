@@ -21,6 +21,10 @@
     <Compile Include="..\Theory\PianoFingering.cs" Link="Theory\PianoFingering.cs" />
     <Compile Include="..\Model\Pedals.cs" Link="Model\Pedals.cs" />
     <Compile Include="..\Model\MixerChannel.cs" Link="Model\MixerChannel.cs" />
+    <Compile Include="..\Model\Chords.cs" Link="Model\Chords.cs" />
+    <Compile Include="..\Theory\ChordNamer.cs" Link="Theory\ChordNamer.cs" />
+    <Compile Include="..\Model\Practice.cs" Link="Model\Practice.cs" />
+    <Compile Include="..\Model\Instruments.cs" Link="Model\Instruments.cs" />
   </ItemGroup>
 
   <ItemGroup>

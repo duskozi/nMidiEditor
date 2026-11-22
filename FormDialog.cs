@@ -166,6 +166,44 @@ namespace nMIDI
             return () => box.Text;
         }
 
+        /// <summary>A file path with a Browse button. With <paramref name="required"/>, OK needs an existing file.</summary>
+        public Func<string> AddFile(string label, string value, string filter, bool required, string? hint = null)
+        {
+            var box = new TextBox { Text = value, Height = 26, Width = 300, Style = (Style)Application.Current.FindResource("DarkTextBox") };
+            var browse = new Button
+            {
+                Content = "Browse…",
+                Height = 26,
+                Padding = new Thickness(10, 0, 10, 0),
+                Margin = new Thickness(6, 0, 0, 0),
+                Style = (Style)Application.Current.FindResource("ToolButton"),
+            };
+            browse.Click += (_, _) =>
+            {
+                var dialog = new Microsoft.Win32.OpenFileDialog { Filter = filter, Title = label };
+                try
+                {
+                    if (System.IO.File.Exists(box.Text)) dialog.InitialDirectory = System.IO.Path.GetDirectoryName(box.Text);
+                }
+                catch (ArgumentException) { }
+                if (dialog.ShowDialog(this) == true) box.Text = dialog.FileName;
+            };
+            var panel = new StackPanel { Orientation = Orientation.Horizontal };
+            panel.Children.Add(box);
+            panel.Children.Add(browse);
+            _first ??= box;
+            AddRow(label, panel, hint);
+            if (required)
+                _validators.Add(() =>
+                {
+                    if (System.IO.File.Exists(box.Text.Trim())) { box.ClearValue(BorderBrushProperty); return true; }
+                    box.BorderBrush = Brushes.IndianRed;
+                    box.Focus();
+                    return false;
+                });
+            return () => box.Text.Trim();
+        }
+
         public Func<T> AddChoice<T>(string label, IEnumerable<T> items, T selected, string? hint = null)
         {
             var combo = new ComboBox { Height = 26, MinWidth = 160, HorizontalAlignment = HorizontalAlignment.Left, MaxDropDownHeight = 360 };
@@ -175,6 +213,27 @@ namespace nMIDI
             _first ??= combo;
             AddRow(label, combo, hint);
             return () => (T)combo.SelectedItem!;
+        }
+
+        /// <summary>A button that shows a value and opens another dialog to change it; <paramref name="pick"/> returns the new text, or null.</summary>
+        public void AddPicker(string label, string text, Func<string?> pick, string? hint = null)
+        {
+            var button = new Button
+            {
+                Content = text,
+                Height = 26,
+                MinWidth = 220,
+                HorizontalAlignment = HorizontalAlignment.Left,
+                HorizontalContentAlignment = HorizontalAlignment.Left,
+                Padding = new Thickness(10, 0, 10, 0),
+                Style = (Style)Application.Current.FindResource("ToolButton"),
+            };
+            button.Click += (_, _) =>
+            {
+                if (pick() is string chosen) button.Content = chosen;
+            };
+            _first ??= button;
+            AddRow(label, button, hint);
         }
 
         public Func<bool> AddCheck(string label, bool value, string? hint = null)

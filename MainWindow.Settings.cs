@@ -19,6 +19,7 @@ namespace nMIDI
     {
         private static readonly string[] KeyLabelNames = ["Fingers & hands", "Note names", "Nothing"];
         private static readonly string[] KeyRangeNames = ["88 keys", "Song range", "61 keys", "49 keys"];
+        private static readonly string[] ChordModeNames = ["Real time (what sounds now)", "Hold the last chord until the next"];
         private static readonly string[] ColorModeNames = ["Track", "Velocity"];
         private static readonly string[] RecordModeNames = ["Overdub", "Replace"];
         private const string AutomaticPort = "(automatic: GS synth or first port)";
@@ -35,6 +36,10 @@ namespace nMIDI
             tglKeyboard.IsChecked = s.ShowKeyboard;
             tglPedals.IsChecked = s.ShowPedals;
             UpdatePedalPanelVisibility();
+            tglChords.IsChecked = s.ShowChords;
+            UpdateChordVisibility();
+            tglFalling.IsChecked = _practiceMode ? s.FallingInPractice : s.FallingInEdit;
+            ApplyFalling();
 
             _laneHeight = new GridLength(Math.Clamp(s.LaneHeight, 60, 500));
             if (tglLane.IsChecked == true) rowLane.Height = _laneHeight;
@@ -75,6 +80,7 @@ namespace nMIDI
             var s = _settings;
             s.ShowKeyboard = tglKeyboard.IsChecked == true;
             s.ShowPedals = tglPedals.IsChecked == true;
+            s.ShowChords = tglChords.IsChecked == true;
             s.KeyboardHeight = s.ShowKeyboard ? rowKeyboard.ActualHeight : _keyboardHeight.Value;
             s.ShowLane = tglLane.IsChecked == true;
             s.LaneHeight = s.ShowLane ? rowLane.ActualHeight : _laneHeight.Value;
@@ -169,6 +175,7 @@ namespace nMIDI
             var showPedals = d.AddCheck("Pedals", s.ShowPedals, "Pedals next to the keyboard, pressed while the song plays");
             var labels = d.AddChoice("Labels", KeyLabelNames, KeyLabelNames[Math.Clamp(s.KeyLabels, 0, 2)]);
             var range = d.AddChoice("Range", KeyRangeNames, KeyRangeNames[Math.Clamp(s.KeyRange, 0, 3)]);
+            var chordMode = d.AddChoice("Chord name", ChordModeNames, ChordModeNames[s.ChordHold ? 1 : 0]);
 
             d.AddHeading("Lane");
             var showLane = d.AddCheck("Show", s.ShowLane, "Velocity and controller lane");
@@ -230,6 +237,12 @@ namespace nMIDI
             s.ShowPedals = showPedals();
             tglPedals.IsChecked = s.ShowPedals;
             UpdatePedalPanelVisibility();
+            tglChords.IsChecked = s.ShowChords;
+            s.ChordHold = chordMode() == ChordModeNames[1];
+            UpdateChordVisibility();
+            ResetLiveChord();
+            tglFalling.IsChecked = _practiceMode ? s.FallingInPractice : s.FallingInEdit;
+            ApplyFalling();
             s.KeyboardHeight = keyboardHeight();
             s.KeyLabels = Array.IndexOf(KeyLabelNames, labels());
             s.KeyRange = Array.IndexOf(KeyRangeNames, range());
