@@ -62,7 +62,7 @@ namespace nMIDI
         }
 
         private (OutputDevice Device, int Channel, InstrumentChoice Sound)? _keyboardSound;
-        private (object? Controls, long Tick, OutputDevice? Device, int Channel) _keyboardSoundKey;
+        private (object? Track, int Version, long Tick, OutputDevice? Device, int Channel) _keyboardSoundKey;
 
         /// <summary>
         /// The keyboard (on screen, computer keys and MIDI thru) plays on the edited track's port and channel. Give
@@ -86,15 +86,12 @@ namespace nMIDI
             int channel = track.Channel;
             long tick = (long)_player.PositionTicks;
             // Every frame calls this: skip the lookup while nothing it depends on has changed.
-            var key = ((object?)track.Controls, tick, (OutputDevice?)device, channel);
+            var key = ((object?)track, _editVersion, tick, (OutputDevice?)device, channel);
             if (_keyboardSound != null && key.Equals(_keyboardSoundKey)) return;
             _keyboardSoundKey = key;
 
-            var found = SongOps.InstrumentAt(track, channel, tick);
-            // A track whose program changes are on another channel than its own (as the track list names it).
-            if (found == null && channel != 9 && track.Controls.FirstOrDefault(c => c.Kind == CtrlKind.Program) is { } other)
-                found = SongOps.InstrumentAt(track, other.Channel, tick);
-            var sound = found ?? new InstrumentChoice(null, null, 0);
+            var sameOutput = Tracks.Where(t => t.OutputDevice == vm.OutputDevice).Select(t => t.Track);
+            var sound = SongOps.KeyboardSoundAt(track, sameOutput, tick) ?? new InstrumentChoice(null, null, 0);
             if (channel != 9) sound = sound with { Msb = sound.Msb ?? 0, Lsb = sound.Lsb ?? 0 };
             if (_keyboardSound is { } last && ReferenceEquals(last.Device, device) && last.Channel == channel && last.Sound == sound) return;
             SendInstrument(device, channel, sound);

@@ -312,6 +312,26 @@ namespace nMIDI.Model
         }
 
         /// <summary>
+        /// The sound the keyboard plays for a track at a tick: the program in effect on the track's channel; else
+        /// one on that channel in another track on the same output (many files keep every program change in a
+        /// setup track, apart from the notes); else the track's program on another channel. Null when there is
+        /// none at all, which means the default sound (Acoustic Grand Piano).
+        /// </summary>
+        public static InstrumentChoice? KeyboardSoundAt(SongTrack track, IEnumerable<SongTrack> sameOutput, long tick)
+        {
+            int channel = track.Channel;
+            if (InstrumentAt(track, channel, tick) is { } own) return own;
+
+            var shared = new SongTrack("", channel);
+            shared.SetControls(sameOutput.Where(t => t != track).SelectMany(t => t.Controls.Where(c => c.Channel == channel)));
+            if (InstrumentAt(shared, channel, tick) is { } elsewhere) return elsewhere;
+
+            if (channel != 9 && track.Controls.FirstOrDefault(c => c.Kind == CtrlKind.Program) is { } other)
+                return InstrumentAt(track, other.Channel, tick);
+            return null;
+        }
+
+        /// <summary>
         /// Put a program change, with its bank select when the choice has one, at the tick on the channel. A program
         /// change and bank select already at that tick are replaced. The bank select comes first, as devices need it.
         /// </summary>
