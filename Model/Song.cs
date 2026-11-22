@@ -620,15 +620,13 @@ namespace nMIDI.Model
         /// <summary>
         /// Write the song as a standard MIDI file: format 1 (a conductor track, then one track per
         /// song track) or format 0 (everything in one track). The file is written next to the target
-        /// first and then moved over it, so a failed save never leaves a broken file behind.
+        /// first and then moved over it, so a failed save never leaves a broken file (or a stray temporary file) behind.
         /// </summary>
         public void Save(string path, int format = 1)
         {
             var file = ToMidiFile(format);
-            string full = System.IO.Path.GetFullPath(path);
-            string temp = full + ".saving";
-            file.Write(temp, overwriteFile: true, format: format == 0 ? MidiFileFormat.SingleTrack : MidiFileFormat.MultiTrack);
-            File.Move(temp, full, overwrite: true);
+            var fileFormat = format == 0 ? MidiFileFormat.SingleTrack : MidiFileFormat.MultiTrack;
+            AtomicFile.Write(path, temp => file.Write(temp, overwriteFile: true, format: fileFormat));
         }
 
         public MidiFile ToMidiFile(int format = 1)

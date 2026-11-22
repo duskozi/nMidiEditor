@@ -41,7 +41,9 @@ namespace nMIDI.Playback
         private PlayerState _state;
 
         private Thread? _thread;
-        private volatile bool _stopThread;
+        // Each player thread runs while this still has the value it started with. Stopping bumps it, so a thread
+        // that is slow to finish (a MIDI driver blocking in SendEvent) can never keep playing next to a new one.
+        private int _threadGeneration;
 
         private bool _metronome;
         private OutputDevice? _clickDevice;
@@ -70,6 +72,9 @@ namespace nMIDI.Playback
 
         /// <summary>Raised on the player thread when the end of the song is reached.</summary>
         public event EventHandler? Finished;
+
+        /// <summary>Raised on the player thread when playback stopped because of an unexpected error (it is paused, and logged).</summary>
+        public event Action<Exception>? Failed;
 
         public PlayerState State { get { lock (_gate) return _state; } }
 
@@ -475,8 +480,8 @@ namespace nMIDI.Playback
         private void StartThread()
         {
             StopThread();
-            _stopThread = false;
-            _thread = new Thread(Run) { IsBackground = true, Name = "nMIDI player", Priority = ThreadPriority.Highest };
+            int generation = Interlocked.Increment(ref _threadGeneration);
+            _thread = new Thread(() => Run(generation)) { IsBackground = true, Name = "nMIDI player", Priority = ThreadPriority.Highest };
             _thread.Start();
         }
 
@@ -484,17 +489,18 @@ namespace nMIDI.Playback
         {
             var thread = _thread;
             if (thread == null) return;
-            _stopThread = true;
-            if (thread != Thread.CurrentThread) thread.Join(500);
+            Interlocked.Increment(ref _threadGeneration);
+            if (thread != Thread.CurrentThread && !thread.Join(500))
+                AppLog.Warning("The MIDI player thread did not stop within 500 ms (a MIDI driver may be blocking).");
             _thread = null;
         }
 
-        private void Run()
+        private void Run(int generation)
         {
             TimerResolution.Begin();
             try
             {
-                while (!_stopThread)
+                while (Volatile.Read(ref _threadGeneration) == generation)
                 {
                     double wait;
                     bool finished = false;
@@ -556,6 +562,28 @@ namespace nMIDI.Playback
                     else Thread.Yield();
                 }
             }
+            catch (Exception ex) when (ex is not OutOfMemoryException)
+            {
+                // Never let a playback error end the process: log it, stop quietly and tell the UI.
+                AppLog.Error("MIDI player thread", ex);
+                bool current;
+                lock (_gate)
+                {
+                    current = Volatile.Read(ref _threadGeneration) == generation;
+                    if (current)
+                    {
+                        _anchorTime = TimeUnlocked;
+                        _state = PlayerState.Paused;
+                        try { Silence(soundOff: true); }
+                        catch (Exception silenceError) when (silenceError is not OutOfMemoryException) { AppLog.Error("MIDI player silence", silenceError); }
+                    }
+                }
+                if (current)
+                {
+                    Interlocked.CompareExchange(ref _thread, null, Thread.CurrentThread);
+                    Failed?.Invoke(ex);
+                }
+            }
             finally
             {
                 TimerResolution.End();
@@ -599,7 +627,8 @@ namespace nMIDI.Playback
         {
             if (device == null) return;
             try { device.SendEvent(e); }
-            catch (MidiDeviceException) { }
+            // A port that failed, or was closed while the app shuts down: drop the event, keep playing.
+            catch (Exception ex) when (ex is MidiDeviceException or ObjectDisposedException or InvalidOperationException) { }
         }
 
         private int FirstEventAt(double time)
@@ -761,6 +790,7 @@ namespace nMIDI.Playback
         {
             Stop();
             Finished = null;
+            Failed = null;
         }
 
         /// <summary>1 ms Windows timer resolution while playing, so Thread.Sleep(1) sleeps about 1 ms.</summary>

@@ -29,8 +29,7 @@ namespace nMIDI.Playback
             {
                 foreach (var device in InputDevice.GetAll())
                 {
-                    names.Add(device.Name);
-                    device.Dispose();
+                    using (device) names.Add(device.Name);
                 }
             }
             catch (Exception ex) when (ex is MidiDeviceException or InvalidOperationException) { }
@@ -42,9 +41,10 @@ namespace nMIDI.Playback
         {
             Close();
             if (string.IsNullOrEmpty(name)) return true;
+            InputDevice? device = null;
             try
             {
-                var device = InputDevice.GetByName(name);
+                device = InputDevice.GetByName(name);
                 device.EventReceived += OnEventReceived;
                 device.StartEventsListening();
                 _device = device;
@@ -54,6 +54,13 @@ namespace nMIDI.Playback
             }
             catch (Exception ex) when (ex is MidiDeviceException or ArgumentException or InvalidOperationException)
             {
+                // Opened but could not start listening (the port is in use, the driver failed): release it.
+                if (device != null)
+                {
+                    device.EventReceived -= OnEventReceived;
+                    try { device.Dispose(); }
+                    catch (MidiDeviceException) { }
+                }
                 LastError = $"Cannot open MIDI input '{name}': {ex.Message}";
                 return false;
             }

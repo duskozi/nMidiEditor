@@ -25,6 +25,7 @@
     <Compile Include="..\Theory\ChordNamer.cs" Link="Theory\ChordNamer.cs" />
     <Compile Include="..\Model\Practice.cs" Link="Model\Practice.cs" />
     <Compile Include="..\Model\Instruments.cs" Link="Model\Instruments.cs" />
+    <Compile Include="..\Infrastructure\AtomicFile.cs" Link="Infrastructure\AtomicFile.cs" />
   </ItemGroup>
 
   <ItemGroup>
