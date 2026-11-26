@@ -60,6 +60,7 @@ namespace nMIDI
                     viewer.ScrollToY(MaxNote - middle, 0.5);
                 }
             }
+            pianoKeys.Width = rows.IsDrums ? 116 : 60;   // room for the drum names
             pianoKeys.ToolTip = rows.IsDrums
                 ? "Click a drum to hear it and select all its hits in the edited track (Shift adds)"
                 : "Click a key to hear it and select all its notes in the edited track (Shift adds)";
