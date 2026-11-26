@@ -41,6 +41,8 @@ namespace nMIDI
         public string NoteLength { get; set; } = "Last";
         public int Velocity { get; set; } = 100;
         public bool DimOthers { get; set; } = true;
+        /// <summary>Drum tracks are edited in the drum view: one named row per drum, fixed-length hits.</summary>
+        public bool DrumView { get; set; } = true;
         public bool Follow { get; set; } = true;
         public int ColorMode { get; set; }
 

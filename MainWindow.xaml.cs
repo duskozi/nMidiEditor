@@ -288,6 +288,11 @@ namespace nMIDI
         {
             if (_song == null) return;
             var size = viewer.ViewportSize;
+            if (PianoRollStyle.Rows.IsDrums)
+            {
+                viewer.SetView(32.0 / _song.TicksPerBeat, 0, DrumRowHeight(), 0);
+                return;
+            }
             var notes = _song.Tracks.SelectMany(t => t.Notes).ToList();
             int low = notes.Count > 0 ? notes.Min(n => n.Number) : 48;
             int high = notes.Count > 0 ? notes.Max(n => n.Number) : 72;
@@ -304,6 +309,7 @@ namespace nMIDI
 
         private void BuildElements()
         {
+            UpdateRollRows();
             if (_noteViewPaused)
             {
                 _elementsDirty = true;   // rebuilt when the view resumes
@@ -321,20 +327,26 @@ namespace nMIDI
             var rows = _rowBuckets;
             foreach (var row in rows) row.Clear();
             bool dim = tglDimOthers.IsChecked == true;
+            var layout = PianoRollStyle.Rows;
 
-            void Add(SongNote note, NinePatchWpf.NinePatchImage skin) =>
-                rows[MaxNote - Math.Clamp(note.Number, 0, MaxNote)].Add(new NinePatchElement
+            void Add(SongNote note, NinePatchWpf.NinePatchImage skin)
+            {
+                int row = layout.RowOf(note.Number);
+                if (row < 0) return;   // the drum view shows the drum tracks' rows only
+                rows[row].Add(new NinePatchElement
                 {
                     Source = skin,
                     X = (int)note.Start,
-                    Y = MaxNote - note.Number,
+                    Y = row,
                     Width = (int)Math.Max(1, note.End - note.Start),
                     Height = 1,
                 });
+            }
 
             foreach (var vm in Tracks)
             {
                 if (vm == _activeVm || _coEdited.Contains(vm) || !vm.ShowNotes) continue;
+                if (layout.IsDrums && !vm.Track.IsDrums) continue;   // the drum rows are drums, not piano keys
                 foreach (var note in vm.Track.Notes)
                 {
                     var color = NoteColor(vm, note.Velocity);
@@ -350,6 +362,7 @@ namespace nMIDI
                 foreach (var co in Tracks)
                 {
                     if (co == active || !_coEdited.Contains(co)) continue;
+                    if (layout.IsDrums && !co.Track.IsDrums) continue;
                     foreach (var note in co.Track.Notes)
                     {
                         if (hidden.Count > 0 && hidden.Contains(note)) continue;

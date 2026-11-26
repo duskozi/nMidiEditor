@@ -160,7 +160,7 @@ namespace nMIDI
 
         public long SnapTicks => cmbGrid.SelectedItem is GridChoice g ? ChoiceTicks(g) : 0;
 
-        public long NewNoteLength => cmbLength.SelectedItem switch
+        public long NewNoteLength => PianoRollStyle.Rows.IsDrums ? DrumHitLength : cmbLength.SelectedItem switch
         {
             GridChoice { IsLast: true } => _lastLength,
             GridChoice { IsGrid: true } => Math.Max(1, SnapTicks > 0 ? SnapTicks : _lastLength),
@@ -170,7 +170,11 @@ namespace nMIDI
 
         public int NewVelocity => _velocity;
 
-        public void RememberNoteLength(long ticks) => _lastLength = Math.Max(1, ticks);
+        public void RememberNoteLength(long ticks)
+        {
+            if (PianoRollStyle.Rows.IsDrums) return;   // drum hits have a fixed length; keep the length for other tracks
+            _lastLength = Math.Max(1, ticks);
+        }
 
         private long ChoiceTicks(GridChoice g)
         {
@@ -310,6 +314,15 @@ namespace nMIDI
         }
 
         private void OnDimOthersClick(object sender, RoutedEventArgs e) => BuildElements();
+
+        private void OnDrumViewClick(object sender, RoutedEventArgs e)
+        {
+            _settings.DrumView = tglDrumView.IsChecked == true;
+            _settings.Save();
+            BuildElements();
+            if (_activeVm?.Track.IsDrums != true)
+                txtStatus.Text = _settings.DrumView ? "Drum view: shown when a drum track (channel 10) is edited." : "Drum view off.";
+        }
 
         private void OnUndo(object sender, RoutedEventArgs e) => Undo();
         private void OnRedo(object sender, RoutedEventArgs e) => Redo();

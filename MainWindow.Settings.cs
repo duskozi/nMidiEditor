@@ -61,6 +61,7 @@ namespace nMIDI
             _velocity = Math.Clamp(s.Velocity, 1, 127);
             txtVelocity.Text = _velocity.ToString(CultureInfo.InvariantCulture);
             tglDimOthers.IsChecked = s.DimOthers;
+            tglDrumView.IsChecked = s.DrumView;
             btnFollow.IsChecked = s.Follow;
             cmbColorMode.SelectedIndex = Math.Clamp(s.ColorMode, 0, ColorModeNames.Length - 1);
             BuildElements();

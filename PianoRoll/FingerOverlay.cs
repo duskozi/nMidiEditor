@@ -39,8 +39,6 @@ namespace nMIDI.PianoRoll
         /// <summary>The difference the report's Next/Previous is on.</summary>
         public SongNote? CurrentDifference { get; set; }
 
-        /// <summary>Highest MIDI key: row 0 of the roll.</summary>
-        public int MaxNote { get; set; } = 127;
 
         public FingerOverlay() { IsHitTestVisible = false; }
 
@@ -65,7 +63,9 @@ namespace nMIDI.PianoRoll
                     var n = notes[i];
                     if (n.Start > rightTick) break;
                     if (n.End < leftTick) continue;
-                    double top = v.WorldToViewY(MaxNote - n.Number), bottom = v.WorldToViewY(MaxNote - n.Number + 1);
+                    int row = PianoRollStyle.Rows.RowOf(n.Number);
+                    if (row < 0) continue;
+                    double top = v.WorldToViewY(row), bottom = v.WorldToViewY(row + 1);
                     if (bottom < 0 || top > size.Height) continue;
                     double x1 = v.WorldToViewX(n.Start), x2 = v.WorldToViewX(n.End);
                     var rect = new Rect(x1, top, Math.Max(2, x2 - x1), Math.Max(2, bottom - top));

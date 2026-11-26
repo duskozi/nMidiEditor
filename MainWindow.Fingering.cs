@@ -28,7 +28,6 @@ namespace nMIDI
             _fingeringSong = song;
             song.Fingering.Updated += OnFingeringUpdated;
             fingerOverlay.Viewer = viewer;
-            fingerOverlay.MaxNote = MaxNote;
             fingerOverlay.Differences = null;
             _report?.ShowSong();
             UpdateFingerOverlay();
@@ -320,9 +319,11 @@ namespace nMIDI
             var size = viewer.ViewportSize;
             double x = viewer.WorldToViewX(note.Start);
             if (x < size.Width * 0.1 || x > size.Width * 0.8) viewer.ScrollToX(note.Start, 0.3);
-            double y = viewer.WorldToViewY(MaxNote - note.Number);
-            if (y < 0 || y > size.Height - 10) viewer.ScrollToY(MaxNote - note.Number, 0.5);
-            BuildElements();
+            BuildElements();   // first: activating a drum track switches to the drum rows
+            int row = PianoRollStyle.Rows.RowOf(note.Number);
+            if (row < 0) return;
+            double y = viewer.WorldToViewY(row);
+            if (y < 0 || y > size.Height - 10) viewer.ScrollToY(row, 0.5);
         }
 
         internal void SelectFinger(int finger) => SetSelectionFinger(finger);

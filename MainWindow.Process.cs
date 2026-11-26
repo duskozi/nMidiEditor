@@ -59,8 +59,11 @@ namespace nMIDI
         }
 
         /// <summary>Drawn notes move to the nearest note of the scale when the snap button is on.</summary>
-        public int SnapPitch(int note) =>
-            tglScaleSnap.IsChecked == true && CurrentScale is { } scale ? scale.Nearest(CurrentKey, note) : note;
+        public int SnapPitch(int note)
+        {
+            if (PianoRoll.PianoRollStyle.Rows.IsDrums) return note;   // drums: the row's drum, never a scale note
+            return tglScaleSnap.IsChecked == true && CurrentScale is { } scale ? scale.Nearest(CurrentKey, note) : note;
+        }
 
         // --- Menu ---
 
