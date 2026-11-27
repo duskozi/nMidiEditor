@@ -79,6 +79,7 @@ namespace nMIDI.PianoRoll
         private Point _downPoint;
         private double _downTick;
         private int _downNote;
+        private int _downRow;
         private SongNote? _anchor;         // the note that was pressed
         private bool _toggleOnClick;       // Ctrl+click without moving toggles the note
         private bool _selectOnlyOnClick;   // a click without moving on a selected note selects only it
@@ -154,7 +155,9 @@ namespace nMIDI.PianoRoll
 
         private double TickAt(Point p) => Math.Max(0, _viewer.ViewToWorldX(p.X));
 
-        private int NoteAt(Point p) => Math.Clamp(PianoRollStyle.MaxNote - (int)Math.Floor(_viewer.ViewToWorldY(p.Y)), 0, 127);
+        private int RowAt(Point p) => (int)Math.Floor(_viewer.ViewToWorldY(p.Y));
+
+        private int NoteAt(Point p) => PianoRollStyle.Rows.NoteAt(RowAt(p));
 
         private static bool AltDown => Keyboard.Modifiers.HasFlag(ModifierKeys.Alt);
 
@@ -166,6 +169,7 @@ namespace nMIDI.PianoRoll
             var edit = _host.EditTracks;
             var tracks = new List<SongTrack>(edit);
             if (!activeOnly) tracks.AddRange(_host.ShownTracks.Where(t => !edit.Contains(t)).Reverse());   // later tracks draw on top
+            if (PianoRollStyle.Rows.IsDrums) tracks.RemoveAll(t => !t.IsDrums);   // the drum view draws only drum tracks
 
             int key = NoteAt(p);
             foreach (var track in tracks)
@@ -208,6 +212,7 @@ namespace nMIDI.PianoRoll
             _downPoint = p;
             _downTick = TickAt(p);
             _downNote = NoteAt(p);
+            _downRow = RowAt(p);
             _toggleOnClick = _selectOnlyOnClick = _copy = false;
 
             switch (Tool)
@@ -437,10 +442,16 @@ namespace nMIDI.PianoRoll
             long grid = Grid;
             double rawStart = _anchor.Start + (TickAt(p) - _downTick);
             long dt = (grid > 0 ? NoteOps.Snap(rawStart, grid) : (long)Math.Round(rawStart)) - _anchor.Start;
-            int dp = NoteAt(p) - _downNote;
-
             var selected = SelectedNotes();
-            var moved = NoteOps.Move(selected, dt, dp);
+            var rows = PianoRollStyle.Rows;
+            List<SongNote> moved;
+            if (rows.IsDrums)
+            {
+                // Drum view: move by rows (drums), not by semitones, so a hit lands on the drum it is dragged to.
+                int dRows = Math.Clamp(RowAt(p), 0, rows.Count - 1) - Math.Clamp(_downRow, 0, rows.Count - 1);
+                moved = NoteOps.Move(selected, dt, 0).Select(n => n with { Number = rows.Shift(n.Number, dRows) }).ToList();
+            }
+            else moved = NoteOps.Move(selected, dt, NoteAt(p) - _downNote);
             Hidden.Clear();
             if (!_copy) Hidden.UnionWith(selected);
             Preview.Clear();
@@ -548,6 +559,11 @@ namespace nMIDI.PianoRoll
         private void UpdateDraw(Point p)
         {
             if (_anchor == null) return;
+            if (PianoRollStyle.Rows.IsDrums)
+            {
+                PaintHits(p);
+                return;
+            }
             long grid = Grid;
             long minLength = grid > 0 ? grid : 1;
             double tick = TickAt(p);
@@ -622,6 +638,22 @@ namespace nMIDI.PianoRoll
             SetSelection(parts.SelectMany(x => x.Split));
         }
 
+        /// <summary>
+        /// Drum view: dragging while drawing paints a hit on every grid step from the first hit to the mouse, on the
+        /// first hit's drum. Hits keep the drawn length (the fixed hit length of the drum view).
+        /// </summary>
+        private void PaintHits(Point p)
+        {
+            if (_anchor == null) return;
+            long step = Grid > 0 ? Grid : Math.Max(1, _anchor.Length);
+            double tick = TickAt(p);
+            long to = Math.Max(_anchor.Start, NoteOps.SnapDown(tick, step));
+            Preview.Clear();
+            for (long start = _anchor.Start; start <= to && Preview.Count < 4096; start += step)
+                Preview.Add(_anchor with { Start = start, End = start + _anchor.Length });
+            _host.RefreshNotes();
+        }
+
         // --- Rubber band ---
 
         private void UpdateRubber(Point p)
@@ -636,16 +668,21 @@ namespace nMIDI.PianoRoll
             _rubber.Visibility = Visibility.Visible;
 
             double t1 = _viewer.ViewToWorldX(rect.Left), t2 = _viewer.ViewToWorldX(rect.Right);
-            int high = Math.Clamp(PianoRollStyle.MaxNote - (int)Math.Floor(_viewer.ViewToWorldY(rect.Top)), 0, 127);
-            int low = Math.Clamp(PianoRollStyle.MaxNote - (int)Math.Floor(_viewer.ViewToWorldY(rect.Bottom)), 0, 127);
+            var rows = PianoRollStyle.Rows;
+            int topRow = (int)Math.Floor(_viewer.ViewToWorldY(rect.Top));
+            int bottomRow = (int)Math.Floor(_viewer.ViewToWorldY(rect.Bottom));
 
             var selection = NoteOps.NewSet(_rubberBase);
             foreach (var t in _host.EditTracks)
+            {
+                if (rows.IsDrums && !t.IsDrums) continue;   // hidden in the drum view
                 foreach (var n in t.Notes)
                 {
                     if (n.Start > t2) break;
-                    if (n.End >= t1 && n.Number >= low && n.Number <= high) selection.Add(n);
+                    int row = rows.RowOf(n.Number);
+                    if (n.End >= t1 && row >= 0 && row >= topRow && row <= bottomRow) selection.Add(n);
                 }
+            }
             Selection = selection;
             _host.SelectionChanged();
             _host.RefreshNotes();

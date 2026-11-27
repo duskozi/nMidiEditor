@@ -65,6 +65,9 @@ namespace nMIDI.PianoRoll
 
         public const int MaxNote = 127;
 
+        /// <summary>The note of each row: a row per note (piano), or a row per drum (drum view). UI thread only.</summary>
+        public static RollRows Rows { get; set; } = RollRows.Piano;
+
         public static bool IsBlack(int note) => NoteHelper.IsBlackKey(note);
 
         public static readonly Typeface Typeface = new("Segoe UI");
@@ -125,9 +128,19 @@ namespace nMIDI.PianoRoll
             double onePixel = 1 / ppd;
 
             int firstRow = Math.Max(0, (int)Math.Floor(viewer.OffsetY));
-            int lastRow = Math.Min(MaxNote, (int)Math.Ceiling(viewer.ViewToWorldY(size.Height)));
+            var rows = Rows;
+            int lastRow = Math.Min(rows.Count - 1, (int)Math.Ceiling(viewer.ViewToWorldY(size.Height)));
             for (int row = firstRow; row <= lastRow; row++)
             {
+                if (rows.IsDrums)
+                {
+                    // Drum rows: alternating shades with a line under each drum.
+                    double dTop = Snap(viewer.WorldToViewY(row), ppd);
+                    double dBottom = Snap(viewer.WorldToViewY(row + 1), ppd);
+                    dc.DrawRectangle(row % 2 == 0 ? RowWhite : RowBlack, null, new Rect(0, dTop, size.Width, Math.Max(0, dBottom - dTop)));
+                    dc.DrawRectangle(OctaveLine, null, new Rect(0, dBottom - onePixel, size.Width, onePixel));
+                    continue;
+                }
                 int note = MaxNote - row;
                 double top = Snap(viewer.WorldToViewY(row), ppd);
                 double bottom = Snap(viewer.WorldToViewY(row + 1), ppd);
@@ -216,9 +229,10 @@ namespace nMIDI.PianoRoll
         {
             base.OnMouseLeftButtonDown(e);
             if (Viewer == null) return;
-            int note = PianoRollStyle.MaxNote - (int)Math.Floor(Viewer.ViewToWorldY(e.GetPosition(this).Y));
-            if (note is >= 0 and <= PianoRollStyle.MaxNote)
-                KeyClicked?.Invoke(note, Keyboard.Modifiers.HasFlag(ModifierKeys.Shift));
+            var rows = PianoRollStyle.Rows;
+            int row = (int)Math.Floor(Viewer.ViewToWorldY(e.GetPosition(this).Y));
+            if (row >= 0 && row < rows.Count)
+                KeyClicked?.Invoke(rows.NoteAt(row), Keyboard.Modifiers.HasFlag(ModifierKeys.Shift));
             e.Handled = true;
         }
 
@@ -232,6 +246,36 @@ namespace nMIDI.PianoRoll
                     InvalidateVisual();
                     return;
                 }
+            }
+        }
+
+        /// <summary>Drum view: one cell per drum with its name, lit while it sounds.</summary>
+        private void DrawDrumNames(DrawingContext dc, NinePatchZoomViewer viewer, Size size, double ppd)
+        {
+            var rows = PianoRollStyle.Rows;
+            double rowHeight = viewer.ZoomY;
+            int firstRow = Math.Max(0, (int)Math.Floor(viewer.OffsetY));
+            int lastRow = Math.Min(rows.Count - 1, (int)Math.Ceiling(viewer.ViewToWorldY(size.Height)));
+            double fontSize = Math.Clamp(rowHeight * 0.6, 7, 11);
+            for (int row = firstRow; row <= lastRow; row++)
+            {
+                int note = rows.NoteAt(row);
+                double top = PianoRollStyle.Snap(viewer.WorldToViewY(row), ppd);
+                double bottom = PianoRollStyle.Snap(viewer.WorldToViewY(row + 1), ppd);
+                var cell = new Rect(0, top, size.Width - 1, Math.Max(0, bottom - top));
+                dc.DrawRectangle(_drawn[note] is { } down ? Kit.Solid(down) : PianoRollStyle.WhiteKey, null, cell);
+                if (rowHeight >= 3)
+                    dc.DrawLine(PianoRollStyle.KeySeparator, new Point(0, bottom - 0.5), new Point(size.Width - 1, bottom - 0.5));
+                if (rowHeight < 7) continue;
+
+                var text = new FormattedText(DrumMap.Label(note), CultureInfo.InvariantCulture, FlowDirection.LeftToRight,
+                                             PianoRollStyle.Typeface, fontSize, PianoRollStyle.KeyLabel, ppd)
+                {
+                    MaxTextWidth = Math.Max(1, size.Width - 8),
+                    MaxLineCount = 1,
+                    Trimming = TextTrimming.CharacterEllipsis,
+                };
+                dc.DrawText(text, new Point(4, top + (bottom - top - text.Height) / 2));
             }
         }
 
@@ -249,6 +293,14 @@ namespace nMIDI.PianoRoll
             int lastRow = Math.Min(PianoRollStyle.MaxNote, (int)Math.Ceiling(viewer.ViewToWorldY(size.Height)));
 
             dc.PushClip(new RectangleGeometry(new Rect(size)));
+
+            if (PianoRollStyle.Rows.IsDrums)
+            {
+                DrawDrumNames(dc, viewer, size, ppd);
+                dc.Pop();
+                dc.DrawRectangle(PianoRollStyle.RulerEdge, null, new Rect(size.Width - 1, 0, 1, size.Height));
+                return;
+            }
 
             // White keys first, full width, then the black keys on top, shorter.
             for (int row = firstRow; row <= lastRow; row++)

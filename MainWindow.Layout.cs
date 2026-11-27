@@ -147,7 +147,7 @@ namespace nMIDI
             if (stage == _editStage) return;
             _editStage = stage;
             var labels = stage >= 1 ? Visibility.Collapsed : Visibility.Visible;
-            foreach (var t in new TextBlock[] { lblStep, lblProcess, lblSong, lblDim })
+            foreach (var t in new TextBlock[] { lblStep, lblProcess, lblSong, lblDim, lblDrums })
             {
                 t.Visibility = labels;
                 if (t.Parent is StackPanel sp && sp.Children.Count > 0 && sp.Children[0] is TextBlock icon)

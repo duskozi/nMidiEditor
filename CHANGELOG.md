@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- **Drum view.** When the edited track is a drum track (channel 10), the piano roll shows one tall, named row per
+  drum (Bass Drum, Acoustic Snare, Closed Hi-Hat, ...): a basic kit plus every drum the track uses, instead of
+  128 piano keys. Drawn notes are hits of the grid length, and dragging the draw tool paints a hit on every grid
+  step. Dragging hits up or down moves them from drum to drum. **Drums** in the editor toolbar turns it off.
+- Choosing a SoundFont, and starting the app with one set, is instant and uses almost no memory: only the preset
+  list is read, not the samples (a 1.5 GB SoundFont used to be loaded into memory just for the instrument names).
+
 Reliability:
 
 - An unexpected error no longer closes the editor without a word: it is written to
